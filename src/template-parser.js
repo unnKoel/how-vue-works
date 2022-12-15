@@ -10,10 +10,9 @@ const abstractTag = (template, index) => {
   let tag = '';
   let char = '';
 
-  while (char !== ' ') {
-    let char = template.at(++index);
+  while (char !== ' ' && char !== '>') {
     tag += char;
-    index += 1;
+    char = template.at(++index);
   }
 
   return { tag, index };
@@ -76,6 +75,7 @@ const abstractText = (template, index) => {
 const parse = (template) => {
   template  = template.replace(/\n/g, '');
   let index = -1;
+  let rootRef;
 
   let char = '';
   while (char !== undefined) {
@@ -89,21 +89,33 @@ const parse = (template) => {
         const { tag, index: indexOfStartTagName } = abstractTag(template, index);
         const { attributes, index: indexOfStartTag } = abstractAttributes(template, indexOfStartTagName);
         index = indexOfStartTag;
-        stack.push({ tag, attributes });
+        stack.push({ tag, attributes, children: [] });
+        rootRef = stack.peek();
       } else {
         // current char is the ending of tag.
-
+        const child = stack.pop();
+        rootRef = stack.peek();
+        rootRef.children.push(child);
       }
     }
 
-    // it's text node
+    // text node
     if(char === '>' && template.at(index + 1)!== '<') {
       const { text, index: indexOfText } = abstractText(template, index);
       index = indexOfText;
+      rootRef.children.push({
+        tag: 'textNode',
+        attributes: { text }
+      });
     }
   }
+
+  return rootRef;
 }
 
 export {
+  abstractTag,
+  abstractAttributes,
+  abstractText,
   parse,
 }
