@@ -12,7 +12,7 @@ const abstractTag = (template, index) => {
 
   while (char !== ' ' && char !== '>') {
     tag += char;
-    char = template.at(++index);
+    char = template.at(index++);
   }
 
   return { tag, index };
@@ -27,18 +27,21 @@ const abstractAttributes = (template, index) => {
   let quoteFlag = 0;
 
   while (char !== '>') {
-    let char = template.at(++index);
+    char = template.at(index++);
+
     if (char === '"') {
-      quoteFlag = ++quoteFlag % 2;
+      quoteFlag = (++quoteFlag) % 2;
       continue;
     }
     if (char === '=') {
       equalFlag = true;
       continue;
     }
-    if (char === ' ' && quoteFlag === 0) {
+    if ((char === ' ' || char === '>') && quoteFlag === 0) {
       equalFlag = false;
-      attributes[key] = value === '' ? true : value;
+      if (key != '') {
+        attributes[key] = value === '' ? true : value;
+      }
       key = '';
       value = '';
       continue;
@@ -61,9 +64,8 @@ const abstractText = (template, index) => {
   let char = '';
 
   while (char !== '<') {
-    let char = template.at(++index);
     text += char;
-    index += 1;
+    char = template.at(index++);
   }
 
   return {
@@ -73,7 +75,8 @@ const abstractText = (template, index) => {
 }
 
 const parse = (template) => {
-  template  = template.replace(/\n/g, '');
+  template = template.replace(/\n/g, '');
+  console.log('template', template);
   let index = -1;
   let rootRef;
 
@@ -100,7 +103,7 @@ const parse = (template) => {
     }
 
     // text node
-    if(char === '>' && template.at(index + 1)!== '<') {
+    if (char === '>' && template.at(index + 1) !== '<') {
       const { text, index: indexOfText } = abstractText(template, index);
       index = indexOfText;
       rootRef.children.push({
