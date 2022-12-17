@@ -18,6 +18,7 @@ function Stack() {
   }
 
   return {
+    items,
     push,
     pop,
     isEmpty,

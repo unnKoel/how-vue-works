@@ -7,12 +7,16 @@ import Stack from './stack';
 const stack = Stack();
 
 const abstractTag = (template, index) => {
+  if (template.at(index) !== '<') {
+    throw new Error("Syntax error: tag should be started with '<'");
+  }
+
   let tag = '';
   let char = '';
 
   while (char !== ' ' && char !== '>') {
     tag += char;
-    char = template.at(index++);
+    char = template.at(++index);
   }
 
   return { tag, index };
@@ -20,14 +24,14 @@ const abstractTag = (template, index) => {
 
 const abstractAttributes = (template, index) => {
   const attributes = {};
-  let char = '';
+  let char = template.at(index);
   let key = '';
   let value = '';
   let equalFlag = false;
   let quoteFlag = 0;
 
   while (char !== '>') {
-    char = template.at(index++);
+    char = template.at(++index);
 
     if (char === '"') {
       quoteFlag = (++quoteFlag) % 2;
@@ -60,12 +64,16 @@ const abstractAttributes = (template, index) => {
 }
 
 const abstractText = (template, index) => {
+  if (template.at(index) !== '>') {
+    throw new Error("Syntax error: text should be after '>'");
+  }
+
   let text = '';
   let char = '';
 
   while (char !== '<') {
     text += char;
-    char = template.at(index++);
+    char = template.at(++index);
   }
 
   return {
@@ -76,40 +84,37 @@ const abstractText = (template, index) => {
 
 const parse = (template) => {
   template = template.replace(/\n/g, '');
-  console.log('template', template);
   let index = -1;
   let rootRef;
 
   let char = '';
   while (char !== undefined) {
-    index += 1;
-    char = template.at(index);
-
+    char = template.at(++index);
     if (char === '<') {
       const siblingChar = template.at(index + 1);
       // current char is the begining of tag.
       if (siblingChar !== '/') {
         const { tag, index: indexOfStartTagName } = abstractTag(template, index);
         const { attributes, index: indexOfStartTag } = abstractAttributes(template, indexOfStartTagName);
-        index = indexOfStartTag;
+        index = indexOfStartTag - 1;
         stack.push({ tag, attributes, children: [] });
         rootRef = stack.peek();
       } else {
         // current char is the ending of tag.
         const child = stack.pop();
+        index = index + child.tag.length + 2;
         rootRef = stack.peek();
-        rootRef.children.push(child);
+        if (rootRef) {
+          rootRef.children.push(child)
+        } else {
+          rootRef = child;
+        }
       }
-    }
-
-    // text node
-    if (char === '>' && template.at(index + 1) !== '<') {
+      // text
+    } else if (char === '>' && template.at(index + 1) !== '<') {
       const { text, index: indexOfText } = abstractText(template, index);
-      index = indexOfText;
-      rootRef.children.push({
-        tag: 'textNode',
-        attributes: { text }
-      });
+      index = indexOfText - 1;
+      rootRef.children.push(text);
     }
   }
 
