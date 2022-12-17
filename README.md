@@ -1,4 +1,12 @@
 ## How Vue works
 
+work list as follows.
+
+- ✅ html parser.
+- custom directives.
+- component tree.
+- data observer.
+
 #### Issues
-- Does not support to exsit spaces between tags.
+- Don't allow exsiting spaces between tags.
+- tags like \<br /> couldn't be parsed yet.
