@@ -77,7 +77,7 @@ const abstractText = (template, index) => {
   }
 
   return {
-    text: text.join(''),
+    text: text.join('').trim(),
     index,
   }
 }
@@ -114,7 +114,7 @@ const parse = (template) => {
     } else if (char === '>' && template.at(index + 1) !== '<') {
       const { text, index: indexOfText } = abstractText(template, index);
       index = indexOfText - 1;
-      rootRef.children.push(text);
+      text !== '' && rootRef.children.push(text);
     }
   }
 
