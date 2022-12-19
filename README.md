@@ -3,6 +3,7 @@
 work list as follows.
 
 - ✅ html parser.
+  - Html syntax validation.
 - custom directives.
 - component tree.
 - data observer.
