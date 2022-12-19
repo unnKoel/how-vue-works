@@ -11,22 +11,22 @@ const abstractTag = (template, index) => {
     throw new Error("Syntax error: tag should be started with '<'");
   }
 
-  let tag = '';
+  let tag = [];
   let char = '';
 
   while (char !== ' ' && char !== '>') {
-    tag += char;
+    tag.push(char);
     char = template.at(++index);
   }
 
-  return { tag, index };
+  return { tag: tag.join(''), index };
 }
 
 const abstractAttributes = (template, index) => {
   const attributes = {};
   let char = template.at(index);
-  let key = '';
-  let value = '';
+  let key = [];
+  let value = [];
   let equalFlag = false;
   let quoteFlag = 0;
 
@@ -43,17 +43,17 @@ const abstractAttributes = (template, index) => {
     }
     if ((char === ' ' || char === '>') && quoteFlag === 0) {
       equalFlag = false;
-      if (key != '') {
-        attributes[key] = value === '' ? true : value;
+      if (key.length) {
+        attributes[key.join('')] = value.length ? value.join('') : true;
       }
-      key = '';
-      value = '';
+      key = [];
+      value = [];
       continue;
     }
     if (!equalFlag) {
-      key += char;
+      key.push(char);
     } else {
-      value += char;
+      value.push(char);
     }
   }
 
@@ -68,16 +68,16 @@ const abstractText = (template, index) => {
     throw new Error("Syntax error: text should be after '>'");
   }
 
-  let text = '';
+  let text = [];
   let char = '';
 
   while (char !== '<') {
-    text += char;
+    text.push(char);
     char = template.at(++index);
   }
 
   return {
-    text,
+    text: text.join(''),
     index,
   }
 }
