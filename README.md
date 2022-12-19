@@ -8,5 +8,6 @@ work list as follows.
 - data observer.
 
 #### Issues
-- Don't allow exsiting spaces between tags.
-- tags like \<br /> couldn't be parsed yet.
+- ✅ Don't allow exsiting spaces between tags.
+- ✅ Tags like \<br /> couldn't be parsed yet.
+- \>, < should not be considered as a tag or end of tag while in between quotes or test.

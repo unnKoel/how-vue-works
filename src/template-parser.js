@@ -14,7 +14,8 @@ const abstractTag = (template, index) => {
   let tag = [];
   let char = '';
 
-  while (char !== ' ' && char !== '>') {
+  // for types such as <a> | <br/> | <a href="">
+  while (char !== ' ' && char !== '>' && char !== '/') {
     tag.push(char);
     char = template.at(++index);
   }
@@ -30,7 +31,7 @@ const abstractAttributes = (template, index) => {
   let equalFlag = false;
   let quoteFlag = 0;
 
-  while (char !== '>') {
+  while (char !== '>' && char !== '/') {
     char = template.at(++index);
 
     if (char === '"') {
@@ -71,7 +72,7 @@ const abstractText = (template, index) => {
   let text = [];
   let char = '';
 
-  while (char !== '<') {
+  while (char !== '<' && char !== undefined) {
     text.push(char);
     char = template.at(++index);
   }
@@ -80,6 +81,19 @@ const abstractText = (template, index) => {
     text: text.join('').trim(),
     index,
   }
+}
+
+const structureTree = () => {
+  const child = stack.pop();
+
+  let parentRef = stack.peek();
+  if (parentRef) {
+    parentRef.children.push(child)
+  } else {
+    parentRef = child;
+  }
+
+  return { parentRef, child };
 }
 
 const parse = (template) => {
@@ -101,20 +115,17 @@ const parse = (template) => {
         rootRef = stack.peek();
       } else {
         // current char is the ending of tag.
-        const child = stack.pop();
-        index = index + child.tag.length + 2;
-        rootRef = stack.peek();
-        if (rootRef) {
-          rootRef.children.push(child)
-        } else {
-          rootRef = child;
-        }
+        const { parentRef, child } = structureTree();
+        index += child.tag.length + 1;
+        rootRef = parentRef;
       }
-      // text
-    } else if (char === '>' && template.at(index + 1) !== '<') {
+    } else if (char === '>' && template.at(index + 1) !== '<') {  // text
       const { text, index: indexOfText } = abstractText(template, index);
       index = indexOfText - 1;
       text !== '' && rootRef.children.push(text);
+    } else if (char === '/' && template.at(index + 1) === '>') {  // <br /> or <br/>
+      const { parentRef } = structureTree();
+      rootRef = parentRef;
     }
   }
 
