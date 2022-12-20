@@ -4,9 +4,15 @@ work list as follows.
 
 - ✅ html parser.
   - Html syntax validation.
-- custom directives.
-- component tree.
+- directives.
+  - {{}}
+  - v-bind
+  - v-if
+  - v-for
+  - v-on
+  - v-model
 - data observer.
+- component tree.
 
 #### Issues
 - ✅ Don't allow exsiting spaces between tags.
