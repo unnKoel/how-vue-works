@@ -83,20 +83,21 @@ const abstractText = (template, index) => {
   }
 }
 
-const structureTree = () => {
-  const child = stack.pop();
+const structureTree = (linkParentChild) => {
+  const { element: child, tag: childTag } = stack.pop();
 
-  let parentRef = stack.peek();
+  let { element: parentRef } = stack.peek() ?? {};
   if (parentRef) {
-    parentRef.children.push(child)
+    linkParentChild(parentRef, child);
+    // parentRef.children.push(child)
   } else {
     parentRef = child;
   }
 
-  return { parentRef, child };
+  return { parentRef, childTag };
 }
 
-const parse = (template) => {
+const createParser = (createElement, linkParentChild) => (template) => {
   template = template.replace(/\n/g, '');
   let index = -1;
   let rootRef;
@@ -111,20 +112,21 @@ const parse = (template) => {
         const { tag, index: indexOfStartTagName } = abstractTag(template, index);
         const { attributes, index: indexOfStartTag } = abstractAttributes(template, indexOfStartTagName);
         index = indexOfStartTag - 1;
-        stack.push({ tag, attributes, children: [] });
-        rootRef = stack.peek();
+        const element = createElement({ tag, attributes });
+        stack.push({ element, tag });
+        rootRef = stack.peek().element;
       } else {
         // current char is the ending of tag.
-        const { parentRef, child } = structureTree();
-        index += child.tag.length + 1;
+        const { parentRef, childTag } = structureTree(linkParentChild);
+        index += childTag.length + 1;
         rootRef = parentRef;
       }
     } else if (char === '>' && template.at(index + 1) !== '<') {  // text
       const { text, index: indexOfText } = abstractText(template, index);
       index = indexOfText - 1;
-      text !== '' && rootRef.children.push(text);
+      text !== '' && linkParentChild(rootRef, text);
     } else if (char === '/' && template.at(index + 1) === '>') {  // <br /> or <br/>
-      const { parentRef } = structureTree();
+      const { parentRef } = structureTree(linkParentChild);
       rootRef = parentRef;
     }
   }
@@ -136,5 +138,5 @@ export {
   abstractTag,
   abstractAttributes,
   abstractText,
-  parse,
+  createParser,
 }
