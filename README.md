@@ -5,7 +5,7 @@ work list as follows.
 - ✅ html parser.
   - Html syntax validation.
 - directives.
-  - {{}}
+  - ✅ {{}}
   - v-bind
   - v-if
   - v-for
