@@ -3,8 +3,11 @@
  * which creates real dom structure. 
  */
 import Stack from './stack';
+import Queue from './queue';
+import { MustacheDirective } from './directives';
 
-const stack = Stack();
+const htmlParseStack = Stack();
+const directiveQueue = Queue();
 
 const abstractTag = (template, index) => {
   if (template.at(index) !== '<') {
@@ -84,9 +87,9 @@ const abstractText = (template, index) => {
 }
 
 const structureTree = (linkParentChild) => {
-  const { element: child, tag: childTag } = stack.pop();
+  const { element: child, tag: childTag } = htmlParseStack.pop();
 
-  let { element: parentRef } = stack.peek() ?? {};
+  let { element: parentRef } = htmlParseStack.peek() ?? {};
   if (parentRef) {
     linkParentChild(parentRef, child);
     // parentRef.children.push(child)
@@ -113,8 +116,8 @@ const createParser = (createElement, linkParentChild) => (template) => {
         const { attributes, index: indexOfStartTag } = abstractAttributes(template, indexOfStartTagName);
         index = indexOfStartTag - 1;
         const element = createElement({ tag, attributes });
-        stack.push({ element, tag });
-        rootRef = stack.peek().element;
+        htmlParseStack.push({ element, tag });
+        rootRef = htmlParseStack.peek().element;
       } else {
         // current char is the ending of tag.
         const { parentRef, childTag } = structureTree(linkParentChild);
@@ -124,7 +127,12 @@ const createParser = (createElement, linkParentChild) => (template) => {
     } else if (char === '>' && template.at(index + 1) !== '<') {  // text
       const { text, index: indexOfText } = abstractText(template, index);
       index = indexOfText - 1;
-      text !== '' && linkParentChild(rootRef, text);
+      if (text !== '') {
+        const textNode = document.createTextNode(text);
+        linkParentChild(rootRef, textNode);
+        const mustacheInstance = MustacheDirective(textNode, text);
+        mustacheInstance.isMustache() && directiveQueue.enqueue(mustacheInstance);
+      }
     } else if (char === '/' && template.at(index + 1) === '>') {  // <br /> or <br/>
       const { parentRef } = structureTree(linkParentChild);
       rootRef = parentRef;
