@@ -6,7 +6,7 @@ work list as follows.
   - Html syntax validation.
 - directives.
   - ✅ {{}}
-  - v-bind
+  - ✅ v-bind
   - v-if
   - v-for
   - v-on
