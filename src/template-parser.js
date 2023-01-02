@@ -4,7 +4,7 @@
  */
 import Stack from './stack';
 import Queue from './queue';
-import { MustacheDirective } from './directives';
+import { MustacheDirective, VBindDirective } from './directives';
 
 const htmlParseStack = Stack();
 const directiveQueue = Queue();
@@ -116,6 +116,9 @@ const createParser = (createElement, linkParentChild) => (template) => {
         const { attributes, index: indexOfStartTag } = abstractAttributes(template, indexOfStartTagName);
         index = indexOfStartTag - 1;
         const element = createElement({ tag, attributes });
+        const vBindDirective = VBindDirective(element, attributes);
+        vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
+        
         htmlParseStack.push({ element, tag });
         rootRef = htmlParseStack.peek().element;
       } else {
