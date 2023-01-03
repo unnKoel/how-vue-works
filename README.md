@@ -8,6 +8,7 @@ work list as follows.
   - ✅ {{}}
   - ✅ v-bind
   - v-if
+    - there is test left.
   - v-for
   - v-on
   - v-model
@@ -18,3 +19,4 @@ work list as follows.
 - ✅ Don't allow exsiting spaces between tags.
 - ✅ Tags like \<br /> couldn't be parsed yet.
 - \>, < should not be considered as a tag or end of tag while in between quotes or test.
+- filter attributes to get ones without in relation to VUE to directly set in the target node.

@@ -2,12 +2,9 @@
  * This is a tool to parse html tag and produce vitual dom or a render function
  * which creates real dom structure. 
  */
-import Stack from './stack';
 import Queue from './queue';
-import { MustacheDirective, VBindDirective } from './directives';
-
-const htmlParseStack = Stack();
-const directiveQueue = Queue();
+import Stack from './stack';
+import { MustacheDirective, VBindDirective, VIfDirective } from './directives';
 
 const abstractTag = (template, index) => {
   if (template.at(index) !== '<') {
@@ -86,7 +83,7 @@ const abstractText = (template, index) => {
   }
 }
 
-const structureTree = (linkParentChild) => {
+const structureTree = (linkParentChild, htmlParseStack) => {
   const { element: child, tag: childTag } = htmlParseStack.pop();
 
   let { element: parentRef } = htmlParseStack.peek() ?? {};
@@ -100,7 +97,21 @@ const structureTree = (linkParentChild) => {
   return { parentRef, childTag };
 }
 
-const createParser = (createElement, linkParentChild) => (template) => {
+const createElement = ({ tag, attributes }) => {
+  const element = document.createElement(tag);
+
+  for (let attrName in attributes) {
+    element.setAttribute(attrName, attributes[attrName]);
+  }
+
+  return element;
+}
+
+const linkParentChild = (parentRef, childRef) => {
+  parentRef.append(childRef);
+}
+
+const parse = (template, htmlParseStack, directiveQueue) => {
   template = template.replace(/\n/g, '');
   let index = -1;
   let rootRef;
@@ -116,9 +127,23 @@ const createParser = (createElement, linkParentChild) => (template) => {
         const { attributes, index: indexOfStartTag } = abstractAttributes(template, indexOfStartTagName);
         index = indexOfStartTag - 1;
         const element = createElement({ tag, attributes });
+
         const vBindDirective = VBindDirective(element, attributes);
         vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
-        
+        const vIfDirective = VIfDirective(element, attributes);
+        if (vIfDirective.isVIf()) {
+          const vIfTemplateParseStack = Stack();
+          const vIfTemplateDirectiveQueue = Queue();
+
+          tag.vIf = true;
+          vIfTemplateParseStack.push({ element, tag });
+          const { rootRef: vIfTemplateRef, index: vIfTemplateEndIndex } = parse(template.substring(index), vIfTemplateParseStack, vIfTemplateDirectiveQueue);
+          vIfDirective.setVIfTemplateDirectiveQueue(vIfTemplateDirectiveQueue);
+          vIfDirective.setVIfTemplateRef(vIfTemplateRef);
+          directiveQueue.enqueue(vIfDirective);
+          index = vIfTemplateEndIndex;
+        }
+
         htmlParseStack.push({ element, tag });
         rootRef = htmlParseStack.peek().element;
       } else {
@@ -126,6 +151,9 @@ const createParser = (createElement, linkParentChild) => (template) => {
         const { parentRef, childTag } = structureTree(linkParentChild);
         index += childTag.length + 1;
         rootRef = parentRef;
+        if (childTag.vIf) {
+          return { rootRef, index };
+        }
       }
     } else if (char === '>' && template.at(index + 1) !== '<') {  // text
       const { text, index: indexOfText } = abstractText(template, index);
@@ -142,12 +170,12 @@ const createParser = (createElement, linkParentChild) => (template) => {
     }
   }
 
-  return rootRef;
+  return { rootRef, index };
 }
 
 export {
   abstractTag,
   abstractAttributes,
   abstractText,
-  createParser,
+  parse,
 }

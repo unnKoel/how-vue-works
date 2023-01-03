@@ -1,25 +1,18 @@
-import { createParser } from './template-parser';
-// const internalDirectives = ['v-bind', 'v-if', 'v-for', 'v-on', 'v-model'];
+import { parse } from './template-parser';
+import Stack from './stack';
+import Queue from './queue';
 
-const createElement = ({ tag, attributes }) => {
-  const element = document.createElement(tag);
+const htmlParseStack = Stack();
+const directiveQueue = Queue();
 
-  for (let attrName in attributes) {
-    element.setAttribute(attrName, attributes[attrName]);
-  }
-
-  return element;
-}
-
-const linkParentChild = (parentRef, childRef) => {
-  parentRef.append(childRef);
-}
-
-const realDomParser = createParser(createElement, linkParentChild);
-
-const render = (template, container) => {
-  const domTree = realDomParser(template);
+const render = (template, container, data) => {
+  const domTree = parse(template, htmlParseStack, directiveQueue);
   (typeof container === 'string' ? document.querySelector(container) : container).append(domTree);
+
+  while (!directiveQueue.isEmpty()) {
+    const directive = directiveQueue.dequeue();
+    directive.handle(data);
+  }
 }
 
 export {

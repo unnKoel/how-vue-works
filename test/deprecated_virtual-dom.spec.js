@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import { virtualDomParser } from '../src/virtual-dom';
+import { virtualDomParser } from '../src/deprecated_virtual-dom';
 
 test('parse templete to become an object tree', () => {
   const objectTree = virtualDomParser(`

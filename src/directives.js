@@ -39,7 +39,7 @@ const VBindDirective = (node, attributes = {}) => {
   }
 
   const handle = (data) => {
-    vBindAttributes.forEach(({ attributeKey, path}) => {
+    vBindAttributes.forEach(({ attributeKey, path }) => {
       node.setAttribute(attributeKey, get(data, path));
     });
   }
@@ -51,7 +51,51 @@ const VBindDirective = (node, attributes = {}) => {
   }
 }
 
+/**
+ * @todo the value of `v-if` should be parsed as an expression.
+ */
+const VIfDirective = (node, attributes = {}) => {
+  let vIfTemplateRef = null;
+  let vIfTemplateDirectiveQueue = null;
+
+  const vIfExpression = attributes['v-if'];
+
+  const isVIf = () => {
+    return !!vIfExpression;
+  }
+
+  const setVIfTemplateRef = (vIfTemplateRef) => {
+    this.vIfTemplateRef = vIfTemplateRef;
+  }
+
+  const setVIfTemplateDirectiveQueue = (vIfTemplateDirectiveQueue) => {
+    this.vIfTemplateDirectiveQueue = vIfTemplateDirectiveQueue;
+  }
+
+  const handle = (data) => {
+    const value = data[vIfExpression];
+
+    if (value) {
+      node.parentNode.appendChild(vIfTemplateRef);
+      while (!vIfTemplateDirectiveQueue.isEmpty()) {
+        const directive = vIfTemplateDirectiveQueue.dequeue();
+        directive.handle(data);
+      }
+    } else {
+      node.parentNode.removeChild();
+    }
+  }
+
+  return {
+    isVIf,
+    setVIfTemplateRef,
+    setVIfTemplateDirectiveQueue,
+    handle,
+  }
+}
+
 export {
   MustacheDirective,
   VBindDirective,
+  VIfDirective,
 }
