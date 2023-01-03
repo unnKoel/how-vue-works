@@ -8,7 +8,9 @@ work list as follows.
   - ✅ {{}}
   - ✅ v-bind
   - v-if
-    - there is test left.
+    - `idea`: parse child template identified by `v-if` to be appended as child by its parent node if value of `v-if` expression is `true`, otherwise remove this child.
+
+    - `work`: there is test left.
   - v-for
   - v-on
   - v-model
