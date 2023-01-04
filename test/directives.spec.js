@@ -2,10 +2,10 @@
  * @jest-environment jsdom
  */
 /* eslint-disable no-undef */
-import { MustacheDirective, VBindDirective } from '../src/directives';
+import { MustacheDirective, VBindDirective, VIfDirective } from '../src/directives';
 
 describe('mustache directive', () => {
-  test('check out mustache braces', () => {
+  test('check if it\'s a mustache braces', () => {
     const text = 'hello, {{name}}. Welcome to {{ field }}\'s world';
     const textNode = document.createTextNode(text);
 
@@ -37,7 +37,7 @@ describe('mustache directive', () => {
 });
 
 describe('v-bind directive', () => {
-  test('check out v-bind attributes', () => {
+  test('check if it\'s a v-bind directive', () => {
     const node = document.createElement('span');
     const attributes = { 'v-bind : title ': 'title', 'class': 'bind-example', 'v-bind:p': 'p' };
 
@@ -65,5 +65,23 @@ describe('v-bind directive', () => {
     }
     vBindDirective.handle(data);
     expect(node.getAttribute('title')).toBe('how to create a node');
+  });
+});
+
+describe('v-if directive', () => {
+  test('check if it\'s a v-if directive', () => {
+    const parentNode = document.createElement('div');
+    const vIfRootNode = document.createElement('div');
+    parentNode.appendChild(vIfRootNode);
+    const attributes = {
+      'v-if': 'showed'
+    };
+
+    const vIfDirective = VIfDirective(vIfRootNode, attributes);
+    
+  });
+
+  test('show or hide some element using v-if', () => {
+
   });
 });

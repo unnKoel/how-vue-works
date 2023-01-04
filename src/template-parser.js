@@ -6,6 +6,8 @@ import Queue from './queue';
 import Stack from './stack';
 import { MustacheDirective, VBindDirective, VIfDirective } from './directives';
 
+const DIRECTIVES = ['v-bind', 'v-if', 'v-for', 'v-on', 'v-model'];
+
 const abstractTag = (template, index) => {
   if (template.at(index) !== '<') {
     throw new Error("Syntax error: tag should be started with '<'");
@@ -101,7 +103,9 @@ const createElement = ({ tag, attributes }) => {
   const element = document.createElement(tag);
 
   for (let attrName in attributes) {
-    element.setAttribute(attrName, attributes[attrName]);
+    if (!DIRECTIVES.some(directive => new RegExp(directive).test(attrName))) {
+      element.setAttribute(attrName, attributes[attrName]);
+    }
   }
 
   return element;
@@ -148,7 +152,7 @@ const parse = (template, htmlParseStack, directiveQueue) => {
         rootRef = htmlParseStack.peek().element;
       } else {
         // current char is the ending of tag.
-        const { parentRef, childTag } = structureTree(linkParentChild);
+        const { parentRef, childTag } = structureTree(linkParentChild, htmlParseStack);
         index += childTag.length + 1;
         rootRef = parentRef;
         if (childTag.vIf) {
@@ -165,7 +169,7 @@ const parse = (template, htmlParseStack, directiveQueue) => {
         mustacheInstance.isMustache() && directiveQueue.enqueue(mustacheInstance);
       }
     } else if (char === '/' && template.at(index + 1) === '>') {  // <br /> or <br/>
-      const { parentRef } = structureTree(linkParentChild);
+      const { parentRef } = structureTree(linkParentChild, htmlParseStack);
       rootRef = parentRef;
     }
   }
