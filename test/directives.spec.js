@@ -3,6 +3,9 @@
  */
 /* eslint-disable no-undef */
 import { MustacheDirective, VBindDirective, VIfDirective } from '../src/directives';
+import { parse } from '../src/template-parser';
+import Queue from '../src/queue';
+import Stack from '../src/stack';
 
 describe('mustache directive', () => {
   test('check if it\'s a mustache braces', () => {
@@ -70,18 +73,37 @@ describe('v-bind directive', () => {
 
 describe('v-if directive', () => {
   test('check if it\'s a v-if directive', () => {
-    const parentNode = document.createElement('div');
     const vIfRootNode = document.createElement('div');
-    parentNode.appendChild(vIfRootNode);
     const attributes = {
-      'v-if': 'showed'
+      'v-if': 'show'
     };
 
     const vIfDirective = VIfDirective(vIfRootNode, attributes);
-    
+    expect(vIfDirective.isVIf()).toBe(true);
   });
 
   test('show or hide some element using v-if', () => {
+    const parentNode = document.createElement('div');
+    const vIfRootNode = document.createElement('div');
+    parentNode.appendChild(vIfRootNode);
+    
+    const attributes = {
+      'v-if': 'show',
+    };
 
+    const vIfDirective = VIfDirective(vIfRootNode, attributes);
+
+    const template = `<span>hello welcome to {{directive}}</span>`;
+    const htmlParseStack = Stack();
+    const directiveQueue = Queue();
+    const { rootRef } = parse(template, htmlParseStack, directiveQueue);
+    vIfDirective.setVIfTemplateRef(rootRef);
+    vIfDirective.setVIfTemplateDirectiveQueue(directiveQueue);
+    const data = {
+      show: true,
+      directive: 'v-if',
+    };
+    vIfDirective.handle(data);
+    expect(parentNode.innerHTML).toBe('<div></div><span>hello welcome to v-if</span>');
   });
 });

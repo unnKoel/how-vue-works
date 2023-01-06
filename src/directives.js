@@ -64,12 +64,12 @@ const VIfDirective = (node, attributes = {}) => {
     return !!vIfExpression;
   }
 
-  const setVIfTemplateRef = (vIfTemplateRef) => {
-    this.vIfTemplateRef = vIfTemplateRef;
+  const setVIfTemplateRef = (agVIfTemplateRef) => {
+    vIfTemplateRef = agVIfTemplateRef;
   }
 
-  const setVIfTemplateDirectiveQueue = (vIfTemplateDirectiveQueue) => {
-    this.vIfTemplateDirectiveQueue = vIfTemplateDirectiveQueue;
+  const setVIfTemplateDirectiveQueue = (agVIfTemplateDirectiveQueue) => {
+    vIfTemplateDirectiveQueue = agVIfTemplateDirectiveQueue;
   }
 
   const handle = (data) => {
@@ -82,7 +82,7 @@ const VIfDirective = (node, attributes = {}) => {
         directive.handle(data);
       }
     } else {
-      node.parentNode.removeChild();
+      node.parentNode.removeChild(node);
     }
   }
 

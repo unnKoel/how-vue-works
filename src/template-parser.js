@@ -86,7 +86,7 @@ const abstractText = (template, index) => {
 }
 
 const structureTree = (linkParentChild, htmlParseStack) => {
-  const { element: child, tag: childTag } = htmlParseStack.pop();
+  const { element: child, label } = htmlParseStack.pop();
 
   let { element: parentRef } = htmlParseStack.peek() ?? {};
   if (parentRef) {
@@ -96,7 +96,7 @@ const structureTree = (linkParentChild, htmlParseStack) => {
     parentRef = child;
   }
 
-  return { parentRef, childTag };
+  return { parentRef, label };
 }
 
 const createElement = ({ tag, attributes }) => {
@@ -139,23 +139,22 @@ const parse = (template, htmlParseStack, directiveQueue) => {
           const vIfTemplateParseStack = Stack();
           const vIfTemplateDirectiveQueue = Queue();
 
-          tag.vIf = true;
-          vIfTemplateParseStack.push({ element, tag });
-          const { rootRef: vIfTemplateRef, index: vIfTemplateEndIndex } = parse(template.substring(index), vIfTemplateParseStack, vIfTemplateDirectiveQueue);
+          vIfTemplateParseStack.push({ element, label: { tag, vIf: true } });
+          const { rootRef: vIfTemplateRef, index: vIfTemplateEndIndex } = parse(template.substring(++index), vIfTemplateParseStack, vIfTemplateDirectiveQueue);
           vIfDirective.setVIfTemplateDirectiveQueue(vIfTemplateDirectiveQueue);
           vIfDirective.setVIfTemplateRef(vIfTemplateRef);
           directiveQueue.enqueue(vIfDirective);
-          index = vIfTemplateEndIndex;
+          index += vIfTemplateEndIndex;
         }
 
-        htmlParseStack.push({ element, tag });
+        htmlParseStack.push({ element, label: { tag } });
         rootRef = htmlParseStack.peek().element;
       } else {
         // current char is the ending of tag.
-        const { parentRef, childTag } = structureTree(linkParentChild, htmlParseStack);
-        index += childTag.length + 1;
+        const { parentRef, label } = structureTree(linkParentChild, htmlParseStack);
+        index += label?.tag?.length + 1;
         rootRef = parentRef;
-        if (childTag.vIf) {
+        if (label?.vIf) {
           return { rootRef, index };
         }
       }
