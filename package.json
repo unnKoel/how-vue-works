@@ -4,7 +4,8 @@
   "description": "Explore how Vue works under the hood.",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "prepare": "husky install"
   },
   "author": "Addy Zhou",
   "license": "ISC",
@@ -14,6 +15,7 @@
     "babel-jest": "^27.3.1",
     "core-js": "3.26.1",
     "eslint": "^8.29.0",
+    "husky": "^8.0.3",
     "jest": "^27.3.1"
   },
   "dependencies": {
