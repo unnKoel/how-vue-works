@@ -2,8 +2,6 @@
  * This is a tool to parse html tag and produce vitual dom or a render function
  * which creates real dom structure. 
  */
-import Queue from './queue';
-import Stack from './stack';
 import { MustacheDirective, VBindDirective, VIfDirective } from './directives';
 
 const DIRECTIVES = ['v-bind', 'v-if', 'v-for', 'v-on', 'v-model'];
@@ -136,13 +134,9 @@ const parse = (template, htmlParseStack, directiveQueue) => {
         vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
         const vIfDirective = VIfDirective(element, attributes);
         if (vIfDirective.isVIf()) {
-          const vIfTemplateParseStack = Stack();
-          const vIfTemplateDirectiveQueue = Queue();
-
-          vIfTemplateParseStack.push({ element, label: { tag, vIf: true } });
-          const { rootRef: vIfTemplateRef, index: vIfTemplateEndIndex } = parse(template.substring(++index), vIfTemplateParseStack, vIfTemplateDirectiveQueue);
-          vIfDirective.setVIfTemplateDirectiveQueue(vIfTemplateDirectiveQueue);
-          vIfDirective.setVIfTemplateRef(vIfTemplateRef);
+          const label = { tag, vIf: true };
+          const vIfTemplateEndIndex = vIfDirective.parseChildTemplate(template.substring(++index), label);
+          
           directiveQueue.enqueue(vIfDirective);
           index += vIfTemplateEndIndex;
         }

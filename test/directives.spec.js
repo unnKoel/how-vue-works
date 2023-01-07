@@ -90,20 +90,18 @@ describe('v-if directive', () => {
     const attributes = {
       'v-if': 'show',
     };
-
     const vIfDirective = VIfDirective(vIfRootNode, attributes);
 
     const template = `<span>hello welcome to {{directive}}</span>`;
-    const htmlParseStack = Stack();
-    const directiveQueue = Queue();
-    const { rootRef } = parse(template, htmlParseStack, directiveQueue);
-    vIfDirective.setVIfTemplateRef(rootRef);
-    vIfDirective.setVIfTemplateDirectiveQueue(directiveQueue);
+    const label = { tag: 'div', vIf: true };
+    vIfDirective.parseChildTemplate(template, label);
+
     const data = {
       show: true,
       directive: 'v-if',
     };
     vIfDirective.handle(data);
-    expect(parentNode.innerHTML).toBe('<div></div><span>hello welcome to v-if</span>');
+
+    expect(parentNode.innerHTML).toBe('<div><span>hello welcome to v-if</span></div>');
   });
 });

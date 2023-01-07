@@ -1,4 +1,7 @@
 import { get } from 'lodash';
+import { parse } from './template-parser';
+import Stack from './stack';
+import Queue from './queue';
 
 // Identify mustache braces to interpolate the value into text.
 const MustacheDirective = (textNode, text = '') => {
@@ -52,11 +55,11 @@ const VBindDirective = (node, attributes = {}) => {
 }
 
 /**
- * @todo the value of `v-if` should be parsed as an expression.
+ * @todo the value of `v-if` should be evaluated as an expression.
  */
 const VIfDirective = (node, attributes = {}) => {
   let vIfTemplateRef = null;
-  let vIfTemplateDirectiveQueue = null;
+  const vIfTemplateDirectiveQueue = Queue();
 
   const vIfExpression = attributes['v-if'];
 
@@ -64,12 +67,14 @@ const VIfDirective = (node, attributes = {}) => {
     return !!vIfExpression;
   }
 
-  const setVIfTemplateRef = (agVIfTemplateRef) => {
-    vIfTemplateRef = agVIfTemplateRef;
-  }
+  const parseChildTemplate = (childTemplate, label) => {
+    const vIfTemplateParseStack = Stack();
 
-  const setVIfTemplateDirectiveQueue = (agVIfTemplateDirectiveQueue) => {
-    vIfTemplateDirectiveQueue = agVIfTemplateDirectiveQueue;
+    vIfTemplateParseStack.push({ element: node, label });
+    const { rootRef, index } = parse(childTemplate, vIfTemplateParseStack, vIfTemplateDirectiveQueue);
+    vIfTemplateRef = rootRef;
+    
+    return index;
   }
 
   const handle = (data) => {
@@ -88,11 +93,30 @@ const VIfDirective = (node, attributes = {}) => {
 
   return {
     isVIf,
-    setVIfTemplateRef,
-    setVIfTemplateDirectiveQueue,
     handle,
+    parseChildTemplate,
   }
 }
+
+/** 
+const VForDirective = (node, attributes = {}) => {
+  let vForTemplateRef = null;
+  let vForTemplateDirectiveQueue = null;
+
+  const isVFor = () => {
+    return attributes['v-for']
+  }
+
+  const handle = (data) => {
+
+  }
+
+  return {
+    isVFor,
+
+  }
+}
+*/
 
 export {
   MustacheDirective,

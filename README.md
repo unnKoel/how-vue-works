@@ -22,6 +22,7 @@ work list as follows.
 - ✅ Tags like \<br /> couldn't be parsed yet.
 - \>, < should not be considered as a tag or end of tag while in between quotes or test.
 - filter attributes to get ones without in relation to VUE to directly set in the target node.
+- For both `v-if` and mustache braces, there is js expression support left on its value. 
 - When debug tests in Jest, error shows in the termial like `node_modules\jest\node_modules\jest-cli\build\cli\index.js:227 } catch {`
 
   This issue is caused by the conflict between local installation of node and nvm. through removing local installation and setting default version of node in nvm as greater than 9.11.2, it's fixed.
