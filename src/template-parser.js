@@ -2,7 +2,7 @@
  * This is a tool to parse html tag and produce vitual dom or a render function
  * which creates real dom structure. 
  */
-import { MustacheDirective, VBindDirective, VIfDirective } from './directives';
+import { MustacheDirective, VBindDirective, VIfDirective, VForDirective } from './directives';
 
 const DIRECTIVES = ['v-bind', 'v-if', 'v-for', 'v-on', 'v-model'];
 
@@ -113,7 +113,7 @@ const linkParentChild = (parentRef, childRef) => {
   parentRef.append(childRef);
 }
 
-const parse = (template, htmlParseStack, directiveQueue) => {
+const parse = (template, htmlParseStack, directiveQueue, data) => {
   template = template.replace(/\n/g, '');
   let index = -1;
   let rootRef;
@@ -134,11 +134,16 @@ const parse = (template, htmlParseStack, directiveQueue) => {
         vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
         const vIfDirective = VIfDirective(element, attributes);
         if (vIfDirective.isVIf()) {
-          const label = { tag, vIf: true };
-          const vIfTemplateEndIndex = vIfDirective.parseChildTemplate(template.substring(++index), label);
-          
+          const vIfTemplateEndIndex = vIfDirective.parseChildTemplate(template.substring(++index), { tag, vIf: true });
           directiveQueue.enqueue(vIfDirective);
           index += vIfTemplateEndIndex;
+        }
+
+        const vForDirective = VForDirective(element, attributes);
+        if (vForDirective.isVFor()) {
+          const vForTemplateEndIndex = vForDirective.parseChildTemplate(template.substring(++index), { tag, vFor: true }, data);
+          directiveQueue.enqueue(vForDirective);
+          index += vForTemplateEndIndex;
         }
 
         htmlParseStack.push({ element, label: { tag } });
@@ -148,7 +153,7 @@ const parse = (template, htmlParseStack, directiveQueue) => {
         const { parentRef, label } = structureTree(linkParentChild, htmlParseStack);
         index += label?.tag?.length + 1;
         rootRef = parentRef;
-        if (label?.vIf) {
+        if (label?.vIf || label?.vFor) {
           return { rootRef, index };
         }
       }

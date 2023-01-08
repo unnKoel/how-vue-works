@@ -8,10 +8,13 @@ work list as follows.
   - ✅ {{}}
   - ✅ v-bind
   - ✅ v-if
-    - `idea`: parse child template identified by `v-if` to be appended as child by its parent node if value of `v-if` expression is `true`, otherwise remove this child.
+    - `thought`: parse child template identified by `v-if` to be appended as child by its parent node if value of `v-if` expression is `true`, otherwise remove this child.
 
     - `work`: test to `v-if` is completed.
-  - v-for
+  - ✅ v-for
+    - `thought`: It's the same with `v-if`, parsing child template with for loop over along with collecting all directives inside of it.
+    
+    - `work`: there is test left.
   - v-on
   - v-model
 - data observer.

@@ -3,9 +3,6 @@
  */
 /* eslint-disable no-undef */
 import { MustacheDirective, VBindDirective, VIfDirective } from '../src/directives';
-import { parse } from '../src/template-parser';
-import Queue from '../src/queue';
-import Stack from '../src/stack';
 
 describe('mustache directive', () => {
   test('check if it\'s a mustache braces', () => {

@@ -73,7 +73,7 @@ const VIfDirective = (node, attributes = {}) => {
     vIfTemplateParseStack.push({ element: node, label });
     const { rootRef, index } = parse(childTemplate, vIfTemplateParseStack, vIfTemplateDirectiveQueue);
     vIfTemplateRef = rootRef;
-    
+
     return index;
   }
 
@@ -82,10 +82,7 @@ const VIfDirective = (node, attributes = {}) => {
 
     if (value) {
       node.parentNode.appendChild(vIfTemplateRef);
-      while (!vIfTemplateDirectiveQueue.isEmpty()) {
-        const directive = vIfTemplateDirectiveQueue.dequeue();
-        directive.handle(data);
-      }
+      vIfTemplateDirectiveQueue.getItems().forEach(directive => directive.handle(data));
     } else {
       node.parentNode.removeChild(node);
     }
@@ -98,28 +95,60 @@ const VIfDirective = (node, attributes = {}) => {
   }
 }
 
-/** 
 const VForDirective = (node, attributes = {}) => {
-  let vForTemplateRef = null;
-  let vForTemplateDirectiveQueue = null;
+  let arrayKey = '';
+  const vForTemplateDirectiveQueueArray = [];
 
   const isVFor = () => {
     return attributes['v-for']
   }
 
-  const handle = (data) => {
+  if (isVFor()) {
+    const expression = attributes['v-for'];
+    [, arrayKey] = expression.split('in');
 
+    arrayKey = arrayKey.trim();
+  }
+
+  const parseChildTemplate = (childTemplate, label, data) => {
+    const array = data[arrayKey];
+    let vForTemplateEndIndex = 0;
+
+    for (let i = 0; i < array.length; i++) {
+      const vForTemplateParseStack = Stack();
+      const vForTemplateDirectiveQueue = Queue();
+
+      vForTemplateParseStack.push({ element: node, label });
+      const { rootRef, index } = parse(childTemplate, vForTemplateParseStack, vForTemplateDirectiveQueue);
+
+      node.appendChild(rootRef);
+      vForTemplateEndIndex = index;
+      vForTemplateDirectiveQueueArray.push(vForTemplateDirectiveQueue);
+    }
+
+    return vForTemplateEndIndex;
+  }
+
+  const handle = (data) => {
+    const array = data[arrayKey];
+
+    for (let i = 0; i < array.length; i++) {
+      const item = array[i];
+      const vForTemplateDirective = vForTemplateDirectiveQueueArray[i];
+      vForTemplateDirective.forEach(directive => directive.handle(item));
+    }
   }
 
   return {
     isVFor,
-
+    parseChildTemplate,
+    handle,
   }
 }
-*/
 
 export {
   MustacheDirective,
   VBindDirective,
   VIfDirective,
+  VForDirective,
 }

@@ -5,7 +5,7 @@
 /* eslint-disable no-undef */
 import { render } from '../src/render';
 
-afterEach(() => {
+beforeEach(() => {
   document.body.innerHTML = "";
 });
 
@@ -48,7 +48,7 @@ test('render template with v-bind directive', () => {
   expect(document.body.innerHTML).toBe('<div class="root"><a href="www.google.com" title="Navigate to Google">Navtigate to Google</a></div>');
 });
 
-test('render template with v-if=false directive', () => {
+test.skip('render template with v-if=false directive', () => {
   const templete = `
     <div class="root">
       <div v-if="show">

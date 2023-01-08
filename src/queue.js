@@ -14,11 +14,15 @@ function Queue() {
   }
 
   const length = () => {
-    return items[items.length - 1];
+    return items.length - 1;
   }
 
   const isEmpty = () => {
     return items.length === 0;
+  }
+
+  const getItems = () => {
+    return items;
   }
 
   return {
@@ -27,6 +31,7 @@ function Queue() {
     peek,
     length,
     isEmpty,
+    getItems,
   }
 }
 
