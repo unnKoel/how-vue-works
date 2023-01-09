@@ -81,7 +81,7 @@ const VIfDirective = (node, attributes = {}) => {
   const handle = (data) => {
     const value = data[vIfExpression];
     parentNode = node.parentNode;
-  
+
     if (value) {
       parentNode.appendChild(vIfTemplateRef);
       vIfTemplateDirectiveQueue.getItems().forEach(directive => directive.handle(data));
@@ -97,19 +97,25 @@ const VIfDirective = (node, attributes = {}) => {
   }
 }
 
+/**
+ * @todo the item looped over in `v-for` can be deconstructed 
+ * as a form like (item, index).
+ */
 const VForDirective = (node, attributes = {}) => {
   let arrayKey = '';
-  const vForTemplateDirectiveQueueArray = [];
+  let itemName = '';
+  const vForTemplateArray = [];
 
   const isVFor = () => {
-    return attributes['v-for']
+    return !!attributes['v-for']
   }
 
   if (isVFor()) {
     const expression = attributes['v-for'];
-    [, arrayKey] = expression.split('in');
+    [itemName, arrayKey] = expression.split('in');
 
     arrayKey = arrayKey.trim();
+    itemName = itemName.trim();
   }
 
   const parseChildTemplate = (childTemplate, label, data) => {
@@ -120,24 +126,34 @@ const VForDirective = (node, attributes = {}) => {
       const vForTemplateParseStack = Stack();
       const vForTemplateDirectiveQueue = Queue();
 
-      vForTemplateParseStack.push({ element: node, label });
+      vForTemplateParseStack.push({ element: node.cloneNode(), label });
       const { rootRef, index } = parse(childTemplate, vForTemplateParseStack, vForTemplateDirectiveQueue);
 
-      node.appendChild(rootRef);
+      console.log(rootRef);
       vForTemplateEndIndex = index;
-      vForTemplateDirectiveQueueArray.push(vForTemplateDirectiveQueue);
+      vForTemplateArray.push({ vForTemplateDirectiveQueue, vForTemplateRef: rootRef });
     }
 
     return vForTemplateEndIndex;
+  }
+
+  const _prependItemName = (item) => {
+    if(Object.prototype.toString.call(item) === '[object Object]') {
+      return { [itemName]: item}
+    }
+    return item;
   }
 
   const handle = (data) => {
     const array = data[arrayKey];
 
     for (let i = 0; i < array.length; i++) {
-      const item = array[i];
-      const vForTemplateDirective = vForTemplateDirectiveQueueArray[i];
-      vForTemplateDirective.forEach(directive => directive.handle(item));
+      let item = array[i];
+      item = _prependItemName(item);
+      const { vForTemplateDirectiveQueue, vForTemplateRef } = vForTemplateArray[i];
+
+      node.parentNode.appendChild(vForTemplateRef);
+      vForTemplateDirectiveQueue.getItems().forEach(directive => directive.handle(item));
     }
   }
 

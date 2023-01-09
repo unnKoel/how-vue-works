@@ -68,7 +68,6 @@ test('render template with v-if=false directive', () => {
 });
 
 test('render template with v-if=true directive', () => {
-  console.log(document.body.innerHTML);
   const templete = `
     <div class="root">
       <span>Search for {{something}}</span>
@@ -86,4 +85,27 @@ test('render template with v-if=true directive', () => {
 
   render(templete, document.body, data);
   expect(document.body.innerHTML).toBe('<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navtigate to Google</a></div></div>');
+});
+
+test('render template with v-for directive', () => {
+  const templete = `
+    <div class="root">
+      <span>Search for {{something}}</span>
+      <div v-for="item in array">
+        <a href="www.google.com" v-bind:title="item.title">Navtigate to {{item.site}}</a>
+      </div>
+    </div>`;
+
+  const data = {
+    array: [
+      { title: 'Navigate to Google', site: 'Google' },
+      { title: 'Navigate to Microsoft', site: 'Microsoft' },
+      { title: 'Navigate to Apple', site: 'Apple' },
+    ],
+    something: 'Vue'
+  };
+
+  render(templete, document.body, data);
+  console.log(document.body.innerHTML);
+  // expect(document.body.innerHTML).toBe('<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navtigate to Google</a></div></div>');
 });

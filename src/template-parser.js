@@ -133,6 +133,7 @@ const parse = (template, htmlParseStack, directiveQueue, data) => {
         const vBindDirective = VBindDirective(element, attributes);
         vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
         const vIfDirective = VIfDirective(element, attributes);
+
         if (vIfDirective.isVIf()) {
           const vIfTemplateEndIndex = vIfDirective.parseChildTemplate(template.substring(++index), { tag, vIf: true });
           directiveQueue.enqueue(vIfDirective);
