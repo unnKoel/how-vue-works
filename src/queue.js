@@ -1,5 +1,5 @@
 function Queue() {
-  const items = [];
+  let items = [];
 
   const enqueue = (element) => {
     items.push(element);
@@ -25,6 +25,10 @@ function Queue() {
     return items;
   }
 
+  const clear = () => {
+    items = [];
+  }
+
   return {
     enqueue,
     dequeue,
@@ -32,6 +36,7 @@ function Queue() {
     length,
     isEmpty,
     getItems,
+    clear,
   }
 }
 

@@ -82,6 +82,7 @@ describe('v-if directive', () => {
   test('show or hide some element using v-if', () => {
     const parentNode = document.createElement('div');
     const vIfRootNode = document.createElement('div');
+    vIfRootNode.setAttribute('class', 'a-is')
     parentNode.appendChild(vIfRootNode);
     
     const attributes = {
@@ -98,7 +99,6 @@ describe('v-if directive', () => {
       directive: 'v-if',
     };
     vIfDirective.handle(data);
-
-    expect(parentNode.innerHTML).toBe('<div><span>hello welcome to v-if</span></div>');
+    expect(parentNode.innerHTML).toBe('<div class="a-is"><span>hello welcome to v-if</span></div>');
   });
 });

@@ -58,6 +58,7 @@ const VBindDirective = (node, attributes = {}) => {
  * @todo the value of `v-if` should be evaluated as an expression.
  */
 const VIfDirective = (node, attributes = {}) => {
+  let parentNode = null;
   let vIfTemplateRef = null;
   const vIfTemplateDirectiveQueue = Queue();
 
@@ -79,12 +80,13 @@ const VIfDirective = (node, attributes = {}) => {
 
   const handle = (data) => {
     const value = data[vIfExpression];
-
+    parentNode = node.parentNode;
+  
     if (value) {
-      node.parentNode.appendChild(vIfTemplateRef);
+      parentNode.appendChild(vIfTemplateRef);
       vIfTemplateDirectiveQueue.getItems().forEach(directive => directive.handle(data));
     } else {
-      node.parentNode.removeChild(node);
+      parentNode.removeChild(node);
     }
   }
 
