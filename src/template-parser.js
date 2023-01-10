@@ -128,7 +128,7 @@ const parse = (template, htmlParseStack, directiveQueue, data) => {
         const { tag, index: indexOfStartTagName } = abstractTag(template, index);
         const { attributes, index: indexOfStartTag } = abstractAttributes(template, indexOfStartTagName);
         index = indexOfStartTag - 1;
-        const element = createElement({ tag, attributes });
+        let element = createElement({ tag, attributes });
 
         const vBindDirective = VBindDirective(element, attributes);
         vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
@@ -142,9 +142,10 @@ const parse = (template, htmlParseStack, directiveQueue, data) => {
 
         const vForDirective = VForDirective(element, attributes);
         if (vForDirective.isVFor()) {
-          const vForTemplateEndIndex = vForDirective.parseChildTemplate(template.substring(++index), { tag, vFor: true }, data);
+          const { vForTemplateEndIndex, lastVForTemplateRef } = vForDirective.parseChildTemplate(template.substring(++index), { tag, vFor: true }, data);
           directiveQueue.enqueue(vForDirective);
           index += vForTemplateEndIndex;
+          element = lastVForTemplateRef;
         }
 
         htmlParseStack.push({ element, label: { tag } });
@@ -152,11 +153,11 @@ const parse = (template, htmlParseStack, directiveQueue, data) => {
       } else {
         // current char is the ending of tag.
         const { parentRef, label } = structureTree(linkParentChild, htmlParseStack);
-        index += label?.tag?.length + 1;
         rootRef = parentRef;
         if (label?.vIf || label?.vFor) {
-          return { rootRef, index };
+          return { rootRef, index: index - 1 };
         }
+        index += label?.tag?.length + 1;
       }
     } else if (char === '>' && template.at(index + 1) !== '<') {  // text
       const { text, index: indexOfText } = abstractText(template, index);

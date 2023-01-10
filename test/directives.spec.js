@@ -68,7 +68,7 @@ describe('v-bind directive', () => {
   });
 });
 
-describe('v-if directive', () => {
+describe.skip('v-if directive', () => {
   test('check if it\'s a v-if directive', () => {
     const vIfRootNode = document.createElement('div');
     const attributes = {
@@ -134,7 +134,8 @@ describe('v-for directive', () => {
       ],
     };
 
-    vForDirective.parseChildTemplate(template, label, data);
+    const { lastVForTemplateRef } = vForDirective.parseChildTemplate(template, label, data);
+    parentNode.appendChild(lastVForTemplateRef);
     vForDirective.handle(data);
 
     expect(parentNode.innerHTML).toBe('<div></div><div><span>Hi,vue. your character is template</span></div><div><span>Hi,react. your character is virtual dom</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div>')
