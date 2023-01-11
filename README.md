@@ -22,6 +22,8 @@ work list as follows.
   - v-on
   - v-model
 - data observer.
+  As to how to impliment data observer, I think changing each simple value of path recurvely with a object which contains a watcher list used to collect all dom updates related to this specified data.
+  
 - component tree.
 
 #### Issues
