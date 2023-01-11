@@ -74,17 +74,19 @@ test('render template with v-if=true directive', () => {
       <div v-if="show">
         <a href="www.google.com" v-bind:title="title">Navtigate to {{site}}</a>
       </div>
+      <p>{{text}}</p>
     </div>`;
 
   const data = {
     show: true,
     site: 'Google',
     title: 'Navigate to Google',
-    something: 'Vue'
+    something: 'Vue',
+    text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
   };
 
   render(templete, document.body, data);
-  expect(document.body.innerHTML).toBe('<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navtigate to Google</a></div></div>');
+  expect(document.body.innerHTML).toBe('<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navtigate to Google</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>');
 });
 
 test('render template with v-for directive', () => {
@@ -104,9 +106,9 @@ test('render template with v-for directive', () => {
       { title: 'Navigate to Apple', site: 'Apple' },
     ],
     something: 'Vue',
-    text: 'keep in mind to catch and cherish the subtle and fleeting feeling just right when you achieve something challenges youself.',
+    text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
   };
 
   render(templete, document.body, data);
-  expect(document.body.innerHTML).toBe('<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navtigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navtigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navtigate to Apple</a></div><p>keep in mind to catch and cherish the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>');
+  expect(document.body.innerHTML).toBe('<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navtigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navtigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navtigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>');
 });

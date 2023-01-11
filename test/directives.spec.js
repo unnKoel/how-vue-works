@@ -68,7 +68,7 @@ describe('v-bind directive', () => {
   });
 });
 
-describe.skip('v-if directive', () => {
+describe('v-if directive', () => {
   test('check if it\'s a v-if directive', () => {
     const vIfRootNode = document.createElement('div');
     const attributes = {
@@ -92,12 +92,12 @@ describe.skip('v-if directive', () => {
 
     const template = `<span>hello welcome to {{directive}}</span>`;
     const label = { tag: 'div', vIf: true };
-    vIfDirective.parseChildTemplate(template, label);
-
     const data = {
       show: true,
       directive: 'v-if',
     };
+    vIfDirective.parseChildTemplate(template, label, data);
+
     vIfDirective.handle(data);
     expect(parentNode.innerHTML).toBe('<div class="a-is"><span>hello welcome to v-if</span></div>');
   });

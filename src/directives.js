@@ -58,7 +58,6 @@ const VBindDirective = (node, attributes = {}) => {
  * @todo the value of `v-if` should be evaluated as an expression.
  */
 const VIfDirective = (node, attributes = {}) => {
-  let parentNode = null;
   let vIfTemplateRef = null;
   const vIfTemplateDirectiveQueue = Queue();
 
@@ -68,25 +67,25 @@ const VIfDirective = (node, attributes = {}) => {
     return !!vIfExpression;
   }
 
-  const parseChildTemplate = (childTemplate, label) => {
-    const vIfTemplateParseStack = Stack();
+  const parseChildTemplate = (childTemplate, label, data) => {
+    const value = data[vIfExpression];
+    if (!value) {
+      return { vIfTemplateEndIndex: 0, vIfTemplateRef: '' };
+    }
 
+    const vIfTemplateParseStack = Stack();
     vIfTemplateParseStack.push({ element: node, label });
     const { rootRef, index } = parse(childTemplate, vIfTemplateParseStack, vIfTemplateDirectiveQueue);
     vIfTemplateRef = rootRef;
 
-    return index;
+    return { vIfTemplateEndIndex: index, vIfTemplateRef };
   }
 
   const handle = (data) => {
     const value = data[vIfExpression];
-    parentNode = node.parentNode;
 
     if (value) {
-      parentNode.appendChild(vIfTemplateRef);
       vIfTemplateDirectiveQueue.getItems().forEach(directive => directive.handle(data));
-    } else {
-      parentNode.removeChild(node);
     }
   }
 
@@ -98,7 +97,7 @@ const VIfDirective = (node, attributes = {}) => {
 }
 
 /**
- * @todo the item looped over in `v-for` can be deconstructed 
+ * @todo the items looped over in `v-for` can be deconstructed 
  * as a form like (item, index).
  */
 const VForDirective = (node, attributes = {}) => {
