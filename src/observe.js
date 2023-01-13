@@ -6,12 +6,18 @@
  *  @todo need to support array type.
  */
 
+const attacheWathers = (value, watchers) => {
+  const protoType = Object.getPrototypeOf(value);
+  protoType.watchers = watchers;
+}
+
 const WatcherWrapper = (initialValue) => {
   const watchers = [];
   let value = initialValue;
 
   const get = () => {
-    return { value, watchers }
+    attacheWathers(value, watchers);
+    return value;
   }
 
   const set = (newValue) => {
@@ -30,11 +36,12 @@ const WatcherWrapper = (initialValue) => {
 const observe = (data = {}) => {
   Object.keys(data).forEach(key => {
     const value = data[key];
+
+    Object.defineProperty(data, key, WatcherWrapper(value));
+
     if (typeof value === 'object' && value !== null) {
       return observe(value);
     }
-
-    Object.defineProperty(data, key, WatcherWrapper(value));
   });
 };
 
