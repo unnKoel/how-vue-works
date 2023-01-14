@@ -23,8 +23,7 @@ work list as follows.
 
   As to how to finalize data observer, I think changing each simple value of path recurvely with a object which contains the sub-path data and a watcher list used to collect all dom updates related to that data. Thus, while that sub-path data has been changed somehow, excuting all dom updates from watcher list in set function which is defined by `Object.defineProperty`.
 
-  `progress`: complete a simple observe function which create observer for each field of data, even nested.
-  There is supporting for type array left.
+  `progress`: complete a simple observe function which create observer for each field of data, even nested. Support array's function like `push`, `unshift` to trigger the reactive, meaning watcher list will be executed iteratively while change happends on array.
 
 - component tree.
 
