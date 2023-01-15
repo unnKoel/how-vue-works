@@ -1,8 +1,13 @@
 /**
  * This is a tool to parse html tag and produce vitual dom or a render function
- * which creates real dom structure. 
+ * which creates real dom structure.
  */
-import { MustacheDirective, VBindDirective, VIfDirective, VForDirective } from './directives';
+import {
+  MustacheDirective,
+  VBindDirective,
+  VIfDirective,
+  VForDirective,
+} from './directives';
 
 const DIRECTIVES = ['v-bind', 'v-if', 'v-for', 'v-on', 'v-model'];
 
@@ -21,7 +26,7 @@ const abstractTag = (template, index) => {
   }
 
   return { tag: tag.join(''), index };
-}
+};
 
 const abstractAttributes = (template, index) => {
   const attributes = {};
@@ -35,7 +40,7 @@ const abstractAttributes = (template, index) => {
     char = template.at(++index);
 
     if (char === '"') {
-      quoteFlag = (++quoteFlag) % 2;
+      quoteFlag = ++quoteFlag % 2;
       continue;
     }
     if (char === '=') {
@@ -61,8 +66,8 @@ const abstractAttributes = (template, index) => {
   return {
     attributes,
     index,
-  }
-}
+  };
+};
 
 const abstractText = (template, index) => {
   if (template.at(index) !== '>') {
@@ -80,8 +85,8 @@ const abstractText = (template, index) => {
   return {
     text: text.join('').trim(),
     index,
-  }
-}
+  };
+};
 
 const structureTree = (linkParentChild, htmlParseStack) => {
   const { element: child, label } = htmlParseStack.pop();
@@ -95,23 +100,23 @@ const structureTree = (linkParentChild, htmlParseStack) => {
   }
 
   return { parentRef, label };
-}
+};
 
 const createElement = ({ tag, attributes }) => {
   const element = document.createElement(tag);
 
   for (let attrName in attributes) {
-    if (!DIRECTIVES.some(directive => new RegExp(directive).test(attrName))) {
+    if (!DIRECTIVES.some((directive) => new RegExp(directive).test(attrName))) {
       element.setAttribute(attrName, attributes[attrName]);
     }
   }
 
   return element;
-}
+};
 
 const linkParentChild = (parentRef, childRef) => {
   parentRef.append(childRef);
-}
+};
 
 const parse = (template, htmlParseStack, directiveQueue, data) => {
   template = template.replace(/\n/g, '');
@@ -125,8 +130,14 @@ const parse = (template, htmlParseStack, directiveQueue, data) => {
       const siblingChar = template.at(index + 1);
       // current char is the begining of tag.
       if (siblingChar !== '/') {
-        const { tag, index: indexOfStartTagName } = abstractTag(template, index);
-        const { attributes, index: indexOfStartTag } = abstractAttributes(template, indexOfStartTagName);
+        const { tag, index: indexOfStartTagName } = abstractTag(
+          template,
+          index
+        );
+        const { attributes, index: indexOfStartTag } = abstractAttributes(
+          template,
+          indexOfStartTagName
+        );
         index = indexOfStartTag - 1;
         let element = createElement({ tag, attributes });
 
@@ -135,7 +146,12 @@ const parse = (template, htmlParseStack, directiveQueue, data) => {
 
         const vIfDirective = VIfDirective(element, attributes);
         if (vIfDirective.isVIf()) {
-          const { vIfTemplateEndIndex, vIfTemplateRef } = vIfDirective.parseChildTemplate(template.substring(++index), { tag, vIf: true }, data);
+          const { vIfTemplateEndIndex, vIfTemplateRef } =
+            vIfDirective.parseChildTemplate(
+              template.substring(++index),
+              { tag, vIf: true },
+              data
+            );
           directiveQueue.enqueue(vIfDirective);
           index += vIfTemplateEndIndex;
           element = vIfTemplateRef;
@@ -143,7 +159,12 @@ const parse = (template, htmlParseStack, directiveQueue, data) => {
 
         const vForDirective = VForDirective(element, attributes);
         if (vForDirective.isVFor()) {
-          const { vForTemplateEndIndex, lastVForTemplateRef } = vForDirective.parseChildTemplate(template.substring(++index), { tag, vFor: true }, data);
+          const { vForTemplateEndIndex, lastVForTemplateRef } =
+            vForDirective.parseChildTemplate(
+              template.substring(++index),
+              { tag, vFor: true },
+              data
+            );
           directiveQueue.enqueue(vForDirective);
           index += vForTemplateEndIndex;
           element = lastVForTemplateRef;
@@ -153,34 +174,35 @@ const parse = (template, htmlParseStack, directiveQueue, data) => {
         rootRef = htmlParseStack.peek().element;
       } else {
         // current char is the ending of tag.
-        const { parentRef, label } = structureTree(linkParentChild, htmlParseStack);
+        const { parentRef, label } = structureTree(
+          linkParentChild,
+          htmlParseStack
+        );
         rootRef = parentRef;
         if (label?.vIf || label?.vFor) {
           return { rootRef, index: index - 1 };
         }
         index += label?.tag?.length + 1;
       }
-    } else if (char === '>' && template.at(index + 1) !== '<') {  // text
+    } else if (char === '>' && template.at(index + 1) !== '<') {
+      // text
       const { text, index: indexOfText } = abstractText(template, index);
       index = indexOfText - 1;
       if (text !== '') {
         const textNode = document.createTextNode(text);
         linkParentChild(rootRef, textNode);
-        const mustacheInstance = MustacheDirective(textNode, text);
-        mustacheInstance.isMustache() && directiveQueue.enqueue(mustacheInstance);
+        const mustacheInstance = MustacheDirective(textNode, text, data);
+        mustacheInstance.isMustache() &&
+          directiveQueue.enqueue(mustacheInstance);
       }
-    } else if (char === '/' && template.at(index + 1) === '>') {  // <br /> or <br/>
+    } else if (char === '/' && template.at(index + 1) === '>') {
+      // <br /> or <br/>
       const { parentRef } = structureTree(linkParentChild, htmlParseStack);
       rootRef = parentRef;
     }
   }
 
   return { rootRef, index };
-}
+};
 
-export {
-  abstractTag,
-  abstractAttributes,
-  abstractText,
-  parse,
-}
+export { abstractTag, abstractAttributes, abstractText, parse };

@@ -2,77 +2,99 @@
  * @jest-environment jsdom
  */
 /* eslint-disable no-undef */
-import { MustacheDirective, VBindDirective, VIfDirective, VForDirective } from '../src/directives';
+import {
+  MustacheDirective,
+  VBindDirective,
+  VIfDirective,
+  VForDirective,
+} from '../src/directives';
+import observe from '../src/observe';
 
 describe('mustache directive', () => {
-  test('check if it\'s a mustache braces', () => {
-    const text = 'hello, {{name}}. Welcome to {{ field }}\'s world';
+  test("check if it's a mustache braces", () => {
+    const data = observe({
+      name: 'Addy',
+      field: 'directive',
+    });
+    const text = "hello, {{name}}. Welcome to {{ field }}'s world";
     const textNode = document.createTextNode(text);
 
-    const mustacheDirective = MustacheDirective(textNode, text);
+    const mustacheDirective = MustacheDirective(textNode, text, data);
     const isMustache = mustacheDirective.isMustache();
     expect(isMustache).toBe(true);
 
     const text2 = 'hello, Welcome to world';
     const textNode2 = document.createTextNode(text2);
 
-    const mustacheDirective2 = MustacheDirective(textNode2, text2);
+    const mustacheDirective2 = MustacheDirective(textNode2, text2, data);
     const isMustache2 = mustacheDirective2.isMustache();
     expect(isMustache2).toBe(false);
   });
 
   test('test interpolate value in mustache braces', () => {
-    const text = 'hello, {{ name  }}. Welcome to {{field}}\'s world';
+    const text = "hello, {{ name  }}. Welcome to {{field}}'s world";
     const textNode = document.createTextNode(text);
 
-    const mustacheDirective = MustacheDirective(textNode, text);
-    const data = {
+    const data = observe({
       name: 'Addy',
-      field: 'directive'
-    };
+      field: 'directive',
+    });
+    const mustacheDirective = MustacheDirective(textNode, text, data);
 
     mustacheDirective.handle(data);
-    expect(textNode.nodeValue).toBe('hello, Addy. Welcome to directive\'s world');
+    expect(textNode.nodeValue).toBe(
+      "hello, Addy. Welcome to directive's world"
+    );
   });
 });
 
 describe('v-bind directive', () => {
-  test('check if it\'s a v-bind directive', () => {
+  test("check if it's a v-bind directive", () => {
     const node = document.createElement('span');
-    const attributes = { 'v-bind : title ': 'title', 'class': 'bind-example', 'v-bind:p': 'p' };
+    const attributes = {
+      'v-bind : title ': 'title',
+      class: 'bind-example',
+      'v-bind:p': 'p',
+    };
 
     const vBindDirective = VBindDirective(node, attributes);
     const isVBind = vBindDirective.isVBind();
     expect(isVBind).toBe(true);
-    expect(vBindDirective.vBindAttributes).toStrictEqual([{
-      attributeKey: 'title',
-      path: 'title'
-    }, {
-      attributeKey: "p",
-      path: "p"
-    }]);
+    expect(vBindDirective.vBindAttributes).toStrictEqual([
+      {
+        attributeKey: 'title',
+        path: 'title',
+      },
+      {
+        attributeKey: 'p',
+        path: 'p',
+      },
+    ]);
   });
 
   test('set attributes bound at node', () => {
     const node = document.createElement('span');
-    const attributes = { 'v-bind : title ': 'article.title', 'class': 'bind-example' };
+    const attributes = {
+      'v-bind : title ': 'article.title',
+      class: 'bind-example',
+    };
 
     const vBindDirective = VBindDirective(node, attributes);
     const data = {
       article: {
         title: 'how to create a node',
-      }
-    }
+      },
+    };
     vBindDirective.handle(data);
     expect(node.getAttribute('title')).toBe('how to create a node');
   });
 });
 
 describe('v-if directive', () => {
-  test('check if it\'s a v-if directive', () => {
+  test("check if it's a v-if directive", () => {
     const vIfRootNode = document.createElement('div');
     const attributes = {
-      'v-if': 'show'
+      'v-if': 'show',
     };
 
     const vIfDirective = VIfDirective(vIfRootNode, attributes);
@@ -82,7 +104,7 @@ describe('v-if directive', () => {
   test('show or hide some element using v-if', () => {
     const parentNode = document.createElement('div');
     const vIfRootNode = document.createElement('div');
-    vIfRootNode.setAttribute('class', 'a-is')
+    vIfRootNode.setAttribute('class', 'a-is');
     parentNode.appendChild(vIfRootNode);
 
     const attributes = {
@@ -92,22 +114,25 @@ describe('v-if directive', () => {
 
     const template = `<span>hello welcome to {{directive}}</span>`;
     const label = { tag: 'div', vIf: true };
-    const data = {
+    const data = observe({
       show: true,
       directive: 'v-if',
-    };
+    });
+
     vIfDirective.parseChildTemplate(template, label, data);
 
     vIfDirective.handle(data);
-    expect(parentNode.innerHTML).toBe('<div class="a-is"><span>hello welcome to v-if</span></div>');
+    expect(parentNode.innerHTML).toBe(
+      '<div class="a-is"><span>hello welcome to v-if</span></div>'
+    );
   });
 });
 
 describe('v-for directive', () => {
-  test('check if it\'s a v-for directive', () => {
+  test("check if it's a v-for directive", () => {
     const vForRootNode = document.createElement('div');
     const attributes = {
-      'v-for': 'item in array'
+      'v-for': 'item in array',
     };
 
     const vForDirective = VForDirective(vForRootNode, attributes);
@@ -120,24 +145,30 @@ describe('v-for directive', () => {
     parentNode.appendChild(vForRootNode);
 
     const attributes = {
-      'v-for': 'item in array'
+      'v-for': 'item in array',
     };
     const vForDirective = VForDirective(vForRootNode, attributes);
 
     const template = `<span>Hi,{{item.name}}. your character is {{item.character}}</span>`;
     const label = { tag: 'div', vFor: true };
-    const data = {
+    const data = observe({
       array: [
         { name: 'vue', character: 'template' },
         { name: 'react', character: 'virtual dom' },
-        { name: 'svelte', character: 'no virtual dom' }
+        { name: 'svelte', character: 'no virtual dom' },
       ],
-    };
+    });
 
-    const { lastVForTemplateRef } = vForDirective.parseChildTemplate(template, label, data);
+    const { lastVForTemplateRef } = vForDirective.parseChildTemplate(
+      template,
+      label,
+      data
+    );
     parentNode.appendChild(lastVForTemplateRef);
     vForDirective.handle(data);
 
-    expect(parentNode.innerHTML).toBe('<div></div><div><span>Hi,vue. your character is template</span></div><div><span>Hi,react. your character is virtual dom</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div>')
-  })
+    expect(parentNode.innerHTML).toBe(
+      '<div></div><div><span>Hi,vue. your character is template</span></div><div><span>Hi,react. your character is virtual dom</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div>'
+    );
+  });
 });

@@ -4,55 +4,75 @@ import Stack from './stack';
 import Queue from './queue';
 
 // Identify mustache braces to interpolate the value into text.
-const MustacheDirective = (textNode, text = '') => {
-  let paths = text.match(/{{\s*\w+(?:\.\w+)*\s*}}/g)?.map(function (x) { return x.match(/[\w\\.]+/)[0]; });
-
+const MustacheDirective = (textNode, text = '', data) => {
+  let paths = [];
   const isMustache = () => /{{\s*\w+(?:\.\w+)*\s*}}/.test(text);
+
+  if (isMustache()) {
+    paths = text.match(/{{\s*\w+(?:\.\w+)*\s*}}/g)?.map(function (x) {
+      return x.match(/[\w\\.]+/)[0];
+    });
+  }
 
   const handle = (data) => {
     let interpolatedText = text;
 
-    paths.forEach(path => {
+    paths?.forEach((path) => {
       const value = get(data, path);
-      interpolatedText = interpolatedText.replace(new RegExp(`{{\\s*${path}\\s*}}`), value);
+      interpolatedText = interpolatedText.replace(
+        new RegExp(`{{\\s*${path}\\s*}}`),
+        value
+      );
     });
 
     textNode.nodeValue = interpolatedText;
-  }
+  };
+
+  (function reativeDataChange() {
+    paths?.forEach((path) => {
+      const value = get(data, path);
+      value.watch(() => {
+        handle(data);
+      });
+    });
+  })();
 
   return {
     isMustache,
     handle,
-  }
-}
+  };
+};
 
 const VBindDirective = (node, attributes = {}) => {
-  const vBindAttributes = Object.entries(attributes).reduce((acc, [attributeName, path]) => {
-    const attributeNameMatch = attributeName.match(/^v-bind\s*:\s*(\w+)/);
-    if (attributeNameMatch !== null) {
-      const attributeKey = attributeNameMatch[1]?.trim();
-      acc.push({ attributeKey, path });
-    }
+  const vBindAttributes = Object.entries(attributes).reduce(
+    (acc, [attributeName, path]) => {
+      const attributeNameMatch = attributeName.match(/^v-bind\s*:\s*(\w+)/);
+      if (attributeNameMatch !== null) {
+        const attributeKey = attributeNameMatch[1]?.trim();
+        acc.push({ attributeKey, path });
+      }
 
-    return acc;
-  }, []);
+      return acc;
+    },
+    []
+  );
 
   const isVBind = () => {
     return vBindAttributes.length !== 0;
-  }
+  };
 
   const handle = (data) => {
     vBindAttributes.forEach(({ attributeKey, path }) => {
       node.setAttribute(attributeKey, get(data, path));
     });
-  }
+  };
 
   return {
     vBindAttributes,
     isVBind,
     handle,
-  }
-}
+  };
+};
 
 /**
  * @todo the value of `v-if` should be evaluated as an expression.
@@ -65,7 +85,7 @@ const VIfDirective = (node, attributes = {}) => {
 
   const isVIf = () => {
     return !!vIfExpression;
-  }
+  };
 
   const parseChildTemplate = (childTemplate, label, data) => {
     const value = data[vIfExpression];
@@ -75,29 +95,36 @@ const VIfDirective = (node, attributes = {}) => {
 
     const vIfTemplateParseStack = Stack();
     vIfTemplateParseStack.push({ element: node, label });
-    const { rootRef, index } = parse(childTemplate, vIfTemplateParseStack, vIfTemplateDirectiveQueue);
+    const { rootRef, index } = parse(
+      childTemplate,
+      vIfTemplateParseStack,
+      vIfTemplateDirectiveQueue,
+      data
+    );
     vIfTemplateRef = rootRef;
 
     return { vIfTemplateEndIndex: index, vIfTemplateRef };
-  }
+  };
 
   const handle = (data) => {
     const value = data[vIfExpression];
 
     if (value) {
-      vIfTemplateDirectiveQueue.getItems().forEach(directive => directive.handle(data));
+      vIfTemplateDirectiveQueue
+        .getItems()
+        .forEach((directive) => directive.handle(data));
     }
-  }
+  };
 
   return {
     isVIf,
     handle,
     parseChildTemplate,
-  }
-}
+  };
+};
 
 /**
- * @todo the items looped over in `v-for` can be deconstructed 
+ * @todo the items looped over in `v-for` can be deconstructed
  * as a form like (item, index).
  */
 const VForDirective = (node, attributes = {}) => {
@@ -110,7 +137,7 @@ const VForDirective = (node, attributes = {}) => {
 
   const isVFor = () => {
     return !!attributes['v-for'];
-  }
+  };
 
   if (isVFor()) {
     const expression = attributes['v-for'];
@@ -126,26 +153,36 @@ const VForDirective = (node, attributes = {}) => {
     const len = array.length;
 
     for (let i = 0; i < len; i++) {
+      let item = array[i];
+      item = _prependItemName(item);
       const vForTemplateParseStack = Stack();
       const vForTemplateDirectiveQueue = Queue();
 
       vForTemplateParseStack.push({ element: node.cloneNode(), label });
-      const { rootRef, index } = parse(childTemplate, vForTemplateParseStack, vForTemplateDirectiveQueue);
+      const { rootRef, index } = parse(
+        childTemplate,
+        vForTemplateParseStack,
+        vForTemplateDirectiveQueue,
+        item
+      );
 
       vForTemplateEndIndex = index;
       lastVForTemplateRef = rootRef;
-      vForTemplateArray.push({ vForTemplateDirectiveQueue, vForTemplateRef: i === len - 1 ? null : rootRef });
+      vForTemplateArray.push({
+        vForTemplateDirectiveQueue,
+        vForTemplateRef: i === len - 1 ? null : rootRef,
+      });
     }
 
     return { vForTemplateEndIndex, lastVForTemplateRef };
-  }
+  };
 
   const _prependItemName = (item) => {
     if (Object.prototype.toString.call(item) === '[object Object]') {
-      return { [itemName]: item }
+      return { [itemName]: item };
     }
     return item;
-  }
+  };
 
   const handle = (data) => {
     const array = data[arrayKey];
@@ -153,23 +190,25 @@ const VForDirective = (node, attributes = {}) => {
     for (let i = 0; i < array.length; i++) {
       let item = array[i];
       item = _prependItemName(item);
-      const { vForTemplateDirectiveQueue, vForTemplateRef } = vForTemplateArray[i];
+      const { vForTemplateDirectiveQueue, vForTemplateRef } =
+        vForTemplateArray[i];
 
-      vForTemplateRef && lastVForTemplateRef.insertAdjacentElement('beforebegin', vForTemplateRef);
-      vForTemplateDirectiveQueue.getItems().forEach(directive => directive.handle(item));
+      vForTemplateRef &&
+        lastVForTemplateRef.insertAdjacentElement(
+          'beforebegin',
+          vForTemplateRef
+        );
+      vForTemplateDirectiveQueue
+        .getItems()
+        .forEach((directive) => directive.handle(item));
     }
-  }
+  };
 
   return {
     isVFor,
     parseChildTemplate,
     handle,
-  }
-}
+  };
+};
 
-export {
-  MustacheDirective,
-  VBindDirective,
-  VIfDirective,
-  VForDirective,
-}
+export { MustacheDirective, VBindDirective, VIfDirective, VForDirective };
