@@ -141,17 +141,16 @@ const parse = (template, htmlParseStack, directiveQueue, data) => {
         index = indexOfStartTag - 1;
         let element = createElement({ tag, attributes });
 
-        const vBindDirective = VBindDirective(element, attributes);
+        const vBindDirective = VBindDirective(element, attributes, data);
         vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
 
-        const vIfDirective = VIfDirective(element, attributes);
+        const vIfDirective = VIfDirective(element, attributes, data);
         if (vIfDirective.isVIf()) {
           const { vIfTemplateEndIndex, vIfTemplateRef } =
-            vIfDirective.parseChildTemplate(
-              template.substring(++index),
-              { tag, vIf: true },
-              data
-            );
+            vIfDirective.parseChildTemplate(template.substring(++index), {
+              tag,
+              vIf: true,
+            });
           directiveQueue.enqueue(vIfDirective);
           index += vIfTemplateEndIndex;
           element = vIfTemplateRef;

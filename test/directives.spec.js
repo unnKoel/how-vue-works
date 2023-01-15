@@ -46,6 +46,27 @@ describe('mustache directive', () => {
       "hello, Addy. Welcome to directive's world"
     );
   });
+
+  test('test template with mustache braces react to data change', () => {
+    const text = "hello, {{ name  }}. Welcome to {{field}}'s world";
+    const textNode = document.createTextNode(text);
+
+    const data = observe({
+      name: 'Addy',
+      field: 'directive',
+    });
+    const mustacheDirective = MustacheDirective(textNode, text, data);
+
+    mustacheDirective.handle(data);
+    expect(textNode.nodeValue).toBe(
+      "hello, Addy. Welcome to directive's world"
+    );
+
+    (data.field = 'vue'),
+      expect(textNode.nodeValue).toBe("hello, Addy. Welcome to vue's world");
+    (data.name = 'common'),
+      expect(textNode.nodeValue).toBe("hello, common. Welcome to vue's world");
+  });
 });
 
 describe('v-bind directive', () => {
@@ -88,6 +109,27 @@ describe('v-bind directive', () => {
     vBindDirective.handle(data);
     expect(node.getAttribute('title')).toBe('how to create a node');
   });
+
+  test('test attributes bound react to data change', () => {
+    const node = document.createElement('span');
+    const attributes = {
+      'v-bind : title ': 'article.title',
+      class: 'bind-example',
+    };
+    const data = observe({
+      article: {
+        title: 'how to create a node',
+      },
+    });
+
+    const vBindDirective = VBindDirective(node, attributes, data);
+    vBindDirective.handle(data);
+    expect(node.getAttribute('title')).toBe('how to create a node');
+    data.article.title = 'how to create a reactive node to data change';
+    expect(node.getAttribute('title')).toBe(
+      'how to create a reactive node to data change'
+    );
+  });
 });
 
 describe('v-if directive', () => {
@@ -96,8 +138,9 @@ describe('v-if directive', () => {
     const attributes = {
       'v-if': 'show',
     };
+    const data = observe({ show: false });
 
-    const vIfDirective = VIfDirective(vIfRootNode, attributes);
+    const vIfDirective = VIfDirective(vIfRootNode, attributes, data);
     expect(vIfDirective.isVIf()).toBe(true);
   });
 
@@ -110,21 +153,56 @@ describe('v-if directive', () => {
     const attributes = {
       'v-if': 'show',
     };
-    const vIfDirective = VIfDirective(vIfRootNode, attributes);
-
-    const template = `<span>hello welcome to {{directive}}</span>`;
-    const label = { tag: 'div', vIf: true };
     const data = observe({
       show: true,
       directive: 'v-if',
     });
 
-    vIfDirective.parseChildTemplate(template, label, data);
+    const vIfDirective = VIfDirective(vIfRootNode, attributes, data);
+
+    const template = `<span>hello welcome to {{directive}}</span>`;
+    const label = { tag: 'div', vIf: true };
+
+    vIfDirective.parseChildTemplate(template, label);
 
     vIfDirective.handle(data);
     expect(parentNode.innerHTML).toBe(
       '<div class="a-is"><span>hello welcome to v-if</span></div>'
     );
+  });
+
+  test('test v-if template reacts to data change', () => {
+    const parentNode = document.createElement('div');
+    const vIfRootNode = document.createElement('div');
+    vIfRootNode.setAttribute('class', 'a-is');
+    parentNode.appendChild(vIfRootNode);
+
+    const attributes = {
+      'v-if': 'show',
+    };
+    const data = observe({
+      show: true,
+      directive: 'v-if',
+    });
+
+    const vIfDirective = VIfDirective(vIfRootNode, attributes, data);
+
+    const template = `<span>hello welcome to {{directive}}</span>`;
+    const label = { tag: 'div', vIf: true };
+
+    vIfDirective.parseChildTemplate(template, label);
+
+    vIfDirective.handle(data);
+    expect(parentNode.innerHTML).toBe(
+      '<div class="a-is"><span>hello welcome to v-if</span></div>'
+    );
+    data.show = false;
+    expect(parentNode.innerHTML).toBe('');
+    data.show = true;
+    (data.directive = 'vue-if'),
+      expect(parentNode.innerHTML).toBe(
+        '<div class="a-is"><span>hello welcome to vue-if</span></div>'
+      );
   });
 });
 

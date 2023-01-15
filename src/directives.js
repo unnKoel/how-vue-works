@@ -28,10 +28,10 @@ const MustacheDirective = (textNode, text = '', data) => {
     textNode.nodeValue = interpolatedText;
   };
 
-  (function reativeDataChange() {
+  (function reatToDataChange() {
     paths?.forEach((path) => {
       const value = get(data, path);
-      value.watch(() => {
+      value?.watch(() => {
         handle(data);
       });
     });
@@ -43,7 +43,7 @@ const MustacheDirective = (textNode, text = '', data) => {
   };
 };
 
-const VBindDirective = (node, attributes = {}) => {
+const VBindDirective = (node, attributes = {}, data) => {
   const vBindAttributes = Object.entries(attributes).reduce(
     (acc, [attributeName, path]) => {
       const attributeNameMatch = attributeName.match(/^v-bind\s*:\s*(\w+)/);
@@ -67,6 +67,15 @@ const VBindDirective = (node, attributes = {}) => {
     });
   };
 
+  (function reatToDataChange() {
+    vBindAttributes?.forEach(({ path }) => {
+      const value = get(data, path);
+      value?.watch(() => {
+        handle(data);
+      });
+    });
+  })();
+
   return {
     vBindAttributes,
     isVBind,
@@ -77,8 +86,10 @@ const VBindDirective = (node, attributes = {}) => {
 /**
  * @todo the value of `v-if` should be evaluated as an expression.
  */
-const VIfDirective = (node, attributes = {}) => {
+const VIfDirective = (node, attributes = {}, data) => {
   let vIfTemplateRef = null;
+  let nextSibling = null;
+  let parentNode = null;
   const vIfTemplateDirectiveQueue = Queue();
 
   const vIfExpression = attributes['v-if'];
@@ -87,12 +98,7 @@ const VIfDirective = (node, attributes = {}) => {
     return !!vIfExpression;
   };
 
-  const parseChildTemplate = (childTemplate, label, data) => {
-    const value = data[vIfExpression];
-    if (!value) {
-      return { vIfTemplateEndIndex: 0, vIfTemplateRef: '' };
-    }
-
+  const parseChildTemplate = (childTemplate, label) => {
     const vIfTemplateParseStack = Stack();
     vIfTemplateParseStack.push({ element: node, label });
     const { rootRef, index } = parse(
@@ -106,15 +112,39 @@ const VIfDirective = (node, attributes = {}) => {
     return { vIfTemplateEndIndex: index, vIfTemplateRef };
   };
 
+  const _insertVIfTemplateRef = (vIfTemplateRef) => {
+    // if the root node of v-if template hasn't been insert into dom. then insert it.
+    // otherwise, do nothing.
+    if (!vIfTemplateRef.parentNode) {
+      if (!nextSibling) {
+        return parentNode.appendChild(vIfTemplateRef);
+      }
+
+      nextSibling.insertAdjacentElement('beforebegin', vIfTemplateRef);
+    }
+  };
+
   const handle = (data) => {
     const value = data[vIfExpression];
 
     if (value) {
+      _insertVIfTemplateRef(vIfTemplateRef);
       vIfTemplateDirectiveQueue
         .getItems()
         .forEach((directive) => directive.handle(data));
+    } else {
+      nextSibling = vIfTemplateRef.nextSibling;
+      parentNode = vIfTemplateRef.parentNode;
+      vIfTemplateRef?.parentNode?.removeChild(vIfTemplateRef);
     }
   };
+
+  (function reatToDataChange() {
+    const value = data[vIfExpression];
+    value?.watch(() => {
+      handle(data);
+    });
+  })();
 
   return {
     isVIf,
