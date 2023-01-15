@@ -35,10 +35,9 @@ work list as follows.
 
 - make directive reactive to data chage.
 
-  - ✅ {{}}
-    make dom updates related to mustache direactive reactive to data change.
-  - v-bind
-  - v-if
+  - ✅ make dom updates related to mustache direactive `{{}}` reactive to data change.
+  - ✅ make dom updates related to directive `v-bind` reactive to data change.
+  - ✅ make dom updates related to directive `v-if` reactive to data change.
   - v-for
 
 - component tree.
@@ -62,3 +61,5 @@ work list as follows.
   - [nvm is not compatible with the npm config "prefix" option:](https://stackoverflow.com/questions/34718528/nvm-is-not-compatible-with-the-npm-config-prefix-option)
 
   - [How can the default node version be set using NVM?](https://stackoverflow.com/questions/47190861/how-can-the-default-node-version-be-set-using-nvm)
+
+- executed twice on the reactive registration of v-if in v-if test.

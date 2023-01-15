@@ -143,6 +143,39 @@ test('render template with v-if=true directive', () => {
   );
 });
 
+test('render template with v-if directive that reacts to data change', () => {
+  const templete = `
+    <div class="root">
+      <span>Search for {{something}}</span>
+      <div v-if="show">
+        <a href="www.google.com" v-bind:title="title">Navigate to {{site}}</a>
+      </div>
+      <p>{{text}}</p>
+    </div>`;
+
+  const data = {
+    show: true,
+    site: 'Google',
+    title: 'Navigate to Google',
+    something: 'Vue',
+    text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
+  };
+
+  render(templete, document.body, data);
+  expect(document.body.innerHTML).toBe(
+    '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
+  );
+  data.show = false;
+  expect(document.body.innerHTML).toBe(
+    '<div class="root"><span>Search for Vue</span><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
+  );
+  data.show = true;
+  data.something = 'React';
+  expect(document.body.innerHTML).toBe(
+    '<div class="root"><span>Search for React</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
+  );
+});
+
 test('render template with v-for directive', () => {
   const templete = `
     <div class="root">
