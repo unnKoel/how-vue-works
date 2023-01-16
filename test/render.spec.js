@@ -3,6 +3,7 @@
  */
 
 /* eslint-disable no-undef */
+import observe from '../src/observe';
 import { render, directiveQueue } from '../src/render';
 
 beforeEach(() => {
@@ -186,7 +187,7 @@ test('render template with v-for directive', () => {
       <p>{{text}}</p>
     </div>`;
 
-  const data = {
+  const data = observe({
     array: [
       { title: 'Navigate to Google', site: 'Google' },
       { title: 'Navigate to Microsoft', site: 'Microsoft' },
@@ -194,7 +195,7 @@ test('render template with v-for directive', () => {
     ],
     something: 'Vue',
     text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
-  };
+  });
 
   render(templete, document.body, data);
   expect(document.body.innerHTML).toBe(

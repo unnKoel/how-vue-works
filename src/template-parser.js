@@ -156,17 +156,16 @@ const parse = (template, htmlParseStack, directiveQueue, data) => {
           element = vIfTemplateRef;
         }
 
-        const vForDirective = VForDirective(element, attributes);
+        const vForDirective = VForDirective(element, attributes, data, {
+          tag,
+          vFor: true,
+        });
         if (vForDirective.isVFor()) {
-          const { vForTemplateEndIndex, lastVForTemplateRef } =
-            vForDirective.parseChildTemplate(
-              template.substring(++index),
-              { tag, vFor: true },
-              data
-            );
+          const { vForTemplateEndIndex, vForPlaceholderRef } =
+            vForDirective.parseChildTemplate(template.substring(++index));
           directiveQueue.enqueue(vForDirective);
           index += vForTemplateEndIndex;
-          element = lastVForTemplateRef;
+          element = vForPlaceholderRef;
         }
 
         htmlParseStack.push({ element, label: { tag } });

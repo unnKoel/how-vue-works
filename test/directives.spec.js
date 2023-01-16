@@ -213,7 +213,9 @@ describe('v-for directive', () => {
       'v-for': 'item in array',
     };
 
-    const vForDirective = VForDirective(vForRootNode, attributes);
+    const data = observe([]);
+
+    const vForDirective = VForDirective(vForRootNode, attributes, data);
     expect(vForDirective.isVFor()).toBe(true);
   });
 
@@ -225,10 +227,7 @@ describe('v-for directive', () => {
     const attributes = {
       'v-for': 'item in array',
     };
-    const vForDirective = VForDirective(vForRootNode, attributes);
 
-    const template = `<span>Hi,{{item.name}}. your character is {{item.character}}</span>`;
-    const label = { tag: 'div', vFor: true };
     const data = observe({
       array: [
         { name: 'vue', character: 'template' },
@@ -237,16 +236,17 @@ describe('v-for directive', () => {
       ],
     });
 
-    const { lastVForTemplateRef } = vForDirective.parseChildTemplate(
-      template,
-      label,
-      data
-    );
-    parentNode.appendChild(lastVForTemplateRef);
+    const label = { tag: 'div', vFor: true };
+    const vForDirective = VForDirective(vForRootNode, attributes, data, label);
+
+    const template = `<span>Hi,{{item.name}}. your character is {{item.character}}</span>`;
+
+    const { vForPlaceholderRef } = vForDirective.parseChildTemplate(template);
+    parentNode.appendChild(vForPlaceholderRef);
     vForDirective.handle(data);
 
     expect(parentNode.innerHTML).toBe(
-      '<div></div><div><span>Hi,vue. your character is template</span></div><div><span>Hi,react. your character is virtual dom</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div>'
+      '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,react. your character is virtual dom</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div>'
     );
   });
 });
