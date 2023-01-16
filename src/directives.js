@@ -160,10 +160,11 @@ const VIfDirective = (node, attributes = {}, data) => {
 const VForDirective = (node, attributes = {}, data, label) => {
   let arrayKey = '';
   let itemName = '';
-  const vForTemplateArray = [];
   let vForTemplate = '';
   let parentNode = null;
   let nextSibling = null;
+  let trackBy = '';
+  const vForTemplateParsedArtifactMemory = [];
 
   const isVFor = () => {
     return !!attributes['v-for'];
@@ -175,6 +176,7 @@ const VForDirective = (node, attributes = {}, data, label) => {
 
     arrayKey = arrayKey.trim();
     itemName = itemName.trim();
+    trackBy = attributes['track-by'];
   }
 
   const _prependItemName = (item) => {
@@ -224,21 +226,76 @@ const VForDirective = (node, attributes = {}, data, label) => {
     }
   };
 
+  const _findVForTemplateParsedArtifactInMemory = (index, trackByValue) => {
+    const { trackByValue: prevTrackByValue } =
+      vForTemplateParsedArtifactMemory[index] ?? {};
+    let vForTemplateParsedArtifact = null;
+
+    if (prevTrackByValue === trackByValue) {
+      vForTemplateParsedArtifact = vForTemplateParsedArtifactMemory[index];
+    } else {
+      vForTemplateParsedArtifact = vForTemplateParsedArtifactMemory.find(
+        ({ trackByValue }) => trackByValue === prevTrackByValue
+      );
+    }
+
+    if (vForTemplateParsedArtifact) {
+      vForTemplateParsedArtifact.alive = true;
+    }
+
+    return vForTemplateParsedArtifact;
+  };
+
+  const _clear = (vForTemplateParsedArtifactMemory) => {
+    let length = vForTemplateParsedArtifactMemory.length;
+    while (length--) {
+      const { vForTemplateRef, alive } =
+        vForTemplateParsedArtifactMemory[length];
+      if (!alive) {
+        vForTemplateRef.parentNode.removeChild(vForTemplateRef);
+        vForTemplateParsedArtifactMemory.splice(length, 1);
+      }
+    }
+  };
+
   const handle = (data) => {
     const array = data[arrayKey];
     _substitutePlaceholderNode(node);
 
     for (let i = 0; i < array.length; i++) {
       let item = array[i];
-      item = _prependItemName(item);
-      const { vForTemplateRef, vForTemplateDirectiveQueue } =
-        _parseChildTemplate(vForTemplate, label, item);
+      let vForTemplateParsedArtifact = null;
+      const trackByValue = item[trackBy] ?? '';
 
+      if (trackBy && trackByValue) {
+        vForTemplateParsedArtifact = _findVForTemplateParsedArtifactInMemory(
+          i,
+          trackByValue
+        );
+      }
+      if (!vForTemplateParsedArtifact) {
+        item = _prependItemName(item);
+        vForTemplateParsedArtifact = _parseChildTemplate(
+          vForTemplate,
+          label,
+          item
+        );
+      }
+
+      const { vForTemplateRef, vForTemplateDirectiveQueue, alive } =
+        vForTemplateParsedArtifact;
       _insertVForTemplateRef(vForTemplateRef);
       vForTemplateDirectiveQueue
         .getItems()
         .forEach((directive) => directive.handle(item));
-      vForTemplateArray.push({ vForTemplateRef, vForTemplateDirectiveQueue });
+      if (alive) {
+        vForTemplateParsedArtifactMemory.push({
+          vForTemplateRef,
+          vForTemplateDirectiveQueue,
+          trackByValue,
+        });
+      }
+      _clear(vForTemplateParsedArtifactMemory);
     }
   };
 
