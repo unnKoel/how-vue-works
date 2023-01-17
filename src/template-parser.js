@@ -9,7 +9,7 @@ import {
   VForDirective,
 } from './directives';
 
-const DIRECTIVES = ['v-bind', 'v-if', 'v-for', 'v-on', 'v-model'];
+const DIRECTIVES = ['v-bind', 'v-if', 'v-for', 'v-on', 'v-model', 'track-by'];
 
 const abstractTag = (template, index) => {
   if (template.at(index) !== '<') {

@@ -227,16 +227,18 @@ const VForDirective = (node, attributes = {}, data, label) => {
   };
 
   const _findVForTemplateParsedArtifactInMemory = (index, trackByValue) => {
+    let vForTemplateParsedArtifact = null;
     const { trackByValue: prevTrackByValue } =
       vForTemplateParsedArtifactMemory[index] ?? {};
-    let vForTemplateParsedArtifact = null;
 
     if (prevTrackByValue === trackByValue) {
       vForTemplateParsedArtifact = vForTemplateParsedArtifactMemory[index];
     } else {
-      vForTemplateParsedArtifact = vForTemplateParsedArtifactMemory.find(
-        ({ trackByValue }) => trackByValue === prevTrackByValue
-      );
+      vForTemplateParsedArtifact =
+        vForTemplateParsedArtifactMemory.find(
+          ({ trackByValue: prevTrackByValue }) =>
+            prevTrackByValue === trackByValue
+        ) ?? null;
     }
 
     if (vForTemplateParsedArtifact) {
@@ -246,14 +248,15 @@ const VForDirective = (node, attributes = {}, data, label) => {
     return vForTemplateParsedArtifact;
   };
 
-  const _clear = (vForTemplateParsedArtifactMemory) => {
+  const _clear = () => {
     let length = vForTemplateParsedArtifactMemory.length;
-    while (length--) {
-      const { vForTemplateRef, alive } =
-        vForTemplateParsedArtifactMemory[length];
+    for (let i = length - 1; i >= 0; i--) {
+      const { vForTemplateRef, alive } = vForTemplateParsedArtifactMemory[i];
       if (!alive) {
         vForTemplateRef.parentNode.removeChild(vForTemplateRef);
-        vForTemplateParsedArtifactMemory.splice(length, 1);
+        vForTemplateParsedArtifactMemory.splice(i, 1);
+      } else {
+        vForTemplateParsedArtifactMemory[i].alive = false;
       }
     }
   };
@@ -273,8 +276,9 @@ const VForDirective = (node, attributes = {}, data, label) => {
           trackByValue
         );
       }
+
+      item = _prependItemName(item);
       if (!vForTemplateParsedArtifact) {
-        item = _prependItemName(item);
         vForTemplateParsedArtifact = _parseChildTemplate(
           vForTemplate,
           label,
@@ -288,15 +292,17 @@ const VForDirective = (node, attributes = {}, data, label) => {
       vForTemplateDirectiveQueue
         .getItems()
         .forEach((directive) => directive.handle(item));
-      if (alive) {
+      // for one without alive, meaning that it's newly created, so needed to push into memory cache.
+      if (!alive) {
         vForTemplateParsedArtifactMemory.push({
           vForTemplateRef,
           vForTemplateDirectiveQueue,
           trackByValue,
+          alive: true,
         });
       }
-      _clear(vForTemplateParsedArtifactMemory);
     }
+    _clear();
   };
 
   (function reatToDataChange() {
@@ -307,6 +313,7 @@ const VForDirective = (node, attributes = {}, data, label) => {
   })();
 
   return {
+    vForTemplateParsedArtifactMemory,
     isVFor,
     parseChildTemplate,
     handle,

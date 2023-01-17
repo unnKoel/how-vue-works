@@ -249,4 +249,130 @@ describe('v-for directive', () => {
       '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,react. your character is virtual dom</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div>'
     );
   });
+
+  test('test v-for template reacts to data change', () => {
+    const parentNode = document.createElement('div');
+    const vForRootNode = document.createElement('div');
+    parentNode.appendChild(vForRootNode);
+
+    const attributes = {
+      'v-for': 'item in array',
+    };
+
+    const data = observe({
+      array: [
+        { name: 'vue', character: 'template' },
+        { name: 'react', character: 'virtual dom' },
+        { name: 'svelte', character: 'no virtual dom' },
+      ],
+    });
+
+    const label = { tag: 'div', vFor: true };
+    const vForDirective = VForDirective(vForRootNode, attributes, data, label);
+
+    const template = `<span>Hi,{{item.name}}. your character is {{item.character}}</span>`;
+
+    const { vForPlaceholderRef } = vForDirective.parseChildTemplate(template);
+    parentNode.appendChild(vForPlaceholderRef);
+    vForDirective.handle(data);
+
+    expect(parentNode.innerHTML).toBe(
+      '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,react. your character is virtual dom</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div>'
+    );
+    expect(vForDirective.vForTemplateParsedArtifactMemory).toHaveLength(3);
+
+    data.array.push({
+      name: 'solid.js',
+      character: 'react syntax with compliation',
+    });
+    expect(parentNode.innerHTML).toBe(
+      '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,react. your character is virtual dom</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div><div><span>Hi,solid.js. your character is react syntax with compliation</span></div>'
+    );
+    expect(vForDirective.vForTemplateParsedArtifactMemory).toHaveLength(4);
+
+    data.array.splice(1, 1);
+    expect(parentNode.innerHTML).toBe(
+      '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div><div><span>Hi,solid.js. your character is react syntax with compliation</span></div>'
+    );
+    expect(vForDirective.vForTemplateParsedArtifactMemory).toHaveLength(3);
+  });
+
+  test('test track-by works with v-for on data changing', () => {
+    const parentNode = document.createElement('div');
+    const vForRootNode = document.createElement('div');
+    parentNode.appendChild(vForRootNode);
+
+    const attributes = {
+      'v-for': 'item in array',
+      'track-by': 'name',
+    };
+
+    const data = observe({
+      array: [
+        { name: 'vue', character: 'template' },
+        { name: 'react', character: 'virtual dom' },
+        { name: 'svelte', character: 'no virtual dom' },
+      ],
+    });
+
+    const label = { tag: 'div', vFor: true };
+    const vForDirective = VForDirective(vForRootNode, attributes, data, label);
+
+    const template = `<span>Hi,{{item.name}}. your character is {{item.character}}</span>`;
+
+    const { vForPlaceholderRef } = vForDirective.parseChildTemplate(template);
+    parentNode.appendChild(vForPlaceholderRef);
+    vForDirective.handle(data);
+
+    expect(parentNode.innerHTML).toBe(
+      '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,react. your character is virtual dom</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div>'
+    );
+    expect(vForDirective.vForTemplateParsedArtifactMemory).toHaveLength(3);
+    const svelte = vForDirective.vForTemplateParsedArtifactMemory[2];
+
+    data.array.push({
+      name: 'solid.js',
+      character: 'react syntax with compliation',
+    });
+    expect(parentNode.innerHTML).toBe(
+      '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,react. your character is virtual dom</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div><div><span>Hi,solid.js. your character is react syntax with compliation</span></div>'
+    );
+    expect(vForDirective.vForTemplateParsedArtifactMemory).toHaveLength(4);
+    expect(vForDirective.vForTemplateParsedArtifactMemory[2] === svelte).toBe(
+      true
+    );
+    const solidJs = vForDirective.vForTemplateParsedArtifactMemory[3];
+
+    data.array.splice(1, 1);
+    expect(parentNode.innerHTML).toBe(
+      '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div><div><span>Hi,solid.js. your character is react syntax with compliation</span></div>'
+    );
+    expect(vForDirective.vForTemplateParsedArtifactMemory).toHaveLength(3);
+    expect(vForDirective.vForTemplateParsedArtifactMemory[1] === svelte).toBe(
+      true
+    );
+    expect(vForDirective.vForTemplateParsedArtifactMemory[2] === solidJs).toBe(
+      true
+    );
+
+    data.array.push({ name: 'react', character: 'virtual dom' });
+    expect(parentNode.innerHTML).toBe(
+      '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div><div><span>Hi,solid.js. your character is react syntax with compliation</span></div><div><span>Hi,react. your character is virtual dom</span></div>'
+    );
+    expect(vForDirective.vForTemplateParsedArtifactMemory[1] === svelte).toBe(
+      true
+    );
+    expect(vForDirective.vForTemplateParsedArtifactMemory[2] === solidJs).toBe(
+      true
+    );
+
+    const react = vForDirective.vForTemplateParsedArtifactMemory[3];
+    data.array.splice(1, 2);
+    expect(parentNode.innerHTML).toBe(
+      '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,react. your character is virtual dom</span></div>'
+    );
+    expect(vForDirective.vForTemplateParsedArtifactMemory[1] === react).toBe(
+      true
+    );
+  });
 });
