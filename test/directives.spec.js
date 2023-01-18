@@ -7,6 +7,7 @@ import {
   VBindDirective,
   VIfDirective,
   VForDirective,
+  vOnDirective,
 } from '../src/directives';
 import observe from '../src/observe';
 
@@ -374,5 +375,34 @@ describe('v-for directive', () => {
     expect(vForDirective.vForTemplateParsedArtifactMemory[1] === react).toBe(
       true
     );
+  });
+});
+
+describe('v-on directive', () => {
+  test('no event binding when no v-on decorates on element', () => {
+    const targetNode = document.createElement('div');
+    const methods = {
+      onClick: jest.fn((event) => event),
+    };
+    const attributes = {};
+
+    const unsubscriptions = vOnDirective(targetNode, attributes, methods);
+    expect(methods.onClick.mock.calls).toHaveLength(0);
+    expect(unsubscriptions).toHaveLength(0);
+  });
+
+  test('event binding on element when v-on decorates on elelent', () => {
+    const targetNode = document.createElement('div');
+    targetNode.addEventListener = jest.fn();
+    const methods = {
+      onClick: jest.fn((event) => event),
+    };
+    const attributes = {
+      'v-on:click': 'onClick',
+    };
+
+    const unsubscriptions = vOnDirective(targetNode, attributes, methods);
+    expect(targetNode.addEventListener.mock.calls).toHaveLength(1);
+    expect(unsubscriptions).toHaveLength(1);
   });
 });

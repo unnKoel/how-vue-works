@@ -7,6 +7,7 @@ import {
   VBindDirective,
   VIfDirective,
   VForDirective,
+  vOnDirective,
 } from './directives';
 
 const DIRECTIVES = ['v-bind', 'v-if', 'v-for', 'v-on', 'v-model', 'track-by'];
@@ -118,10 +119,17 @@ const linkParentChild = (parentRef, childRef) => {
   parentRef.append(childRef);
 };
 
-const parse = (template, htmlParseStack, directiveQueue, data) => {
+const parse = (
+  template,
+  htmlParseStack,
+  directiveQueue,
+  data,
+  methods = {}
+) => {
   template = template.replace(/\n/g, '');
   let index = -1;
   let rootRef;
+  let unsubsriptionEvents = [];
 
   let char = '';
   while (char !== undefined) {
@@ -167,6 +175,7 @@ const parse = (template, htmlParseStack, directiveQueue, data) => {
           index += vForTemplateEndIndex;
           element = vForPlaceholderRef;
         }
+        unsubsriptionEvents.concat(vOnDirective(element, attributes, methods));
 
         htmlParseStack.push({ element, label: { tag } });
         rootRef = htmlParseStack.peek().element;
@@ -200,7 +209,7 @@ const parse = (template, htmlParseStack, directiveQueue, data) => {
     }
   }
 
-  return { rootRef, index };
+  return { rootRef, index, unsubsriptionEvents };
 };
 
 export { abstractTag, abstractAttributes, abstractText, parse };

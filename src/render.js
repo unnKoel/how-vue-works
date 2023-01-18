@@ -5,17 +5,25 @@ import observe from './observe';
 
 const directiveQueue = Queue();
 
-const render = (template, container, data) => {
+const render = (template, container, data, methods) => {
   data = observe(data);
   const htmlParseStack = Stack();
 
-  const { rootRef } = parse(template, htmlParseStack, directiveQueue, data);
+  const { rootRef, unsubsriptionEvents } = parse(
+    template,
+    htmlParseStack,
+    directiveQueue,
+    data,
+    methods
+  );
   (typeof container === 'string'
     ? document.querySelector(container)
     : container
   ).append(rootRef);
 
   directiveQueue.getItems().forEach((directive) => directive.handle(data));
+
+  return { unsubsriptionEvents };
 };
 
 export { render, directiveQueue };

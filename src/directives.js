@@ -86,7 +86,7 @@ const VBindDirective = (node, attributes = {}, data) => {
 /**
  * @todo the value of `v-if` should be evaluated as an expression.
  */
-const VIfDirective = (node, attributes = {}, data) => {
+const VIfDirective = (node, attributes = {}, data, methods) => {
   let vIfTemplateRef = null;
   let nextSibling = null;
   let parentNode = null;
@@ -105,7 +105,8 @@ const VIfDirective = (node, attributes = {}, data) => {
       childTemplate,
       vIfTemplateParseStack,
       vIfTemplateDirectiveQueue,
-      data
+      data,
+      methods
     );
     vIfTemplateRef = rootRef;
 
@@ -157,7 +158,7 @@ const VIfDirective = (node, attributes = {}, data) => {
  * @todo the items looped over in `v-for` can be deconstructed
  * as a form like (item, index).
  */
-const VForDirective = (node, attributes = {}, data, label) => {
+const VForDirective = (node, attributes = {}, data, label, methods) => {
   let arrayKey = '';
   let itemName = '';
   let vForTemplate = '';
@@ -202,7 +203,8 @@ const VForDirective = (node, attributes = {}, data, label) => {
       childTemplate,
       vForTemplateParseStack,
       vForTemplateDirectiveQueue,
-      arrayItem
+      arrayItem,
+      methods
     );
 
     return { vForTemplateRef: rootRef, vForTemplateDirectiveQueue, index };
@@ -320,4 +322,50 @@ const VForDirective = (node, attributes = {}, data, label) => {
   };
 };
 
-export { MustacheDirective, VBindDirective, VIfDirective, VForDirective };
+/**
+ * This verison just implement with providing a method name to bind.
+ *
+ * @todo
+ * - use inline js statement instead of binding directly to a method name.
+ * - involve event midifiers.
+ */
+const vOnDirective = (node, attributes = {}, methods = {}) => {
+  const vonEvents = Object.entries(attributes).reduce(
+    (acc, [attributeName, methodStatement]) => {
+      const attributeNameMatch = attributeName.match(/^v-on\s*:\s*(\w+)/);
+      if (attributeNameMatch !== null) {
+        const eventType = attributeNameMatch[1]?.trim();
+        acc.push({ eventType, methodStatement });
+      }
+
+      return acc;
+    },
+    []
+  );
+
+  const isVon = () => {
+    return vonEvents.length !== 0;
+  };
+
+  if (isVon()) {
+    return vonEvents.map(({ eventType, methodStatement }) => {
+      const listener = methods[methodStatement];
+      if (typeof listener === 'function') {
+        node.addEventListener(eventType, listener);
+        return () => node.removeEventListener(eventType, listener);
+      }
+
+      return () => {};
+    });
+  }
+
+  return [];
+};
+
+export {
+  MustacheDirective,
+  VBindDirective,
+  VIfDirective,
+  VForDirective,
+  vOnDirective,
+};
