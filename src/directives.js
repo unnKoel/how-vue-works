@@ -86,7 +86,13 @@ const VBindDirective = (node, attributes = {}, data) => {
 /**
  * @todo the value of `v-if` should be evaluated as an expression.
  */
-const VIfDirective = (node, attributes = {}, data, methods) => {
+const VIfDirective = (
+  unsubsriptionEvents,
+  node,
+  attributes = {},
+  data,
+  methods
+) => {
   let vIfTemplateRef = null;
   let nextSibling = null;
   let parentNode = null;
@@ -105,6 +111,7 @@ const VIfDirective = (node, attributes = {}, data, methods) => {
       childTemplate,
       vIfTemplateParseStack,
       vIfTemplateDirectiveQueue,
+      unsubsriptionEvents,
       data,
       methods
     );
@@ -158,7 +165,14 @@ const VIfDirective = (node, attributes = {}, data, methods) => {
  * @todo the items looped over in `v-for` can be deconstructed
  * as a form like (item, index).
  */
-const VForDirective = (node, attributes = {}, data, label, methods) => {
+const VForDirective = (
+  unsubsriptionEvents,
+  node,
+  attributes = {},
+  data,
+  label,
+  methods
+) => {
   let arrayKey = '';
   let itemName = '';
   let vForTemplate = '';
@@ -189,12 +203,17 @@ const VForDirective = (node, attributes = {}, data, label, methods) => {
 
   const parseChildTemplate = (childTemplate) => {
     vForTemplate = childTemplate;
-    const { index } = _parseChildTemplate(childTemplate, label, {});
+    const { index } = _parseChildTemplate(childTemplate, [], label, {});
 
     return { vForTemplateEndIndex: index, vForPlaceholderRef: node };
   };
 
-  const _parseChildTemplate = (childTemplate, label, arrayItem) => {
+  const _parseChildTemplate = (
+    childTemplate,
+    unsubsriptionEvents,
+    label,
+    arrayItem
+  ) => {
     const vForTemplateParseStack = Stack();
     const vForTemplateDirectiveQueue = Queue();
 
@@ -203,6 +222,7 @@ const VForDirective = (node, attributes = {}, data, label, methods) => {
       childTemplate,
       vForTemplateParseStack,
       vForTemplateDirectiveQueue,
+      unsubsriptionEvents,
       arrayItem,
       methods
     );
@@ -283,6 +303,7 @@ const VForDirective = (node, attributes = {}, data, label, methods) => {
       if (!vForTemplateParsedArtifact) {
         vForTemplateParsedArtifact = _parseChildTemplate(
           vForTemplate,
+          unsubsriptionEvents,
           label,
           item
         );

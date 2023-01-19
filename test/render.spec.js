@@ -274,3 +274,40 @@ test('render template with v-for directive along with track-by that reacts to da
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><div><a href="www.google.com" title="Navigate to Alibaba">Navigate to alibaba</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
 });
+
+test('render template with v-on directive to bind event', () => {
+  const templete = `
+  <div class="root" v-on:click="onClick">
+    <span>Search for {{something}}</span>
+    <div v-for="item in array" track-by="site">
+      <a href="www.google.com" v-bind:title="item.title" v-on:click="onClick">Navigate to {{item.site}}</a>
+    </div>
+    <p>{{text}}</p>
+  </div>`;
+
+  const data = observe({
+    array: [
+      { title: 'Navigate to Google', site: 'Google' },
+      { title: 'Navigate to Microsoft', site: 'Microsoft' },
+      { title: 'Navigate to Apple', site: 'Apple' },
+    ],
+    something: 'Vue',
+    text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
+  });
+
+  const methods = {
+    onClick: jest.fn((event) => event),
+  };
+
+  const { unsubsriptionEvents } = render(
+    templete,
+    document.body,
+    data,
+    methods
+  );
+  expect(document.body.innerHTML).toBe(
+    '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
+  );
+
+  expect(unsubsriptionEvents).toHaveLength(4);
+});

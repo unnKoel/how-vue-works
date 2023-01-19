@@ -8,14 +8,17 @@ const directiveQueue = Queue();
 const render = (template, container, data, methods) => {
   data = observe(data);
   const htmlParseStack = Stack();
+  const unsubsriptionEvents = [];
 
-  const { rootRef, unsubsriptionEvents } = parse(
+  const { rootRef } = parse(
     template,
     htmlParseStack,
     directiveQueue,
+    unsubsriptionEvents,
     data,
     methods
   );
+
   (typeof container === 'string'
     ? document.querySelector(container)
     : container
@@ -23,7 +26,7 @@ const render = (template, container, data, methods) => {
 
   directiveQueue.getItems().forEach((directive) => directive.handle(data));
 
-  return { unsubsriptionEvents };
+  return { rootRef, unsubsriptionEvents };
 };
 
 export { render, directiveQueue };

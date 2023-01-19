@@ -141,7 +141,7 @@ describe('v-if directive', () => {
     };
     const data = observe({ show: false });
 
-    const vIfDirective = VIfDirective(vIfRootNode, attributes, data);
+    const vIfDirective = VIfDirective([], vIfRootNode, attributes, data, {});
     expect(vIfDirective.isVIf()).toBe(true);
   });
 
@@ -159,7 +159,7 @@ describe('v-if directive', () => {
       directive: 'v-if',
     });
 
-    const vIfDirective = VIfDirective(vIfRootNode, attributes, data);
+    const vIfDirective = VIfDirective([], vIfRootNode, attributes, data);
 
     const template = `<span>hello welcome to {{directive}}</span>`;
     const label = { tag: 'div', vIf: true };
@@ -186,7 +186,7 @@ describe('v-if directive', () => {
       directive: 'v-if',
     });
 
-    const vIfDirective = VIfDirective(vIfRootNode, attributes, data);
+    const vIfDirective = VIfDirective([], vIfRootNode, attributes, data);
 
     const template = `<span>hello welcome to {{directive}}</span>`;
     const label = { tag: 'div', vIf: true };
@@ -216,7 +216,7 @@ describe('v-for directive', () => {
 
     const data = observe([]);
 
-    const vForDirective = VForDirective(vForRootNode, attributes, data);
+    const vForDirective = VForDirective([], vForRootNode, attributes, data);
     expect(vForDirective.isVFor()).toBe(true);
   });
 
@@ -238,7 +238,13 @@ describe('v-for directive', () => {
     });
 
     const label = { tag: 'div', vFor: true };
-    const vForDirective = VForDirective(vForRootNode, attributes, data, label);
+    const vForDirective = VForDirective(
+      [],
+      vForRootNode,
+      attributes,
+      data,
+      label
+    );
 
     const template = `<span>Hi,{{item.name}}. your character is {{item.character}}</span>`;
 
@@ -269,7 +275,13 @@ describe('v-for directive', () => {
     });
 
     const label = { tag: 'div', vFor: true };
-    const vForDirective = VForDirective(vForRootNode, attributes, data, label);
+    const vForDirective = VForDirective(
+      [],
+      vForRootNode,
+      attributes,
+      data,
+      label
+    );
 
     const template = `<span>Hi,{{item.name}}. your character is {{item.character}}</span>`;
 
@@ -317,7 +329,13 @@ describe('v-for directive', () => {
     });
 
     const label = { tag: 'div', vFor: true };
-    const vForDirective = VForDirective(vForRootNode, attributes, data, label);
+    const vForDirective = VForDirective(
+      [],
+      vForRootNode,
+      attributes,
+      data,
+      label
+    );
 
     const template = `<span>Hi,{{item.name}}. your character is {{item.character}}</span>`;
 

@@ -123,13 +123,13 @@ const parse = (
   template,
   htmlParseStack,
   directiveQueue,
+  unsubsriptionEvents,
   data,
   methods = {}
 ) => {
   template = template.replace(/\n/g, '');
   let index = -1;
   let rootRef;
-  let unsubsriptionEvents = [];
 
   let char = '';
   while (char !== undefined) {
@@ -152,7 +152,13 @@ const parse = (
         const vBindDirective = VBindDirective(element, attributes, data);
         vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
 
-        const vIfDirective = VIfDirective(element, attributes, data);
+        const vIfDirective = VIfDirective(
+          unsubsriptionEvents,
+          element,
+          attributes,
+          data,
+          methods
+        );
         if (vIfDirective.isVIf()) {
           const { vIfTemplateEndIndex, vIfTemplateRef } =
             vIfDirective.parseChildTemplate(template.substring(++index), {
@@ -164,10 +170,17 @@ const parse = (
           element = vIfTemplateRef;
         }
 
-        const vForDirective = VForDirective(element, attributes, data, {
-          tag,
-          vFor: true,
-        });
+        const vForDirective = VForDirective(
+          unsubsriptionEvents,
+          element,
+          attributes,
+          data,
+          {
+            tag,
+            vFor: true,
+          },
+          methods
+        );
         if (vForDirective.isVFor()) {
           const { vForTemplateEndIndex, vForPlaceholderRef } =
             vForDirective.parseChildTemplate(template.substring(++index));
@@ -175,7 +188,14 @@ const parse = (
           index += vForTemplateEndIndex;
           element = vForPlaceholderRef;
         }
-        unsubsriptionEvents.concat(vOnDirective(element, attributes, methods));
+
+        const subUnsubsriptionEvents = vOnDirective(
+          element,
+          attributes,
+          methods
+        );
+        subUnsubsriptionEvents.length &&
+          unsubsriptionEvents.push(...subUnsubsriptionEvents);
 
         htmlParseStack.push({ element, label: { tag } });
         rootRef = htmlParseStack.peek().element;
