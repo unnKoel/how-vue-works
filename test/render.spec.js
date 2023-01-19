@@ -14,12 +14,12 @@ beforeEach(() => {
 test('render normal template without directives', () => {
   const template = `
     <div class="root">
-      <a href="www.google.com">Navigate to Google</a>
+      <a href="http://www.google.com">Navigate to Google</a>
     </div>`;
 
   render(template, document.body);
   expect(document.body.innerHTML).toBe(
-    '<div class="root"><a href="www.google.com">Navigate to Google</a></div>'
+    '<div class="root"><a href="http://www.google.com">Navigate to Google</a></div>'
   );
 });
 

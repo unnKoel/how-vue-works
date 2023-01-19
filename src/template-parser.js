@@ -37,7 +37,7 @@ const abstractAttributes = (template, index) => {
   let equalFlag = false;
   let quoteFlag = 0;
 
-  while (char !== '>' && char !== '/') {
+  while (quoteFlag === 1 || (char !== '>' && char !== '/')) {
     char = template.at(++index);
 
     if (char === '"') {
@@ -48,7 +48,7 @@ const abstractAttributes = (template, index) => {
       equalFlag = true;
       continue;
     }
-    if ((char === ' ' || char === '>') && quoteFlag === 0) {
+    if ((char === ' ' || char === '>' || char === '/') && quoteFlag === 0) {
       equalFlag = false;
       if (key.length) {
         attributes[key.join('')] = value.length ? value.join('') : true;
