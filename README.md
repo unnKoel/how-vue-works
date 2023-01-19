@@ -1,8 +1,9 @@
 ## How Vue works
 
 #### structure diagrams.
-  offer later...
-  
+
+offer later...
+
 #### work list as follows.
 
 - ✅ html parser.
@@ -32,7 +33,7 @@
 
   - v-model
 
-- data observer.
+- ✅ data observer.
 
   As to how to finalize data observer, I think changing each simple value of path recurvely with a object which contains the sub-path data and a watcher list used to collect all dom updates related to that data. Thus, while that sub-path data has been changed somehow, excuting all dom updates from watcher list in set function which is defined by `Object.defineProperty`.
 
@@ -42,23 +43,27 @@
 
   - test completely on Array's navtive functions like `pop`, `push`, `unshift`,`reverse` and so forth.
 
-- make directive reactive to data chage.
+- ✅ make directive reactive to data chage.
 
-  - ✅ make dom updates related to mustache direactive `{{}}` reactive to data change.
-  - ✅ make dom updates related to directive `v-bind` reactive to data change.
-  - ✅ make dom updates related to directive `v-if` reactive to data change.
-  - ✅ make dom updates related to directive `v-for` reactive to data change.
-  - ✅ implement `track-by` feature on `v-for` for better performance on rending array.
+  - make dom updates related to mustache direactive `{{}}` reactive to data change.
+  - make dom updates related to directive `v-bind` reactive to data change.
+  - make dom updates related to directive `v-if` reactive to data change.
+  - make dom updates related to directive `v-for` reactive to data change.
+  - mplement `track-by` feature on `v-for` for better performance on rending array.
 
 - component tree.
 
-#### Issues
+#### bugs
 
 - ✅ Don't allow exsiting spaces between tags.
 - ✅ Tags like \<br /> couldn't be parsed yet.
-- \>, < should not be considered as a tag or end of tag while in between quotes or test.
-- filter attributes to get ones without in relation to VUE to directly set in the target node.
+- ✅ \>, < should not be considered as a tag or end of tag while in between quotes or test.
+- ✅ filter attributes to get ones without in relation to VUE to directly set in the target node.
 - For both `v-if` and mustache braces, there is js expression support left on its value.
+- executed twice on the reactive registration of v-if in v-if test.
+
+#### Issues
+
 - When debug tests in Jest, error shows in the termial like `node_modules\jest\node_modules\jest-cli\build\cli\index.js:227 } catch {`
 
   This issue is caused by the conflict between local installation of node and nvm. through removing local installation and setting default version of node in nvm as greater than 9.11.2, it's fixed.
@@ -72,45 +77,41 @@
 
   - [How can the default node version be set using NVM?](https://stackoverflow.com/questions/47190861/how-can-the-default-node-version-be-set-using-nvm)
 
-- executed twice on the reactive registration of v-if in v-if test.
-
 - Remove items in array loop-over.
   refer to
 
   [Looping through array and removing items, without breaking for loop](https://stackoverflow.com/questions/9882284/looping-through-array-and-removing-items-without-breaking-for-loop)
 
   [How to Loop Through Array and Remove Items Without Breaking the For Loop](https://www.w3docs.com/snippets/javascript/how-to-loop-through-array-and-remove-items-without-breaking-the-for-loop.html)
- 
+
 #### Questions
 
-  take notes of questions I am encountering and thinking during this progarm.
-  
-- ✅ How to deal with placeholder node for `v-if`?
+take notes of questions I am encountering and thinking during this progarm.
 
-  supply later...
-  
-- ✅ How to deal with placeholder node for `v-for`?
-
-  supply later...
-  
-- ✅ How to keep track of directives in `v-if` and `v-for` block?
-
-  supply later...
-  
-- ✅ How to implement an Observer based on `Object.definePropery`?
+- How to deal with placeholder node for `v-if`?
 
   supply later...
 
-- ✅ How to implement `track-by` to improve the performace of `v-for` directive?
+- How to deal with placeholder node for `v-for`?
 
   supply later...
-  
+
+- How to keep track of directives in `v-if` and `v-for` block?
+
+  supply later...
+
+- How to implement an Observer based on `Object.definePropery`?
+
+  supply later...
+
+- How to implement `track-by` to improve the performace of `v-for` directive?
+
+  supply later...
+
 - Is creation of component tree necessary? and how to create it?
 
   Form my prospective now, It's necessary to create a component tree for finding out all child components to unmount them with invoking their lifecycle function.
-As how to create it, We can identify Component node and directly render it, as well concatenate with parent component ref as a child ref in parsing phase. through rendering component, end up with getting the root element ref and unsubscription array. then insert that ref of root elemment into dom, in the meantime store both it and unsubscription into component instance.
+  As how to create it, We can identify Component node and directly render it, as well concatenate with parent component ref as a child ref in parsing phase. through rendering component, end up with getting the root element ref and unsubscription array. then insert that ref of root elemment into dom, in the meantime store both it and unsubscription into component instance.
 
 - could directives work on component node?
-  
 - Do I need to collects all doms update as a batch for performance while data changes?
-  
