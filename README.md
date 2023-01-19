@@ -1,10 +1,10 @@
-## How Vue works
+# How Vue works
 
-#### structure diagrams.
+## structure diagrams.
 
 offer later...
 
-#### work list as follows.
+## work list as follows.
 
 - ✅ html parser.
   - Html syntax validation.
@@ -53,7 +53,7 @@ offer later...
 
 - component tree.
 
-#### bugs
+## bugs
 
 - ✅ Don't allow exsiting spaces between tags.
 - ✅ Tags like \<br /> couldn't be parsed yet.
@@ -62,7 +62,7 @@ offer later...
 - For both `v-if` and mustache braces, there is js expression support left on its value.
 - executed twice on the reactive registration of v-if in v-if test.
 
-#### Issues
+## Issues
 
 - When debug tests in Jest, error shows in the termial like `node_modules\jest\node_modules\jest-cli\build\cli\index.js:227 } catch {`
 
@@ -84,7 +84,7 @@ offer later...
 
   [How to Loop Through Array and Remove Items Without Breaking the For Loop](https://www.w3docs.com/snippets/javascript/how-to-loop-through-array-and-remove-items-without-breaking-the-for-loop.html)
 
-#### Questions
+## Questions
 
 take notes of questions I am encountering and thinking during this progarm.
 
@@ -115,3 +115,7 @@ take notes of questions I am encountering and thinking during this progarm.
 
 - could directives work on component node?
 - Do I need to collects all doms update as a batch for performance while data changes?
+- Whether I have to use class to create component, Could I apply function simple?
+  `Class` actually is a contructor function which creates an object in heap and initialize it. There are totally two duties, one is creating an object, another is initialization of it. So can we manually create an object, then using a normal function to initialze it? but how can we access that object created? React uses hooks to sort out this problem, So therefore I think we can do the same as react by adopting hooks. hooks is based on JS closure by it own.
+
+  In terms of programming language, Once function can be returned inside of another function, Closure mechaism is inevitable to be included into that language, because as long as ref to that function hasn't died, then its context couldn't be recycled.
