@@ -3,10 +3,10 @@ import Stack from './stack';
 import Queue from './queue';
 import observe from './observe';
 
-const directiveQueue = Queue();
-
-const render = (template, container, data, methods) => {
-  data = observe(data);
+const render = (componentNode, container) => {
+  const { template = '', data = {}, methods = {} } = componentNode;
+  observe(data);
+  const directiveQueue = Queue();
   const htmlParseStack = Stack();
   const unsubsriptionEvents = [];
 
@@ -19,14 +19,16 @@ const render = (template, container, data, methods) => {
     methods
   );
 
-  (typeof container === 'string'
-    ? document.querySelector(container)
-    : container
-  ).append(rootRef);
-
   directiveQueue.getItems().forEach((directive) => directive.handle(data));
+
+  if (container) {
+    (typeof container === 'string'
+      ? document.querySelector(container)
+      : container
+    ).append(rootRef);
+  }
 
   return { rootRef, unsubsriptionEvents };
 };
 
-export { render, directiveQueue };
+export { render };

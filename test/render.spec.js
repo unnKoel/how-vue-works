@@ -4,11 +4,10 @@
 
 /* eslint-disable no-undef */
 import observe from '../src/observe';
-import { render, directiveQueue } from '../src/render';
+import { render } from '../src/render';
 
 beforeEach(() => {
   document.body.innerHTML = '';
-  directiveQueue.clear();
 });
 
 test('render normal template without directives', () => {
@@ -17,14 +16,14 @@ test('render normal template without directives', () => {
       <a href="http://www.google.com">Navigate to Google</a>
     </div>`;
 
-  render(template, document.body);
+  render({ template }, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><a href="http://www.google.com">Navigate to Google</a></div>'
   );
 });
 
 test('render template with mustache braces', () => {
-  const templete = `
+  const template = `
     <div class="root">
       <a href="www.google.com">Navtigate to {{site}}</a>
     </div>`;
@@ -33,14 +32,19 @@ test('render template with mustache braces', () => {
     site: 'Google',
   };
 
-  render(templete, document.body, data);
+  const componentNode = {
+    template,
+    data,
+  };
+
+  render(componentNode, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><a href="www.google.com">Navtigate to Google</a></div>'
   );
 });
 
 test('render template with mustache braces that reacts to data change', () => {
-  const templete = `
+  const template = `
     <div class="root">
       <a v-bind:href="url">Navigate to {{site}}</a>
     </div>`;
@@ -50,7 +54,12 @@ test('render template with mustache braces that reacts to data change', () => {
     url: 'www.google.com',
   };
 
-  render(templete, document.body, data);
+  const componentNode = {
+    template,
+    data,
+  };
+
+  render(componentNode, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><a href="www.google.com">Navigate to Google</a></div>'
   );
@@ -62,7 +71,7 @@ test('render template with mustache braces that reacts to data change', () => {
 });
 
 test('render template with v-bind directive', () => {
-  const templete = `
+  const template = `
     <div class="root">
       <a href="www.google.com" v-bind:title="title">Navigate to {{site}}</a>
     </div>`;
@@ -72,14 +81,19 @@ test('render template with v-bind directive', () => {
     title: 'Navigate to Google',
   };
 
-  render(templete, document.body, data);
+  const componentNode = {
+    template,
+    data,
+  };
+
+  render(componentNode, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div>'
   );
 });
 
 test('render template with v-bind directive that reacts to data change', () => {
-  const templete = `
+  const template = `
     <div class="root">
       <a v-bind:href="url" v-bind:title="title">Navigate to {{site}}</a>
     </div>`;
@@ -90,7 +104,12 @@ test('render template with v-bind directive that reacts to data change', () => {
     url: 'www.google.com',
   };
 
-  render(templete, document.body, data);
+  const componentNode = {
+    template,
+    data,
+  };
+
+  render(componentNode, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div>'
   );
@@ -103,7 +122,7 @@ test('render template with v-bind directive that reacts to data change', () => {
 });
 
 test('render template with v-if=false directive', () => {
-  const templete = `
+  const template = `
     <div class="root">
       <div v-if="show">
         <a href="www.google.com" v-bind:title="title">Navigate to {{site}}</a>
@@ -116,12 +135,17 @@ test('render template with v-if=false directive', () => {
     title: 'Navigate to Google',
   };
 
-  render(templete, document.body, data);
+  const componentNode = {
+    template,
+    data,
+  };
+
+  render(componentNode, document.body);
   expect(document.body.innerHTML).toBe('<div class="root"></div>');
 });
 
 test('render template with v-if=true directive', () => {
-  const templete = `
+  const template = `
     <div class="root">
       <span>Search for {{something}}</span>
       <div v-if="show">
@@ -138,14 +162,19 @@ test('render template with v-if=true directive', () => {
     text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
   };
 
-  render(templete, document.body, data);
+  const componentNode = {
+    template,
+    data,
+  };
+
+  render(componentNode, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
 });
 
 test('render template with v-if directive that reacts to data change', () => {
-  const templete = `
+  const template = `
     <div class="root">
       <span>Search for {{something}}</span>
       <div v-if="show">
@@ -162,7 +191,12 @@ test('render template with v-if directive that reacts to data change', () => {
     text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
   };
 
-  render(templete, document.body, data);
+  const componentNode = {
+    template,
+    data,
+  };
+
+  render(componentNode, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
@@ -178,7 +212,7 @@ test('render template with v-if directive that reacts to data change', () => {
 });
 
 test('render template with v-for directive', () => {
-  const templete = `
+  const template = `
     <div class="root">
       <span>Search for {{something}}</span>
       <div v-for="item in array">
@@ -197,14 +231,19 @@ test('render template with v-for directive', () => {
     text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
   });
 
-  render(templete, document.body, data);
+  const componentNode = {
+    template,
+    data,
+  };
+
+  render(componentNode, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
 });
 
 test('render template with v-for directive that reacts to data change', () => {
-  const templete = `
+  const template = `
     <div class="root">
       <span>Search for {{something}}</span>
       <div v-for="item in array">
@@ -223,7 +262,11 @@ test('render template with v-for directive that reacts to data change', () => {
     text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
   });
 
-  render(templete, document.body, data);
+  const componentNode = {
+    template,
+    data,
+  };
+  render(componentNode, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
@@ -240,7 +283,7 @@ test('render template with v-for directive that reacts to data change', () => {
 });
 
 test('render template with v-for directive along with track-by that reacts to data change', () => {
-  const templete = `
+  const template = `
     <div class="root">
       <span>Search for {{something}}</span>
       <div v-for="item in array" track-by="site">
@@ -259,7 +302,12 @@ test('render template with v-for directive along with track-by that reacts to da
     text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
   });
 
-  render(templete, document.body, data);
+  const componentNode = {
+    template,
+    data,
+  };
+
+  render(componentNode, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
@@ -276,7 +324,7 @@ test('render template with v-for directive along with track-by that reacts to da
 });
 
 test('render template with v-on directive to bind event', () => {
-  const templete = `
+  const template = `
   <div class="root" v-on:click="onClick">
     <span>Search for {{something}}</span>
     <div v-for="item in array" track-by="site">
@@ -299,12 +347,14 @@ test('render template with v-on directive to bind event', () => {
     onClick: jest.fn((event) => event),
   };
 
-  const { unsubsriptionEvents } = render(
-    templete,
-    document.body,
+  const componentNode = {
+    template,
     data,
-    methods
-  );
+    methods,
+  };
+
+  const { unsubsriptionEvents } = render(componentNode, document.body);
+
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );

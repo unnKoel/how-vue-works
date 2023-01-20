@@ -116,6 +116,7 @@ take notes of questions I am encountering and thinking during this progarm.
 - could directives work on component node?
 - Do I need to collects all doms update as a batch for performance while data changes?
 - Whether I have to use class to create component, Could I apply function simple?
+
   `Class` actually is a contructor function which creates an object in heap and initialize it. There are totally two duties, one is creating an object, another is initialization of it. So can we manually create an object, then using a normal function to initialze it? but how can we access that object created? React uses hooks to sort out this problem, So therefore I think we can do the same as react by adopting hooks. hooks is based on JS closure by it own.
 
   In terms of programming language, Once function can be returned inside of another function, Closure mechaism is inevitable to be included into that language, because as long as ref to that function hasn't died, then its context couldn't be recycled.
