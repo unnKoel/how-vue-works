@@ -4,7 +4,7 @@
 
 /* eslint-disable no-undef */
 import observe from '../src/observe';
-import { render } from '../src/render';
+import render from '../src/render';
 
 beforeEach(() => {
   document.body.innerHTML = '';
@@ -351,13 +351,14 @@ test('render template with v-on directive to bind event', () => {
     template,
     data,
     methods,
+    _unsubsriptionEvents: [],
   };
 
-  const { unsubsriptionEvents } = render(componentNode, document.body);
+  render(componentNode, document.body);
 
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
 
-  expect(unsubsriptionEvents).toHaveLength(4);
+  expect(componentNode._unsubsriptionEvents).toHaveLength(4);
 });

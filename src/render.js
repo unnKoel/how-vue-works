@@ -4,19 +4,26 @@ import Queue from './queue';
 import observe from './observe';
 
 const render = (componentNode, container) => {
-  const { template = '', data = {}, methods = {} } = componentNode;
+  const {
+    template = '',
+    data = {},
+    methods = {},
+    components = {},
+    _unsubsriptionEvents = [],
+  } = componentNode;
+
   observe(data);
   const directiveQueue = Queue();
   const htmlParseStack = Stack();
-  const unsubsriptionEvents = [];
 
   const { rootRef } = parse(
     template,
     htmlParseStack,
     directiveQueue,
-    unsubsriptionEvents,
+    _unsubsriptionEvents,
     data,
-    methods
+    methods,
+    components
   );
 
   directiveQueue.getItems().forEach((directive) => directive.handle(data));
@@ -28,7 +35,7 @@ const render = (componentNode, container) => {
     ).append(rootRef);
   }
 
-  return { rootRef, unsubsriptionEvents };
+  return { rootRef };
 };
 
-export { render };
+export default render;

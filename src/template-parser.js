@@ -10,6 +10,9 @@ import {
   vOnDirective,
 } from './directives';
 
+import { getComponent, createComponent } from './components';
+import render from './render';
+
 const DIRECTIVES = ['v-bind', 'v-if', 'v-for', 'v-on', 'v-model', 'track-by'];
 
 const abstractTag = (template, index) => {
@@ -120,12 +123,13 @@ const linkParentChild = (parentRef, childRef) => {
 };
 
 const parse = (
-  template,
+  template = '',
   htmlParseStack,
   directiveQueue,
   unsubsriptionEvents,
-  data,
-  methods = {}
+  data = {},
+  methods = {},
+  localEnrolledIncomponents = {}
 ) => {
   template = template.replace(/\n/g, '');
   let index = -1;
@@ -147,7 +151,15 @@ const parse = (
           indexOfStartTagName
         );
         index = indexOfStartTag - 1;
-        let element = createElement({ tag, attributes });
+        let element = null;
+        const component = getComponent(localEnrolledIncomponents, tag);
+        if (component) {
+          const componentNode = createComponent(component);
+          const { rootRef } = render(componentNode);
+          element = rootRef;
+        } else {
+          element = createElement({ tag, attributes });
+        }
 
         const vBindDirective = VBindDirective(element, attributes, data);
         vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
