@@ -3,6 +3,8 @@ import Stack from './stack';
 import Queue from './queue';
 import observe from './observe';
 
+let rootComponentNodeRef = null;
+
 const render = (componentNode, container) => {
   const {
     template = '',
@@ -33,9 +35,13 @@ const render = (componentNode, container) => {
       ? document.querySelector(container)
       : container
     ).append(rootRef);
+
+    rootComponentNodeRef = componentNode;
   }
 
   return { rootRef };
 };
 
 export default render;
+
+export { rootComponentNodeRef };

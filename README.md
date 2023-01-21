@@ -52,6 +52,12 @@ offer later...
   - mplement `track-by` feature on `v-for` for better performance on rending array.
 
 - component tree.
+  - ✅ refactor render function as well as test related to make it supported to render component.
+  - ✅ complete coding on creation of component tree.
+  - ✅ complete basic implementation of hooks involving `useData`, `useMethod`, `useEvents`, `useComponents` as a base.
+  - lifecycle functions of component.
+  - when unmount components, trigger the unsubscriptive callbacks to avoid risk of memory leak.
+  - when unmount components, trigger all descendant components to exectute unmount lifecycle function.
 
 ## bugs
 
@@ -120,5 +126,5 @@ take notes of questions I am encountering and thinking during this progarm.
   `Class` actually is a contructor function which creates an object in heap and initialize it. There are totally two duties, one is creating an object, another is initialization of it. So can we manually create an object, then using a normal function to initialze it? but how can we access that object created? React uses hooks to sort out this problem, So therefore I think we can do the same as react by adopting hooks. hooks is based on JS closure by it own.
 
   In terms of programming language, Once function can be returned inside of another function, Closure mechaism is inevitable to be included into that language, because as long as ref to that function hasn't died, then its context couldn't be recycled.
-  
+
   By this way of hooks, for developer they are able to write function only, this programming form is exactly what I prefer.
