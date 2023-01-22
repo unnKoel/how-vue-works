@@ -10,7 +10,7 @@ import {
   vOnDirective,
 } from './directives';
 
-import { getComponent, createComponent } from './components';
+import { getComponent } from './components';
 import render from './render';
 
 const DIRECTIVES = ['v-bind', 'v-if', 'v-for', 'v-on', 'v-model', 'track-by'];
@@ -154,8 +154,7 @@ const parse = (
         let element = null;
         const component = getComponent(localEnrolledIncomponents, tag);
         if (component) {
-          const componentNode = createComponent(component);
-          const { rootRef } = render(componentNode);
+          const { rootRef } = render(component);
           element = rootRef;
         } else {
           element = createElement({ tag, attributes });

@@ -1,11 +1,20 @@
-import { curCompoentNodeRef } from './components';
+import { curComponentNodeRef } from './components';
 import observe from './observe';
 
 /**
  * data hook to offer data of reative type.
  */
 const useData = (data = {}) => {
-  curCompoentNodeRef.data = observe(data);
+  curComponentNodeRef.data = observe(data);
+
+  return curComponentNodeRef.data;
+};
+
+/**
+ * get this ref.
+ */
+const useRef = () => {
+  return curComponentNodeRef;
 };
 
 /**
@@ -18,13 +27,13 @@ const useMethods = (methods = {}) => {
       if (typeof methodFunc !== 'function')
         throw new Error('method must be a function');
 
-      acc[methodName] = methodFunc.bind(curCompoentNodeRef);
+      acc[methodName] = methodFunc;
       return acc;
     },
     {}
   );
 
-  curCompoentNodeRef.methods = methodsBoundComponentNodeRef;
+  curComponentNodeRef.methods = methodsBoundComponentNodeRef;
 };
 
 /**
@@ -38,20 +47,20 @@ const useEvents = (eventListeners = {}) => {
       if (typeof methodFunc !== 'function')
         throw new Error('method must be a function');
 
-      acc[eventName] = methodFunc.bind(curCompoentNodeRef);
+      acc[eventName] = methodFunc;
       return acc;
     },
     {}
   );
 
-  curCompoentNodeRef.events = eventListnersBoundComponentNodeRef;
+  curComponentNodeRef.events = eventListnersBoundComponentNodeRef;
 };
 
 /**
  * components hook used to register component locally.
  */
 const useComponents = (components = {}) => {
-  curCompoentNodeRef.components = components;
+  curComponentNodeRef.components = components;
 };
 
-export { useMethods, useEvents, useData, useComponents };
+export { useMethods, useEvents, useData, useComponents, useRef };

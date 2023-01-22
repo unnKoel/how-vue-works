@@ -2,10 +2,13 @@ import { parse } from './template-parser';
 import Stack from './stack';
 import Queue from './queue';
 import observe from './observe';
+import { createComponent } from './components';
 
 let rootComponentNodeRef = null;
 
-const render = (componentNode, container) => {
+const render = (component, container) => {
+  const componentNode = createComponent(component);
+
   const {
     template = '',
     data = {},
@@ -39,7 +42,7 @@ const render = (componentNode, container) => {
     rootComponentNodeRef = componentNode;
   }
 
-  return { rootRef };
+  return { rootRef, componentNode };
 };
 
 export default render;
