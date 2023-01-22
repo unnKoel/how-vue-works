@@ -1,4 +1,4 @@
-# How Vue works
+# 🐰 How Vue works
 
 ## structure diagrams.
 
