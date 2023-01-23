@@ -275,7 +275,7 @@ const parse = (
         htmlParseStack.push({ element, label: { tag } });
         rootRef = htmlParseStack.peek().element;
       } else {
-        const { tagEnd } = abstractTagEnd(template, index);
+        const { tagEnd, index: tagEndIndex } = abstractTagEnd(template, index);
         // current char is the ending of tag.
         const { parentRef, label } = structureTree(
           linkParentChild,
@@ -292,7 +292,7 @@ const parse = (
         if (label?.vIf || label?.vFor) {
           return { rootRef, index: index - 1 };
         }
-        index += label?.tag?.length + 1;
+        index = tagEndIndex - 1;
       }
     } else if (char === '>' && template.at(index + 1) !== '<') {
       // text
@@ -315,4 +315,4 @@ const parse = (
   return { rootRef, index, unsubsriptionEvents };
 };
 
-export { abstractTag, abstractAttributes, abstractText, parse };
+export { abstractTag, abstractAttributes, abstractText, abstractTagEnd, parse };

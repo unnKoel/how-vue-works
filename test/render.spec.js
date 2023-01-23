@@ -17,7 +17,7 @@ test('render normal template without directives', () => {
   const component = () => `
     <div class="root">
       <a href="http://www.google.com">Navigate to Google</a>
-      </div>`;
+    </div>`;
 
   render(component, document.body);
   expect(document.body.innerHTML).toBe(
