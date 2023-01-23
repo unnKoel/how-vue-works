@@ -655,10 +655,9 @@ test('render template with multiple components while data changes', () => {
       </div>`;
   };
 
+  const data = { list: [1, 2, 3] };
   const componentC = () => {
-    useData({
-      list: [1, 2, 3],
-    });
+    useData(data);
 
     return `
       <div class="list">
@@ -721,6 +720,45 @@ test('render template with multiple components while data changes', () => {
           <li>1</li>
           <li>2</li>
           <li>3</li>
+        </ul>  
+      </div>
+    </div>`
+      .replace(/>\s+|\s+</g, (m) => m.trim())
+      .replace(/\n/g, '')
+  );
+
+  data.list.push(4);
+  expect(document.body.innerHTML).toBe(
+    `<div id="root">
+      <h3>what do you want to search?</h3>
+      <div class="search-box">
+        <span>Search for Vue</span>
+        <div>
+            <a href="www.google.com" title="Navigate to Google">Navigate to Google</a>
+        </div>
+        <div>
+            <a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a>
+        </div>
+        <div>
+            <a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a>
+        </div>
+        <p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p>
+      </div>
+      <div class="list">
+        <ul>
+          <li>1</li>
+          <li>2</li>
+          <li>3</li>
+          <li>4</li>
+        </ul>  
+      </div>
+      <p>search for whatever you prefer without any doubt</p>
+      <div class="list">
+        <ul>
+          <li>1</li>
+          <li>2</li>
+          <li>3</li>
+          <li>4</li>
         </ul>  
       </div>
     </div>`

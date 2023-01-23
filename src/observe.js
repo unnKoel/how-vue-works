@@ -84,6 +84,7 @@ const WatcherWrapper = (initialValue) => {
 };
 
 const observe = (data = {}) => {
+  if (data?._observed) return data;
   if (typeof data !== 'object') return;
 
   Object.keys(data).forEach((key) => {
@@ -98,6 +99,10 @@ const observe = (data = {}) => {
 
       return observe(value);
     }
+  });
+
+  Object.defineProperty(data, '_observed', {
+    value: true,
   });
 
   return data;

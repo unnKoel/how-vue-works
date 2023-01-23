@@ -128,6 +128,25 @@ describe('Array in watch', () => {
     ]);
   });
 
+  test("test if watch works with multiple watchers in case of Array's change", () => {
+    const data = {
+      groups: [1, 2, 3],
+    };
+
+    observe(data);
+    const mockWatcher = jest.fn((data) => data);
+    const mockWatcher2 = jest.fn((data) => data);
+
+    data.groups.watch(mockWatcher);
+    data.groups.watch(mockWatcher2);
+
+    const groups = data.groups;
+    groups.push(4);
+    expect(groups).toStrictEqual([1, 2, 3, 4]);
+    expect(mockWatcher.mock.calls).toHaveLength(1);
+    expect(mockWatcher2.mock.calls).toHaveLength(1);
+  });
+
   test('test pop in array', () => {
     const data = {
       groups: [1, 2, 3],

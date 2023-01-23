@@ -1,7 +1,6 @@
 import { parse } from './template-parser';
 import Stack from './stack';
 import Queue from './queue';
-import observe from './observe';
 import { createComponent } from './components';
 
 let rootComponentNodeRef = null;
@@ -19,7 +18,6 @@ const render = (component, container) => {
     _unsubsriptionEvents = [],
   } = componentNode;
 
-  observe(data);
   const directiveQueue = Queue();
   const htmlParseStack = Stack();
 

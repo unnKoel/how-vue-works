@@ -64,10 +64,10 @@ describe('mustache directive', () => {
       "hello, Addy. Welcome to directive's world"
     );
 
-    (data.field = 'vue'),
-      expect(textNode.nodeValue).toBe("hello, Addy. Welcome to vue's world");
-    (data.name = 'common'),
-      expect(textNode.nodeValue).toBe("hello, common. Welcome to vue's world");
+    data.field = 'vue';
+    expect(textNode.nodeValue).toBe("hello, Addy. Welcome to vue's world");
+    data.name = 'common';
+    expect(textNode.nodeValue).toBe("hello, common. Welcome to vue's world");
   });
 });
 
