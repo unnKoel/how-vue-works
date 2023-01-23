@@ -5,9 +5,11 @@ import observe from './observe';
 import { createComponent } from './components';
 
 let rootComponentNodeRef = null;
+const componentStack = Stack();
 
 const render = (component, container) => {
   const componentNode = createComponent(component);
+  componentStack.push(componentNode);
 
   const {
     template = '',
@@ -24,6 +26,7 @@ const render = (component, container) => {
   const { rootRef } = parse(
     template,
     htmlParseStack,
+    componentStack,
     directiveQueue,
     _unsubsriptionEvents,
     data,
@@ -47,4 +50,4 @@ const render = (component, container) => {
 
 export default render;
 
-export { rootComponentNodeRef };
+export { rootComponentNodeRef, componentStack };

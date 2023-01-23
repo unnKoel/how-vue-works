@@ -10,6 +10,7 @@ import {
   vOnDirective,
 } from '../src/directives';
 import observe from '../src/observe';
+import Stack from '../src/stack';
 
 describe('mustache directive', () => {
   test("check if it's a mustache braces", () => {
@@ -140,8 +141,15 @@ describe('v-if directive', () => {
       'v-if': 'show',
     };
     const data = observe({ show: false });
-
-    const vIfDirective = VIfDirective([], vIfRootNode, attributes, data, {});
+    const stack = Stack();
+    const vIfDirective = VIfDirective(
+      stack,
+      [],
+      vIfRootNode,
+      attributes,
+      data,
+      {}
+    );
     expect(vIfDirective.isVIf()).toBe(true);
   });
 
@@ -159,7 +167,8 @@ describe('v-if directive', () => {
       directive: 'v-if',
     });
 
-    const vIfDirective = VIfDirective([], vIfRootNode, attributes, data);
+    const stack = Stack();
+    const vIfDirective = VIfDirective(stack, [], vIfRootNode, attributes, data);
 
     const template = `<span>hello welcome to {{directive}}</span>`;
     const label = { tag: 'div', vIf: true };
@@ -186,7 +195,8 @@ describe('v-if directive', () => {
       directive: 'v-if',
     });
 
-    const vIfDirective = VIfDirective([], vIfRootNode, attributes, data);
+    const stack = Stack();
+    const vIfDirective = VIfDirective(stack, [], vIfRootNode, attributes, data);
 
     const template = `<span>hello welcome to {{directive}}</span>`;
     const label = { tag: 'div', vIf: true };
@@ -215,8 +225,14 @@ describe('v-for directive', () => {
     };
 
     const data = observe([]);
-
-    const vForDirective = VForDirective([], vForRootNode, attributes, data);
+    const stack = Stack();
+    const vForDirective = VForDirective(
+      stack,
+      [],
+      vForRootNode,
+      attributes,
+      data
+    );
     expect(vForDirective.isVFor()).toBe(true);
   });
 
@@ -238,7 +254,9 @@ describe('v-for directive', () => {
     });
 
     const label = { tag: 'div', vFor: true };
+    const stack = Stack();
     const vForDirective = VForDirective(
+      stack,
       [],
       vForRootNode,
       attributes,
@@ -275,7 +293,9 @@ describe('v-for directive', () => {
     });
 
     const label = { tag: 'div', vFor: true };
+    const stack = Stack();
     const vForDirective = VForDirective(
+      stack,
       [],
       vForRootNode,
       attributes,
@@ -329,7 +349,9 @@ describe('v-for directive', () => {
     });
 
     const label = { tag: 'div', vFor: true };
+    const stack = Stack();
     const vForDirective = VForDirective(
+      stack,
       [],
       vForRootNode,
       attributes,

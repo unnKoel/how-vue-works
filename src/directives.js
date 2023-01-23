@@ -3,6 +3,14 @@ import { parse } from './template-parser';
 import Stack from './stack';
 import Queue from './queue';
 
+const getValueByPath = (data, path) => {
+  if (typeof data === 'object') {
+    return get(data, path);
+  }
+
+  return data;
+};
+
 // Identify mustache braces to interpolate the value into text.
 const MustacheDirective = (textNode, text = '', data) => {
   let paths = [];
@@ -18,7 +26,7 @@ const MustacheDirective = (textNode, text = '', data) => {
     let interpolatedText = text;
 
     paths?.forEach((path) => {
-      const value = get(data, path);
+      const value = getValueByPath(data, path);
       interpolatedText = interpolatedText.replace(
         new RegExp(`{{\\s*${path}\\s*}}`),
         value
@@ -30,10 +38,12 @@ const MustacheDirective = (textNode, text = '', data) => {
 
   (function reatToDataChange() {
     paths?.forEach((path) => {
-      const value = get(data, path);
-      value?.watch(() => {
-        handle(data);
-      });
+      if (typeof data === 'object') {
+        const value = get(data, path);
+        value?.watch(() => {
+          handle(data);
+        });
+      }
     });
   })();
 
@@ -63,16 +73,18 @@ const VBindDirective = (node, attributes = {}, data) => {
 
   const handle = (data) => {
     vBindAttributes.forEach(({ attributeKey, path }) => {
-      node.setAttribute(attributeKey, get(data, path));
+      node.setAttribute(attributeKey, getValueByPath(data, path));
     });
   };
 
   (function reatToDataChange() {
     vBindAttributes?.forEach(({ path }) => {
-      const value = get(data, path);
-      value?.watch(() => {
-        handle(data);
-      });
+      if (typeof data === 'object') {
+        const value = get(data, path);
+        value?.watch(() => {
+          handle(data);
+        });
+      }
     });
   })();
 
@@ -87,6 +99,7 @@ const VBindDirective = (node, attributes = {}, data) => {
  * @todo the value of `v-if` should be evaluated as an expression.
  */
 const VIfDirective = (
+  componentStack,
   unsubsriptionEvents,
   node,
   attributes = {},
@@ -110,6 +123,7 @@ const VIfDirective = (
     const { rootRef, index } = parse(
       childTemplate,
       vIfTemplateParseStack,
+      componentStack,
       vIfTemplateDirectiveQueue,
       unsubsriptionEvents,
       data,
@@ -166,6 +180,7 @@ const VIfDirective = (
  * as a form like (item, index).
  */
 const VForDirective = (
+  componentStack,
   unsubsriptionEvents,
   node,
   attributes = {},
@@ -221,6 +236,7 @@ const VForDirective = (
     const { rootRef, index } = parse(
       childTemplate,
       vForTemplateParseStack,
+      componentStack,
       vForTemplateDirectiveQueue,
       unsubsriptionEvents,
       arrayItem,

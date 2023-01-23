@@ -12,15 +12,16 @@ import {
 
 import { getComponent } from './components';
 import render from './render';
+import { HtmlSytaxError } from './errors';
 
 const DIRECTIVES = ['v-bind', 'v-if', 'v-for', 'v-on', 'v-model', 'track-by'];
 
 const abstractTag = (template, index) => {
   if (template.at(index) !== '<') {
-    throw new Error("Syntax error: tag should be started with '<'");
+    throw new HtmlSytaxError("tag should be started with '<'");
   }
 
-  let tag = [];
+  const tag = [];
   let char = '';
 
   // for types such as <a> | <br/> | <a href="">
@@ -30,6 +31,22 @@ const abstractTag = (template, index) => {
   }
 
   return { tag: tag.join(''), index };
+};
+
+const abstractTagEnd = (template, index) => {
+  if (template.at(index) !== '<' && template.at(index + 1) !== '/') {
+    throw new HtmlSytaxError("tag-end should be started with '/'");
+  }
+
+  const tagEnd = [];
+  let char = '';
+  index++; // skip char '/'
+  while (char !== '>') {
+    tagEnd.push(char);
+    char = template.at(++index);
+  }
+
+  return { tagEnd: tagEnd.join(''), index };
 };
 
 const abstractAttributes = (template, index) => {
@@ -75,7 +92,7 @@ const abstractAttributes = (template, index) => {
 
 const abstractText = (template, index) => {
   if (template.at(index) !== '>') {
-    throw new Error("Syntax error: text should be after '>'");
+    throw new HtmlSytaxError("text should be after '>'");
   }
 
   let text = [];
@@ -92,18 +109,47 @@ const abstractText = (template, index) => {
   };
 };
 
-const structureTree = (linkParentChild, htmlParseStack) => {
+const structureTree = (linkParentChild, htmlParseStack, tagEnd) => {
   const { element: child, label } = htmlParseStack.pop();
+  const { tag: tagStart } = label;
+
+  if (tagStart !== tagEnd) {
+    throw new HtmlSytaxError('The start and end of tag should be same.');
+  }
 
   let { element: parentRef } = htmlParseStack.peek() ?? {};
   if (parentRef) {
     linkParentChild(parentRef, child);
-    // parentRef.children.push(child)
   } else {
     parentRef = child;
   }
 
   return { parentRef, label };
+};
+
+const linkParentChildComponent = (parentComponentNode, componentNode) => {
+  if (parentComponentNode) {
+    const { _children } = parentComponentNode;
+    if (!_children) {
+      parentComponentNode._children = [];
+    }
+    parentComponentNode._children.push(componentNode);
+  }
+
+  componentNode._parent = parentComponentNode;
+};
+
+const structureComponentTree = (componentStack) => {
+  const childComponentNode = componentStack.pop();
+
+  let parentComponentNode = componentStack.peek();
+  if (parentComponentNode) {
+    linkParentChildComponent(parentComponentNode, childComponentNode);
+  } else {
+    parentComponentNode = childComponentNode;
+  }
+
+  return parentComponentNode;
 };
 
 const createElement = ({ tag, attributes }) => {
@@ -122,9 +168,24 @@ const linkParentChild = (parentRef, childRef) => {
   parentRef.append(childRef);
 };
 
+/**
+ * parse html template.
+ * @todo abstract the end mark of tag to validate correctness of html.
+ *
+ * @param {*} template
+ * @param {*} htmlParseStack
+ * @param {*} componentStack
+ * @param {*} directiveQueue
+ * @param {*} unsubsriptionEvents
+ * @param {*} data
+ * @param {*} methods
+ * @param {*} localEnrolledIncomponents
+ * @returns
+ */
 const parse = (
   template = '',
   htmlParseStack,
+  componentStack,
   directiveQueue,
   unsubsriptionEvents,
   data = {},
@@ -133,7 +194,7 @@ const parse = (
 ) => {
   template = template.replace(/\n/g, '');
   let index = -1;
-  let rootRef;
+  let rootRef = htmlParseStack.peek()?.element ?? null;
 
   let char = '';
   while (char !== undefined) {
@@ -154,6 +215,7 @@ const parse = (
         let element = null;
         const component = getComponent(localEnrolledIncomponents, tag);
         if (component) {
+          component.tag = tag;
           const { rootRef } = render(component);
           element = rootRef;
         } else {
@@ -164,6 +226,7 @@ const parse = (
         vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
 
         const vIfDirective = VIfDirective(
+          componentStack,
           unsubsriptionEvents,
           element,
           attributes,
@@ -182,6 +245,7 @@ const parse = (
         }
 
         const vForDirective = VForDirective(
+          componentStack,
           unsubsriptionEvents,
           element,
           attributes,
@@ -211,12 +275,20 @@ const parse = (
         htmlParseStack.push({ element, label: { tag } });
         rootRef = htmlParseStack.peek().element;
       } else {
+        const { tagEnd } = abstractTagEnd(template, index);
         // current char is the ending of tag.
         const { parentRef, label } = structureTree(
           linkParentChild,
-          htmlParseStack
+          htmlParseStack,
+          tagEnd
         );
         rootRef = parentRef;
+
+        const component = getComponent(localEnrolledIncomponents, tagEnd);
+        if (component) {
+          structureComponentTree(componentStack);
+        }
+
         if (label?.vIf || label?.vFor) {
           return { rootRef, index: index - 1 };
         }

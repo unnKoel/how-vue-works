@@ -1,27 +1,17 @@
 const globalComponents = {};
 let curComponentNodeRef = null;
 
-const RegisterComponent = (tag, component) => {
+const registerComponent = (tag, component) => {
   globalComponents[tag] = component;
 };
 
 const createComponent = (component) => {
   const componentNode = Object.create(Object.prototype);
-  const parentComponentNode = curComponentNodeRef;
   curComponentNodeRef = componentNode;
   const template = component();
   componentNode.template = template;
+  componentNode.component = component;
   componentNode._unsubsriptionEvents = [];
-
-  if (parentComponentNode) {
-    const { _childRefs } = parentComponentNode;
-    if (!_childRefs) {
-      parentComponentNode._children = [];
-    }
-    parentComponentNode._children.push(componentNode);
-  }
-
-  componentNode._parent = parentComponentNode;
 
   return componentNode;
 };
@@ -38,5 +28,5 @@ export {
   curComponentNodeRef,
   getComponent,
   createComponent,
-  RegisterComponent,
+  registerComponent,
 };
