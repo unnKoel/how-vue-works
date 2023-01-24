@@ -54,18 +54,7 @@ const MustacheDirective = (textNode, text = '', data) => {
 };
 
 const VBindDirective = (node, attributes = {}, data) => {
-  const vBindAttributes = Object.entries(attributes).reduce(
-    (acc, [attributeName, path]) => {
-      const attributeNameMatch = attributeName.match(/^v-bind\s*:\s*(\w+)/);
-      if (attributeNameMatch !== null) {
-        const attributeKey = attributeNameMatch[1]?.trim();
-        acc.push({ attributeKey, path });
-      }
-
-      return acc;
-    },
-    []
-  );
+  const vBindAttributes = VBindDirective.getVBindAttributes(attributes);
 
   const isVBind = () => {
     return vBindAttributes.length !== 0;
@@ -94,6 +83,17 @@ const VBindDirective = (node, attributes = {}, data) => {
     handle,
   };
 };
+
+VBindDirective.getVBindAttributes = (attributes) =>
+  Object.entries(attributes).reduce((acc, [attributeName, path]) => {
+    const attributeNameMatch = attributeName.match(/^v-bind\s*:\s*(\w+)/);
+    if (attributeNameMatch !== null) {
+      const attributeKey = attributeNameMatch[1]?.trim();
+      acc.push({ attributeKey, path });
+    }
+
+    return acc;
+  }, []);
 
 /**
  * @todo the value of `v-if` should be evaluated as an expression.

@@ -19,7 +19,7 @@ test('render normal template without directives', () => {
       <a href="http://www.google.com">Navigate to Google</a>
     </div>`;
 
-  render(component, document.body);
+  render(component, {}, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><a href="http://www.google.com">Navigate to Google</a></div>'
   );
@@ -37,7 +37,7 @@ test('render template with mustache braces', () => {
       </div>`;
   };
 
-  render(component, document.body);
+  render(component, {}, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><a href="www.google.com">Navtigate to Google</a></div>'
   );
@@ -58,7 +58,7 @@ test('render template with mustache braces that reacts to data change', () => {
       </div>`;
   };
 
-  render(component, document.body);
+  render(component, {}, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><a href="www.google.com">Navigate to Google</a></div>'
   );
@@ -83,7 +83,7 @@ test('render template with v-bind directive', () => {
     `;
   };
 
-  render(component, document.body);
+  render(component, {}, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div>'
   );
@@ -105,7 +105,7 @@ test('render template with v-bind directive that reacts to data change', () => {
       </div>`;
   };
 
-  render(component, document.body);
+  render(component, {}, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div>'
   );
@@ -133,7 +133,7 @@ test('render template with v-if=false directive', () => {
       </div>`;
   };
 
-  render(component, document.body);
+  render(component, {}, document.body);
   expect(document.body.innerHTML).toBe('<div class="root"></div>');
 });
 
@@ -159,7 +159,7 @@ test('render template with v-if=true directive', () => {
       </div>`;
   };
 
-  render(component, document.body);
+  render(component, {}, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
@@ -187,7 +187,7 @@ test('render template with v-if directive that reacts to data change', () => {
       </div>`;
   };
 
-  render(component, document.body);
+  render(component, {}, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
@@ -224,7 +224,7 @@ test('render template with v-for directive', () => {
       </div>`;
   };
 
-  render(component, document.body);
+  render(component, {}, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
@@ -254,7 +254,7 @@ test('render template with v-for directive that reacts to data change', () => {
       </div>`;
   };
 
-  render(component, document.body);
+  render(component, {}, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
@@ -294,7 +294,7 @@ test('render template with v-for directive along with track-by that reacts to da
       </div>`;
   };
 
-  render(component, document.body);
+  render(component, {}, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
@@ -324,7 +324,7 @@ test('render template with v-for directive working in array contains premitive t
       </div>`;
   };
 
-  render(component, document.body);
+  render(component, {}, document.body);
   expect(document.body.innerHTML).toBe(
     '<div class="list"><ul><li>1</li><li>2</li><li>3</li></ul></div>'
   );
@@ -356,7 +356,7 @@ test('render template with v-on directive to bind event', () => {
       </div>`;
   };
 
-  const { componentNode } = render(component, document.body);
+  const { componentNode } = render(component, {}, document.body);
 
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
@@ -410,7 +410,7 @@ test('render template with parent and child components', () => {
     `;
   };
 
-  render(componentA, document.body);
+  render(componentA, {}, document.body);
   expect(document.body.innerHTML).toBe(
     '<div id="root"><h3>what do you want to search?</h3><div class="search-box"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div><p>search for whatever you prefer without any doubt</p></div>'
   );
@@ -480,7 +480,7 @@ test('render template with parent and multiple child components', () => {
     `;
   };
 
-  render(componentA, document.body);
+  render(componentA, {}, document.body);
   expect(document.body.innerHTML).toBe(
     `<div id="root">
       <h3>what do you want to search?</h3>
@@ -588,7 +588,7 @@ test('render template with in-depth descendant components', () => {
     `;
   };
 
-  render(componentA, document.body);
+  render(componentA, {}, document.body);
   expect(document.body.innerHTML).toBe(
     `
     <div id="root">
@@ -690,7 +690,7 @@ test('render template with multiple components while data changes', () => {
     `;
   };
 
-  render(componentA, document.body);
+  render(componentA, {}, document.body);
   expect(document.body.innerHTML).toBe(
     `<div id="root">
       <h3>what do you want to search?</h3>

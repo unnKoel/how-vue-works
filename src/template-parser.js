@@ -10,7 +10,7 @@ import {
   vOnDirective,
 } from './directives';
 
-import { getComponent } from './components';
+import { getComponent, getDynamicProps, getStaticProps } from './components';
 import render from './render';
 import { HtmlSytaxError } from './errors';
 
@@ -216,7 +216,11 @@ const parse = (
         const component = getComponent(localEnrolledIncomponents, tag);
         if (component) {
           component.tag = tag;
-          const { rootRef } = render(component);
+          const props = {
+            dynamicProps: getDynamicProps(attributes, data),
+            staticProps: getStaticProps(attributes),
+          };
+          const { rootRef } = render(component, props);
           element = rootRef;
         } else {
           element = createElement({ tag, attributes });
@@ -315,4 +319,11 @@ const parse = (
   return { rootRef, index, unsubsriptionEvents };
 };
 
-export { abstractTag, abstractAttributes, abstractText, abstractTagEnd, parse };
+export {
+  abstractTag,
+  abstractAttributes,
+  abstractText,
+  abstractTagEnd,
+  parse,
+  DIRECTIVES,
+};

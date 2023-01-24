@@ -2,13 +2,17 @@ import { parse } from './template-parser';
 import Stack from './stack';
 import Queue from './queue';
 import { createComponent } from './components';
+import { assign } from 'lodash';
 
 let rootComponentNodeRef = null;
 const componentStack = Stack();
 
-const render = (component, container) => {
+const render = (component, props = {}, container) => {
   const componentNode = createComponent(component);
   componentStack.push(componentNode);
+  const { dynamicProps = {}, staticProps = {} } = props;
+
+  componentNode.staticProps = staticProps;
 
   const {
     template = '',
@@ -17,6 +21,8 @@ const render = (component, container) => {
     components = {},
     _unsubsriptionEvents = [],
   } = componentNode;
+
+  assign(data, dynamicProps, data);
 
   const directiveQueue = Queue();
   const htmlParseStack = Stack();
