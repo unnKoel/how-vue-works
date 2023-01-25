@@ -108,4 +108,21 @@ const observe = (data = {}) => {
   return data;
 };
 
+const assign = (destination = {}, source = {}, desKey, sourceKey) => {
+  if (desKey) {
+    Object.defineProperty(
+      destination,
+      desKey,
+      Object.getOwnPropertyDescriptor(source, sourceKey ?? desKey)
+    );
+  } else {
+    const descriptors = Object.getOwnPropertyDescriptors(source);
+    Object.defineProperties(destination, descriptors);
+  }
+
+  return destination;
+};
+
+export { assign };
+
 export default observe;

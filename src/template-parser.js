@@ -13,6 +13,7 @@ import {
 import { getComponent, getDynamicProps, getStaticProps } from './components';
 import render from './render';
 import { HtmlSytaxError } from './errors';
+import { curComponentNodeRef } from './components';
 
 const DIRECTIVES = ['v-bind', 'v-if', 'v-for', 'v-on', 'v-model', 'track-by'];
 
@@ -216,17 +217,22 @@ const parse = (
         const component = getComponent(localEnrolledIncomponents, tag);
         if (component) {
           component.tag = tag;
-          const props = {
+          const allProps = {
             dynamicProps: getDynamicProps(attributes, data),
             staticProps: getStaticProps(attributes),
           };
-          const { rootRef } = render(component, props);
+          const { rootRef } = render(component, allProps);
           element = rootRef;
         } else {
           element = createElement({ tag, attributes });
         }
 
-        const vBindDirective = VBindDirective(element, attributes, data);
+        const vBindDirective = VBindDirective(
+          element,
+          attributes,
+          data,
+          curComponentNodeRef
+        );
         vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
 
         const vIfDirective = VIfDirective(
@@ -235,7 +241,8 @@ const parse = (
           element,
           attributes,
           data,
-          methods
+          methods,
+          curComponentNodeRef
         );
         if (vIfDirective.isVIf()) {
           const { vIfTemplateEndIndex, vIfTemplateRef } =
@@ -258,7 +265,8 @@ const parse = (
             tag,
             vFor: true,
           },
-          methods
+          methods,
+          curComponentNodeRef
         );
         if (vForDirective.isVFor()) {
           const { vForTemplateEndIndex, vForPlaceholderRef } =
@@ -271,7 +279,8 @@ const parse = (
         const subUnsubsriptionEvents = vOnDirective(
           element,
           attributes,
-          methods
+          methods,
+          curComponentNodeRef
         );
         subUnsubsriptionEvents.length &&
           unsubsriptionEvents.push(...subUnsubsriptionEvents);
@@ -305,7 +314,12 @@ const parse = (
       if (text !== '') {
         const textNode = document.createTextNode(text);
         linkParentChild(rootRef, textNode);
-        const mustacheInstance = MustacheDirective(textNode, text, data);
+        const mustacheInstance = MustacheDirective(
+          textNode,
+          text,
+          data,
+          curComponentNodeRef
+        );
         mustacheInstance.isMustache() &&
           directiveQueue.enqueue(mustacheInstance);
       }

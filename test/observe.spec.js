@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import observe from '../src/observe';
+import observe, { assign } from '../src/observe';
 
 test('test if watch works in case of change of primitive data', () => {
   const data = { name: 'addy' };
@@ -97,6 +97,28 @@ test("test if watch works in case of Object's change excepts Array", () => {
     name: 'common',
     tech: 'react',
   });
+});
+
+test('test assign function on object observed', () => {
+  const data = { name: 'addy', age: '27' };
+  const data2 = { company: 'epam', position: 'Front-end engineer' };
+
+  observe(data);
+  observe(data2);
+
+  const mockNameWatcher = jest.fn((name) => name);
+  const mockCompanyWatcher = jest.fn((company) => company);
+  data.name.watch(mockNameWatcher);
+  data2.company.watch(mockCompanyWatcher);
+
+  assign(data, data2);
+  data.name = 'addy2';
+  data.company = '32';
+  data2.company = '42';
+
+  expect(mockCompanyWatcher.mock.calls).toHaveLength(2);
+  expect(mockCompanyWatcher.mock.results[0].value).toBe('32');
+  expect(mockCompanyWatcher.mock.results[1].value).toBe('42');
 });
 
 describe('Array in watch', () => {

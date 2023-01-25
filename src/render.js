@@ -1,8 +1,8 @@
 import { parse } from './template-parser';
 import Stack from './stack';
 import Queue from './queue';
-import { createComponent } from './components';
-import { assign } from 'lodash';
+import { createComponent, filterPropsByDeclaration } from './components';
+import { assign } from './observe';
 
 let rootComponentNodeRef = null;
 const componentStack = Stack();
@@ -10,9 +10,7 @@ const componentStack = Stack();
 const render = (component, props = {}, container) => {
   const componentNode = createComponent(component);
   componentStack.push(componentNode);
-  const { dynamicProps = {}, staticProps = {} } = props;
-
-  componentNode.staticProps = staticProps;
+  let { dynamicProps = {}, staticProps = {} } = props;
 
   const {
     template = '',
@@ -20,9 +18,15 @@ const render = (component, props = {}, container) => {
     methods = {},
     components = {},
     _unsubsriptionEvents = [],
+    _propsDeclaration = {},
   } = componentNode;
 
-  assign(data, dynamicProps, data);
+  dynamicProps = filterPropsByDeclaration(dynamicProps, _propsDeclaration);
+  staticProps = filterPropsByDeclaration(staticProps, _propsDeclaration);
+  assign(componentNode, staticProps);
+
+  let combinedDataAndProps = assign({}, dynamicProps);
+  combinedDataAndProps = assign(combinedDataAndProps, data);
 
   const directiveQueue = Queue();
   const htmlParseStack = Stack();
@@ -33,7 +37,7 @@ const render = (component, props = {}, container) => {
     componentStack,
     directiveQueue,
     _unsubsriptionEvents,
-    data,
+    combinedDataAndProps,
     methods,
     components
   );

@@ -63,4 +63,8 @@ const useComponents = (components = {}) => {
   curComponentNodeRef.components = components;
 };
 
-export { useMethods, useEvents, useData, useComponents, useRef };
+const useProps = (propsDeclaration = []) => {
+  curComponentNodeRef._propsDeclaration = propsDeclaration;
+};
+
+export { useMethods, useEvents, useData, useComponents, useRef, useProps };

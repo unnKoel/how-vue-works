@@ -12,7 +12,7 @@ const getValueByPath = (data, path) => {
 };
 
 // Identify mustache braces to interpolate the value into text.
-const MustacheDirective = (textNode, text = '', data) => {
+const MustacheDirective = (textNode, text = '', data, curComponentNodeRef) => {
   let paths = [];
   const isMustache = () => /{{\s*\w+(?:\.\w+)*\s*}}/.test(text);
 
@@ -26,7 +26,8 @@ const MustacheDirective = (textNode, text = '', data) => {
     let interpolatedText = text;
 
     paths?.forEach((path) => {
-      const value = getValueByPath(data, path);
+      const value =
+        getValueByPath(data, path) || getValueByPath(curComponentNodeRef, path);
       interpolatedText = interpolatedText.replace(
         new RegExp(`{{\\s*${path}\\s*}}`),
         value
@@ -53,7 +54,7 @@ const MustacheDirective = (textNode, text = '', data) => {
   };
 };
 
-const VBindDirective = (node, attributes = {}, data) => {
+const VBindDirective = (node, attributes = {}, data, curComponentNodeRef) => {
   const vBindAttributes = VBindDirective.getVBindAttributes(attributes);
 
   const isVBind = () => {
@@ -62,7 +63,10 @@ const VBindDirective = (node, attributes = {}, data) => {
 
   const handle = (data) => {
     vBindAttributes.forEach(({ attributeKey, path }) => {
-      node.setAttribute(attributeKey, getValueByPath(data, path));
+      node.setAttribute(
+        attributeKey,
+        getValueByPath(data, path) || getValueByPath(curComponentNodeRef, path)
+      );
     });
   };
 
@@ -104,7 +108,8 @@ const VIfDirective = (
   node,
   attributes = {},
   data,
-  methods
+  methods,
+  curComponentNodeRef
 ) => {
   let vIfTemplateRef = null;
   let nextSibling = null;
@@ -147,7 +152,9 @@ const VIfDirective = (
   };
 
   const handle = (data) => {
-    const value = data[vIfExpression];
+    const value =
+      getValueByPath(data, vIfExpression) ||
+      getValueByPath(curComponentNodeRef, vIfExpression);
 
     if (value) {
       _insertVIfTemplateRef(vIfTemplateRef);
@@ -162,7 +169,7 @@ const VIfDirective = (
   };
 
   (function reatToDataChange() {
-    const value = data[vIfExpression];
+    const value = get(data, vIfExpression);
     value?.watch(() => {
       handle(data);
     });
@@ -186,7 +193,8 @@ const VForDirective = (
   attributes = {},
   data,
   label,
-  methods
+  methods,
+  curComponentNodeRef
 ) => {
   let arrayKey = '';
   let itemName = '';
@@ -300,7 +308,10 @@ const VForDirective = (
   };
 
   const handle = (data) => {
-    const array = data[arrayKey];
+    const array =
+      getValueByPath(data, arrayKey) ||
+      getValueByPath(curComponentNodeRef, arrayKey);
+
     _substitutePlaceholderNode(node);
 
     for (let i = 0; i < array.length; i++) {
@@ -345,7 +356,7 @@ const VForDirective = (
   };
 
   (function reatToDataChange() {
-    const array = data[arrayKey];
+    const array = getValueByPath(data, arrayKey);
     array?.watch(() => {
       handle(data);
     });

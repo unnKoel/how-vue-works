@@ -766,3 +766,105 @@ test('render template with multiple components while data changes', () => {
       .replace(/\n/g, '')
   );
 });
+
+test('render template with parent and child components', () => {
+  const componentB = () => {
+    useData({
+      array: [
+        { title: 'Navigate to Google', site: 'Google' },
+        { title: 'Navigate to Microsoft', site: 'Microsoft' },
+        { title: 'Navigate to Apple', site: 'Apple' },
+      ],
+      something: 'Vue',
+      text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
+    });
+
+    useMethods({
+      onClick: jest.fn((event) => event),
+    });
+
+    return `
+      <div class="search-box" v-on:click="onClick">
+        <span>Search for {{something}}</span>
+        <div v-for="item in array" track-by="site">
+          <a href="www.google.com" v-bind:title="item.title" v-on:click="onClick">Navigate to {{item.site}}</a>
+        </div>
+        <p>{{text}}</p>
+      </div>`;
+  };
+
+  const componentA = () => {
+    useData({
+      title: 'what do you want to search?',
+      description: 'search for whatever you prefer without any doubt',
+    });
+
+    useComponents({
+      'component-b': componentB,
+    });
+
+    return `
+      <div id="root">
+        <h3>{{title}}</h3>
+        <component-b></component-b>
+        <p>{{description}}</p>
+      </div>
+    `;
+  };
+
+  render(componentA, {}, document.body);
+  expect(document.body.innerHTML).toBe(
+    '<div id="root"><h3>what do you want to search?</h3><div class="search-box"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div><p>search for whatever you prefer without any doubt</p></div>'
+  );
+});
+
+test.skip('render child component with props passed by parent component', () => {
+  const componentB = () => {
+    useData({
+      array: [
+        { title: 'Navigate to Google', site: 'Google' },
+        { title: 'Navigate to Microsoft', site: 'Microsoft' },
+        { title: 'Navigate to Apple', site: 'Apple' },
+      ],
+      something: 'Vue',
+      text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
+    });
+
+    useMethods({
+      onClick: jest.fn((event) => event),
+    });
+
+    return `
+      <div class="search-box" v-on:click="onClick">
+        <span>Search for {{something}}</span>
+        <div v-for="item in array" track-by="site">
+          <a href="www.google.com" v-bind:title="item.title" v-on:click="onClick">Navigate to {{item.site}}</a>
+        </div>
+        <p>{{text}}</p>
+      </div>`;
+  };
+
+  const componentA = () => {
+    useData({
+      title: 'what do you want to search?',
+      description: 'search for whatever you prefer without any doubt',
+    });
+
+    useComponents({
+      'component-b': componentB,
+    });
+
+    return `
+      <div id="root">
+        <h3>{{title}}</h3>
+        <component-b static="hi" v-bind:description="description"></component-b>
+        <p>{{description}}</p>
+      </div>
+    `;
+  };
+
+  render(componentA, {}, document.body);
+  expect(document.body.innerHTML).toBe(
+    '<div id="root"><h3>what do you want to search?</h3><div class="search-box"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div><p>search for whatever you prefer without any doubt</p></div>'
+  );
+});

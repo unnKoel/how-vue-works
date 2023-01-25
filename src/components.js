@@ -1,6 +1,6 @@
 import { VBindDirective } from './directives';
-import { DIRECTIVES } from './render';
-import { get } from 'lodash';
+import { DIRECTIVES } from './template-parser';
+import { assign } from './observe';
 
 const globalComponents = {};
 let curComponentNodeRef = null;
@@ -31,8 +31,8 @@ const getComponent = (localEnrolledIncomponents = {}, tag) => {
 const getDynamicProps = (attributes, data) => {
   const vBindAttributes = VBindDirective.getVBindAttributes(attributes);
 
-  return vBindAttributes.reduce((acc, { attributeKey, path }) => {
-    acc[attributeKey] = get(data, path);
+  return vBindAttributes.reduce((acc, { attributeKey, key }) => {
+    assign(acc, data, attributeKey, key);
     return acc;
   }, {});
 };
@@ -48,6 +48,45 @@ const getStaticProps = (attributes) => {
   return staticProps;
 };
 
+const filterPropsByDeclaration = (props, declaration) => {
+  if (Array.isArray(declaration)) {
+    declaration = declaration.reduce(
+      (acc, value) => ({ ...acc, [value]: value }),
+      {}
+    );
+  }
+
+  const filteredProps = {};
+  Object.entries(props).forEach(([propKey, propValue]) => {
+    const propDeclaration = declaration[propKey];
+    if (typeof propDeclaration === 'string') {
+      assign(filteredProps, props, propKey);
+      return;
+    }
+
+    let { type, default: defaultFunc, validator } = propDeclaration ?? {};
+
+    let valid = false;
+    propValue = propValue ?? defaultFunc();
+
+    if (type) {
+      type = Array.isArray(type) ? type : [type];
+      valid = type.some(
+        (t) => Object.prototype.toString.call(propValue) === `[object ${t}]`
+      );
+    }
+    if (validator) {
+      valid = validator(propValue);
+    }
+    if (valid) {
+      assign(filteredProps, props, propKey);
+      filteredProps[propKey] = propValue;
+    }
+  });
+
+  return filteredProps;
+};
+
 export {
   curComponentNodeRef,
   getComponent,
@@ -55,4 +94,5 @@ export {
   registerComponent,
   getDynamicProps,
   getStaticProps,
+  filterPropsByDeclaration,
 };
