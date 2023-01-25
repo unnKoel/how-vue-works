@@ -4,6 +4,9 @@ import {
   getComponent,
   createComponent,
   registerComponent,
+  getDynamicProps,
+  getStaticProps,
+  // filterPropsByDeclaration,
 } from '../src/components';
 
 import {
@@ -148,3 +151,40 @@ test.skip('test concatenation between parent and child component ndoe while crea
   expect(componentChildNode._parent).toBe(componentParentNode);
   expect(curComponentNodeRef).toBe(componentChildNode);
 });
+
+test('test getting dynamic props', () => {
+  const attributes = {
+    'v-bind:name': 'name',
+    'v-bind:my-age': 'age',
+  };
+
+  const data = {
+    name: 'addy',
+    age: 58,
+  };
+
+  const dynamicProps = getDynamicProps(attributes, data);
+  expect(dynamicProps).toEqual({
+    name: 'addy',
+    myAge: 58,
+  });
+});
+
+test('test getting static props', () => {
+  const attribute = {
+    'v-bind:name': 'name',
+    'v-if': 'showed',
+    'v-for': 'item in array',
+    'v-on:click': 'onClick',
+    age: '18',
+    'tech-stack': 'vue',
+  };
+
+  const staticProps = getStaticProps(attribute);
+  expect(staticProps).toEqual({
+    age: '18',
+    techStack: 'vue',
+  });
+});
+
+test('test filtering props by declaration', () => {});

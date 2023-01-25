@@ -90,7 +90,7 @@ const VBindDirective = (node, attributes = {}, data, curComponentNodeRef) => {
 
 VBindDirective.getVBindAttributes = (attributes) =>
   Object.entries(attributes).reduce((acc, [attributeName, path]) => {
-    const attributeNameMatch = attributeName.match(/^v-bind\s*:\s*(\w+)/);
+    const attributeNameMatch = attributeName.match(/^v-bind\s*:\s*([\w\\-]+)/);
     if (attributeNameMatch !== null) {
       const attributeKey = attributeNameMatch[1]?.trim();
       acc.push({ attributeKey, path });

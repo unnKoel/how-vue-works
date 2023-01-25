@@ -4,7 +4,7 @@
 
 /* eslint-disable no-undef */
 import render, { componentStack, rootComponentNodeRef } from '../src/render';
-import { useComponents, useData, useMethods } from '../src/hooks';
+import { useComponents, useData, useMethods, useProps } from '../src/hooks';
 
 beforeEach(() => {
   document.body.innerHTML = '';
@@ -818,7 +818,7 @@ test('render template with parent and child components', () => {
   );
 });
 
-test.skip('render child component with props passed by parent component', () => {
+test('render child component with props passed by parent component', () => {
   const componentB = () => {
     useData({
       array: [
@@ -830,6 +830,8 @@ test.skip('render child component with props passed by parent component', () => 
       text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
     });
 
+    useProps(['descriptionDetail', 'static']);
+
     useMethods({
       onClick: jest.fn((event) => event),
     });
@@ -837,10 +839,12 @@ test.skip('render child component with props passed by parent component', () => 
     return `
       <div class="search-box" v-on:click="onClick">
         <span>Search for {{something}}</span>
+        <span>{{static}}</span>
         <div v-for="item in array" track-by="site">
           <a href="www.google.com" v-bind:title="item.title" v-on:click="onClick">Navigate to {{item.site}}</a>
         </div>
         <p>{{text}}</p>
+        <p>{{descriptionDetail}}</p>
       </div>`;
   };
 
@@ -857,7 +861,7 @@ test.skip('render child component with props passed by parent component', () => 
     return `
       <div id="root">
         <h3>{{title}}</h3>
-        <component-b static="hi" v-bind:description="description"></component-b>
+        <component-b static="hi" v-bind:description-detail="description"></component-b>
         <p>{{description}}</p>
       </div>
     `;
@@ -865,6 +869,22 @@ test.skip('render child component with props passed by parent component', () => 
 
   render(componentA, {}, document.body);
   expect(document.body.innerHTML).toBe(
-    '<div id="root"><h3>what do you want to search?</h3><div class="search-box"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div><p>search for whatever you prefer without any doubt</p></div>'
+    `
+  <div id="root">
+    <h3>what do you want to search?</h3>
+    <div class="search-box">
+      <span>Search for Vue</span>
+      <span>hi</span>
+      <div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div>
+      <div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div>
+      <div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div>
+      <p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p>
+      <p>search for whatever you prefer without any doubt</p>
+    </div>
+    <p>search for whatever you prefer without any doubt</p>
+  </div>
+  `
+      .replace(/>\s+|\s+</g, (m) => m.trim())
+      .replace(/\n/g, '')
   );
 });

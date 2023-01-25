@@ -1,6 +1,7 @@
 import { VBindDirective } from './directives';
 import { DIRECTIVES } from './template-parser';
 import { assign } from './observe';
+import { camelCase } from 'lodash';
 
 const globalComponents = {};
 let curComponentNodeRef = null;
@@ -31,8 +32,9 @@ const getComponent = (localEnrolledIncomponents = {}, tag) => {
 const getDynamicProps = (attributes, data) => {
   const vBindAttributes = VBindDirective.getVBindAttributes(attributes);
 
-  return vBindAttributes.reduce((acc, { attributeKey, key }) => {
-    assign(acc, data, attributeKey, key);
+  return vBindAttributes.reduce((acc, { attributeKey, path }) => {
+    attributeKey = camelCase(attributeKey);
+    assign(acc, data, attributeKey, path);
     return acc;
   }, {});
 };
@@ -41,7 +43,7 @@ const getStaticProps = (attributes) => {
   const staticProps = {};
   for (let attrName in attributes) {
     if (!DIRECTIVES.some((directive) => new RegExp(directive).test(attrName))) {
-      staticProps[attrName] = attributes[attrName];
+      staticProps[camelCase(attrName)] = attributes[attrName];
     }
   }
 

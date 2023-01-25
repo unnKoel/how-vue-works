@@ -42,7 +42,9 @@ const render = (component, props = {}, container) => {
     components
   );
 
-  directiveQueue.getItems().forEach((directive) => directive.handle(data));
+  directiveQueue
+    .getItems()
+    .forEach((directive) => directive.handle(combinedDataAndProps));
 
   if (container) {
     (typeof container === 'string'

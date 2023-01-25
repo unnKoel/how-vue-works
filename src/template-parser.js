@@ -208,7 +208,7 @@ const parse = (
           template,
           index
         );
-        const { attributes, index: indexOfStartTag } = abstractAttributes(
+        let { attributes, index: indexOfStartTag } = abstractAttributes(
           template,
           indexOfStartTagName
         );
@@ -223,6 +223,7 @@ const parse = (
           };
           const { rootRef } = render(component, allProps);
           element = rootRef;
+          attributes = {};
         } else {
           element = createElement({ tag, attributes });
         }
