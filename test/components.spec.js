@@ -6,8 +6,9 @@ import {
   registerComponent,
   getDynamicProps,
   getStaticProps,
-  // filterPropsByDeclaration,
+  filterPropsByDeclaration,
 } from '../src/components';
+import observe from '../src/observe';
 
 import {
   useMethods,
@@ -100,58 +101,6 @@ test('test creating component', () => {
   expect(componentNode.storeValue).toBe('Happy beautiful raddit year!');
 });
 
-test.skip('test concatenation between parent and child component ndoe while creating components', () => {
-  const componentParent = () => {
-    const data = useData({
-      name: 'addy',
-      company: 'epam',
-    });
-
-    useMethods({
-      onclick: () => {
-        data.name = 'yanjunzhou';
-      },
-    });
-
-    return `
-      <div>
-        <span>{{name}}</span>
-        <a>{{company}}</a>
-      <div>
-    `;
-  };
-
-  const componentChild = () => {
-    const data = useData({
-      book: 'My view on chinglish',
-      chapters: ['preface', 'unnecessary words'],
-    });
-
-    useMethods({
-      onclick: () => {
-        data.chatper.push('unnecessary Nouns and Verbs');
-      },
-    });
-
-    return `
-      <div class="root">
-        <span>{{book}}</span>
-        <div>
-          <span v-for="item in chapters">{{item}}</span>
-        </div>
-      <div>
-    `;
-  };
-
-  const componentParentNode = createComponent(componentParent);
-  expect(curComponentNodeRef).toBe(componentParentNode);
-
-  const componentChildNode = createComponent(componentChild);
-  expect(componentParentNode._children[0]).toBe(componentChildNode);
-  expect(componentChildNode._parent).toBe(componentParentNode);
-  expect(curComponentNodeRef).toBe(componentChildNode);
-});
-
 test('test getting dynamic props', () => {
   const attributes = {
     'v-bind:name': 'name',
@@ -187,4 +136,151 @@ test('test getting static props', () => {
   });
 });
 
-test('test filtering props by declaration', () => {});
+describe('test prop declarations', () => {
+  test('declarations as an array of string representing prop name', () => {
+    let declaration = ['playground', 'number', 'game'];
+    const props = observe({
+      playground: 'PG1',
+      number: 4,
+      game: 'hide and find',
+    });
+
+    let filteredProps = filterPropsByDeclaration(props, declaration);
+    expect(filteredProps).toEqual({
+      playground: 'PG1',
+      number: 4,
+      game: 'hide and find',
+    });
+    expect(
+      Object.getOwnPropertyDescriptor(filteredProps, 'playground').set
+    ).toBeInstanceOf(Function);
+
+    declaration = ['playground', 'game'];
+    filteredProps = filterPropsByDeclaration(props, declaration);
+    expect(filteredProps).toEqual({
+      playground: 'PG1',
+      game: 'hide and find',
+    });
+
+    declaration = [];
+    filteredProps = filterPropsByDeclaration(props, declaration);
+    expect(filteredProps).toEqual({});
+  });
+
+  test('declarations as a object with type option', () => {
+    let declaration = {
+      playground: {
+        type: String,
+      },
+      number: {
+        type: Number,
+      },
+      game: {
+        type: String,
+      },
+    };
+    const props = observe({
+      playground: 'PG1',
+      number: 4,
+      game: 'hide and find',
+    });
+    let filteredProps = filterPropsByDeclaration(props, declaration);
+    expect(filteredProps).toEqual({
+      playground: 'PG1',
+      number: 4,
+      game: 'hide and find',
+    });
+
+    declaration = {
+      playground: {
+        type: Number,
+      },
+      number: {
+        type: [Number, String],
+      },
+    };
+    filteredProps = filterPropsByDeclaration(props, declaration);
+    expect(filteredProps).toEqual({
+      number: 4,
+    });
+    expect(
+      Object.getOwnPropertyDescriptor(filteredProps, 'number').set
+    ).toBeInstanceOf(Function);
+  });
+
+  test('declarations as a object with validator', () => {
+    let declaration = {
+      playground: {
+        type: String,
+      },
+      number: {
+        type: Number,
+        validator: (value) => value > 10,
+      },
+      game: {
+        type: String,
+      },
+    };
+    const props = {
+      playground: 'PG1',
+      number: 4,
+      game: 'hide and find',
+    };
+    let filteredProps = filterPropsByDeclaration(props, declaration);
+    expect(filteredProps).toEqual({
+      playground: 'PG1',
+      game: 'hide and find',
+    });
+  });
+
+  test('declarations as a object with default value', () => {
+    let declaration = {
+      playground: {
+        type: String,
+        default: 'PG2',
+      },
+      number: {
+        type: Number,
+        validator: (value) => value > 10,
+      },
+      game: {
+        type: String,
+      },
+    };
+    const props = observe({
+      playground: '',
+      number: 4,
+      game: 'hide and find',
+    });
+    let filteredProps = filterPropsByDeclaration(props, declaration);
+    expect(filteredProps).toEqual({
+      playground: 'PG2',
+      game: 'hide and find',
+    });
+    expect(
+      Object.getOwnPropertyDescriptor(filteredProps, 'playground').set
+    ).toBeInstanceOf(Function);
+
+    declaration = {
+      playground: {
+        type: String,
+        default: () => 'PG2',
+      },
+      number: {
+        type: Number,
+        validator: (value) => value > 10,
+      },
+      game: {
+        type: String,
+      },
+    };
+    filteredProps = filterPropsByDeclaration(props, declaration);
+    expect(filteredProps).toEqual({
+      playground: 'PG2',
+      game: 'hide and find',
+    });
+    expect(
+      Object.getOwnPropertyDescriptor(filteredProps, 'playground').set
+    ).toBeInstanceOf(Function);
+  });
+});

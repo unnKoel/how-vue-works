@@ -55,7 +55,7 @@ offer later...
   - ✅ refactor render function as well as test related to make it supported to render component.
   - ✅ complete coding on creation of component tree.
   - ✅ complete basic implementation of hooks involving `useData`, `useMethod`, `useEvents`, `useComponents` as a base.
-  - implementation of props.
+  - ✅ implementation of props.
   - pub-sub pattern implementation working on communication between components.
   - lifecycle functions of component.
   - when unmount components, trigger the unsubscriptive callbacks to avoid risk of memory leak.

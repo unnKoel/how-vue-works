@@ -66,15 +66,14 @@ const filterPropsByDeclaration = (props, declaration) => {
       return;
     }
 
-    let { type, default: defaultFunc, validator } = propDeclaration ?? {};
+    let { type, default: defaultBlock, validator } = propDeclaration ?? {};
 
     let valid = false;
-    propValue = propValue ?? defaultFunc();
-
     if (type) {
       type = Array.isArray(type) ? type : [type];
       valid = type.some(
-        (t) => Object.prototype.toString.call(propValue) === `[object ${t}]`
+        (t) =>
+          Object.prototype.toString.call(propValue) === `[object ${t.name}]`
       );
     }
     if (validator) {
@@ -82,7 +81,10 @@ const filterPropsByDeclaration = (props, declaration) => {
     }
     if (valid) {
       assign(filteredProps, props, propKey);
-      filteredProps[propKey] = propValue;
+      if (!propValue) {
+        filteredProps[propKey] =
+          typeof defaultBlock === 'function' ? defaultBlock() : defaultBlock;
+      }
     }
   });
 
