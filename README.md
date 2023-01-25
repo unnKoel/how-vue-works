@@ -52,6 +52,7 @@ offer later...
   - mplement `track-by` feature on `v-for` for better performance on rending array.
 
 - component tree.
+
   - ✅ refactor render function as well as test related to make it supported to render component.
   - ✅ complete coding on creation of component tree.
   - ✅ complete basic implementation of hooks involving `useData`, `useMethod`, `useEvents`, `useComponents` as a base.
@@ -60,6 +61,8 @@ offer later...
   - lifecycle functions of component.
   - when unmount components, trigger the unsubscriptive callbacks to avoid risk of memory leak.
   - when unmount components, trigger all descendant components to exectute unmount lifecycle function.
+
+- slot
 
 ## bugs
 
@@ -130,3 +133,6 @@ take notes of questions I am encountering and thinking during this progarm.
   In terms of programming language, Once function can be returned inside of another function, Closure mechaism is inevitable to be included into that language, because as long as ref to that function hasn't died, then its context couldn't be recycled.
 
   By this way of hooks, for developer they are able to write function only, this programming form is exactly what I prefer.
+
+- how to implement slots?
+  Before render child component found in parent template, wrap up the block inside the scope of child component marks and compile it as a child template. then take the result of compilation as a parameter to render child component. In that process, using the compilation result of child template to replace the position `slot` resides.
