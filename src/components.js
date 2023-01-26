@@ -2,6 +2,12 @@ import { VBindDirective } from './directives';
 import { DIRECTIVES } from './template-parser';
 import { assign } from './observe';
 import { camelCase } from 'lodash';
+import {
+  createOn,
+  createEmit,
+  createBroadcast,
+  createDispatch,
+} from './events';
 
 const globalComponents = {};
 let curComponentNodeRef = null;
@@ -17,6 +23,10 @@ const createComponent = (component) => {
   componentNode.template = template;
   componentNode.component = component;
   componentNode._unsubsriptionEvents = [];
+  createOn(componentNode);
+  createEmit(componentNode);
+  createBroadcast(componentNode);
+  createDispatch(componentNode);
 
   return componentNode;
 };

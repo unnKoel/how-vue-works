@@ -99,6 +99,10 @@ test('test creating component', () => {
   expect(componentNode.components.child1).toBeInstanceOf(Function);
   expect(componentNode.components.child2).toBeInstanceOf(Function);
   expect(componentNode.storeValue).toBe('Happy beautiful raddit year!');
+  expect(componentNode.$on).toBeInstanceOf(Function);
+  expect(componentNode.$emit).toBeInstanceOf(Function);
+  expect(componentNode.$dispatch).toBeInstanceOf(Function);
+  expect(componentNode.$broadcast).toBeInstanceOf(Function);
 });
 
 test('test getting dynamic props', () => {
