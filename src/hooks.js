@@ -67,4 +67,19 @@ const useProps = (propsDeclaration = []) => {
   curComponentNodeRef._propsDeclaration = propsDeclaration;
 };
 
-export { useMethods, useEvents, useData, useComponents, useRef, useProps };
+const useEffect = (didMounted) => {
+  if (typeof didMounted !== 'function')
+    throw new TypeError('didMounted has to be a function');
+
+  curComponentNodeRef._didMounted = didMounted;
+};
+
+export {
+  useMethods,
+  useEvents,
+  useData,
+  useComponents,
+  useRef,
+  useProps,
+  useEffect,
+};

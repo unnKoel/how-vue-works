@@ -3,6 +3,7 @@ import Stack from './stack';
 import Queue from './queue';
 import { createComponent, filterPropsByDeclaration } from './components';
 import { assign } from './observe';
+import { executeLifeCycleDidMounted } from './lifecycle';
 
 let rootComponentNodeRef = null;
 const componentStack = Stack();
@@ -54,6 +55,9 @@ const render = (component, props = {}, container) => {
 
     rootComponentNodeRef = componentNode;
   }
+
+  componentNode.$el = rootRef;
+  executeLifeCycleDidMounted(componentNode);
 
   return { rootRef, componentNode };
 };

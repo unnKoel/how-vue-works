@@ -2,6 +2,7 @@ import { get } from 'lodash';
 import { parse } from './template-parser';
 import Stack from './stack';
 import Queue from './queue';
+// import { destoryComponent, destoryChildComponentTree } from './lifecycle';
 
 const getValueByPath = (data, path) => {
   if (typeof data === 'object') {
@@ -165,6 +166,7 @@ const VIfDirective = (
       nextSibling = vIfTemplateRef.nextSibling;
       parentNode = vIfTemplateRef.parentNode;
       vIfTemplateRef?.parentNode?.removeChild(vIfTemplateRef);
+      // destoryChildComponentTree(curComponentNodeRef);
     }
   };
 

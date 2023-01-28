@@ -23,6 +23,7 @@ const createComponent = (component) => {
   componentNode.template = template;
   componentNode.component = component;
   componentNode._unsubsriptionEvents = [];
+  componentNode.$el = null;
   createOn(componentNode);
   createEmit(componentNode);
   createBroadcast(componentNode);
