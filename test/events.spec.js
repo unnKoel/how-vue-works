@@ -5,6 +5,7 @@ import {
   createBroadcast,
   createDispatch,
 } from '../src/events';
+import LinkedList from '../src/linked-list';
 
 test('test create event `on` function as event register on component node', () => {
   const componentNode = {};
@@ -26,7 +27,9 @@ describe('test broadcase', () => {
   test('broadcast an event that has been enrolled repeatedly', () => {
     const componentNode = {};
     const childComponentNode = {};
-    componentNode._children = [childComponentNode];
+    componentNode._children = LinkedList();
+    childComponentNode._children = LinkedList();
+    componentNode._children.add(childComponentNode);
 
     createOn(componentNode);
     createBroadcast(componentNode);
@@ -52,8 +55,11 @@ describe('test broadcase', () => {
     const componentNode = {};
     const childComponentNode = {};
     const descendantComponentNode = {};
-    componentNode._children = [childComponentNode];
-    childComponentNode._children = [descendantComponentNode];
+    componentNode._children = LinkedList();
+    componentNode._children.add(childComponentNode);
+    childComponentNode._children = LinkedList();
+    childComponentNode._children.add(descendantComponentNode);
+    descendantComponentNode._children = LinkedList();
     createOn(componentNode);
     createBroadcast(componentNode);
     createOn(childComponentNode);
@@ -80,8 +86,11 @@ describe('test broadcase', () => {
     const componentNode = {};
     const childComponentNode = {};
     const descendantComponentNode = {};
-    componentNode._children = [childComponentNode];
-    childComponentNode._children = [descendantComponentNode];
+    componentNode._children = LinkedList();
+    componentNode._children.add(childComponentNode);
+    childComponentNode._children = LinkedList();
+    childComponentNode._children.add(descendantComponentNode);
+    descendantComponentNode._children = LinkedList();
     createOn(componentNode);
     createBroadcast(componentNode);
     createOn(childComponentNode);
@@ -202,7 +211,9 @@ describe('test emit', () => {
     const parentComponentNode = {};
     const childComponentNode = {};
     componentNode._parent = parentComponentNode;
-    componentNode._children = [childComponentNode];
+    componentNode._children = LinkedList();
+    componentNode._children.add(childComponentNode);
+    childComponentNode._children = LinkedList();
 
     createOn(componentNode);
     createEmit(componentNode);

@@ -130,11 +130,7 @@ const structureTree = (linkParentChild, htmlParseStack, tagEnd) => {
 
 const linkParentChildComponent = (parentComponentNode, componentNode) => {
   if (parentComponentNode) {
-    const { _children } = parentComponentNode;
-    if (!_children) {
-      parentComponentNode._children = [];
-    }
-    parentComponentNode._children.push(componentNode);
+    parentComponentNode._children.add(componentNode);
   }
 
   componentNode._parent = parentComponentNode;
@@ -339,6 +335,7 @@ export {
   abstractAttributes,
   abstractText,
   abstractTagEnd,
+  linkParentChildComponent,
   parse,
   DIRECTIVES,
 };

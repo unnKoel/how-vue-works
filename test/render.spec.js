@@ -415,7 +415,9 @@ test('render template with parent and child components', () => {
     '<div id="root"><h3>what do you want to search?</h3><div class="search-box"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div><p>search for whatever you prefer without any doubt</p></div>'
   );
   expect(rootComponentNodeRef.component).toBe(componentA);
-  expect(rootComponentNodeRef._children[0].component).toBe(componentB);
+  expect(rootComponentNodeRef._children.elementAt(0).component).toBe(
+    componentB
+  );
 });
 
 test('render template with parent and multiple child components', () => {
@@ -518,10 +520,16 @@ test('render template with parent and multiple child components', () => {
   );
   expect(rootComponentNodeRef.component).toBe(componentA);
   expect(componentStack.items).toHaveLength(1);
-  expect(rootComponentNodeRef._children).toHaveLength(3);
-  expect(rootComponentNodeRef._children[0].component).toBe(componentB);
-  expect(rootComponentNodeRef._children[1].component).toBe(componentC);
-  expect(rootComponentNodeRef._children[2].component).toBe(componentC);
+  expect(rootComponentNodeRef._children.sizeOf()).toBe(3);
+  expect(rootComponentNodeRef._children.elementAt(0).component).toBe(
+    componentB
+  );
+  expect(rootComponentNodeRef._children.elementAt(1).component).toBe(
+    componentC
+  );
+  expect(rootComponentNodeRef._children.elementAt(2).component).toBe(
+    componentC
+  );
 });
 
 test('render template with in-depth descendant components', () => {
@@ -622,11 +630,13 @@ test('render template with in-depth descendant components', () => {
 
   expect(rootComponentNodeRef.component).toBe(componentA);
   expect(componentStack.items).toHaveLength(1);
-  expect(rootComponentNodeRef._children).toHaveLength(1);
-  expect(rootComponentNodeRef._children[0].component).toBe(componentB);
-  expect(rootComponentNodeRef._children[0]._children[0].component).toBe(
-    componentC
+  expect(rootComponentNodeRef._children.sizeOf()).toBe(1);
+  expect(rootComponentNodeRef._children.elementAt(0).component).toBe(
+    componentB
   );
+  expect(
+    rootComponentNodeRef._children.elementAt(0)._children.elementAt(0).component
+  ).toBe(componentC);
 });
 
 test('render template with multiple components while data changes', () => {

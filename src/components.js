@@ -1,5 +1,6 @@
 import { VBindDirective } from './directives';
 import { DIRECTIVES } from './template-parser';
+import LinkedList from './linked-list';
 import { assign } from './observe';
 import { camelCase } from 'lodash';
 import {
@@ -23,7 +24,10 @@ const createComponent = (component) => {
   componentNode.template = template;
   componentNode.component = component;
   componentNode._unsubsriptionEvents = [];
+  componentNode.__parent = null;
+  componentNode._children = LinkedList();
   componentNode.$el = null;
+
   createOn(componentNode);
   createEmit(componentNode);
   createBroadcast(componentNode);

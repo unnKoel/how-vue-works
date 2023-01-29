@@ -19,11 +19,12 @@ const deconstruct = (componentNodeRef) => {
 
 const destoryComponent = (componentNodeRef) => {
   deconstruct(componentNodeRef);
-  // const = componentNodeRef._parent;
+  const parentComponentNodeRef = componentNodeRef._parent;
+  parentComponentNodeRef?._children.removeElement(componentNodeRef);
 };
 
 const destoryChildComponentTree = (componentNodeRef) => {
-  const { _children = [] } = componentNodeRef;
+  const { _children } = componentNodeRef;
   _children.forEach((child) => {
     destoryChildComponentTree(child);
     deconstruct(child);

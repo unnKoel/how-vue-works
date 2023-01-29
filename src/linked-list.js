@@ -63,6 +63,26 @@ const LinkedList = () => {
     size++;
   };
 
+  const elementAt = (index) => {
+    if (index < 0 || index > size)
+      throw new RangeError('Please enter a valid index.');
+
+    let curr;
+    curr = head;
+
+    if (index == 0) {
+      return head && head.element;
+    }
+
+    let it = 0;
+    while (it < index) {
+      it++;
+      curr = curr.next;
+    }
+
+    return curr.element;
+  };
+
   // removes an element from the specified location
   const removeFrom = (index) => {
     if (index < 0 || index >= size)
@@ -151,8 +171,8 @@ const LinkedList = () => {
       },
     };
   };
-
   return {
+    elementAt,
     add,
     insertAt,
     removeFrom,

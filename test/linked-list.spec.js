@@ -69,3 +69,15 @@ test('remove an element by a given index', () => {
   expect([...ll]).toEqual([10, 20, 30, 50]);
   expect(ll.isEmpty()).toBe(false);
 });
+
+test('access element with index', () => {
+  const ll = LinkedList();
+  ll.add(10);
+  ll.add(20);
+  ll.add(30);
+  ll.add(40);
+  ll.add(50);
+  expect(ll.elementAt(3)).toBe(40);
+  expect(ll.elementAt(0)).toBe(10);
+  expect(ll.elementAt(4)).toBe(50);
+});

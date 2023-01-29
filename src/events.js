@@ -45,7 +45,7 @@ const createDispatch = (componentNode) => {
 };
 
 const broadcase = (curComponentNode, event, args) => {
-  const { _children = [] } = curComponentNode;
+  const { _children } = curComponentNode;
 
   for (let child of _children) {
     const { _events = {} } = child;
