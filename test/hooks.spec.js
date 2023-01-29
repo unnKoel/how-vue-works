@@ -5,6 +5,7 @@ import {
   useData,
   useComponents,
   useRef,
+  useEffect,
 } from '../src/hooks';
 
 import {
@@ -112,4 +113,12 @@ test('test useComponents', () => {
     'c-a': ComponentA,
     'c-b': ComponentB,
   });
+});
+
+test('test useEffect', () => {
+  expect(() => useEffect(1)).toThrow(TypeError);
+
+  const mockEffectCallback = jest.fn();
+  useEffect(mockEffectCallback);
+  expect(curComponentNodeRef._didMounted).toBe(mockEffectCallback);
 });

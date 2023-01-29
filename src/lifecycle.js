@@ -12,17 +12,24 @@ const unsubsriptionEvents = (componentNodeRef) => {
   _unsubsriptionEvents.forEach((unsubsriptionEvent) => unsubsriptionEvent());
 };
 
-const destoryComponent = (componentNodeRef) => {
+const deconstruct = (componentNodeRef) => {
   unsubsriptionEvents(componentNodeRef);
   executeLifeCycleBeforeUnmounted(componentNodeRef);
+};
+
+const destoryComponent = (componentNodeRef) => {
+  deconstruct(componentNodeRef);
+  // const = componentNodeRef._parent;
 };
 
 const destoryChildComponentTree = (componentNodeRef) => {
   const { _children = [] } = componentNodeRef;
   _children.forEach((child) => {
     destoryChildComponentTree(child);
-    destoryComponent(child);
+    deconstruct(child);
   });
+
+  delete componentNodeRef._children;
 };
 
 export {
@@ -30,4 +37,5 @@ export {
   executeLifeCycleBeforeUnmounted,
   destoryComponent,
   destoryChildComponentTree,
+  unsubsriptionEvents,
 };
