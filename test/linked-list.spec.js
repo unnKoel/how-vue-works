@@ -1,50 +1,71 @@
 /* eslint-disable no-undef */
-test('', () => {});
+import LinkedList from '../src/linked-list';
 
-// var ll = new LinkedList();
+test('whether it is empty', () => {
+  const ll = LinkedList();
+  expect(ll.isEmpty()).toBe(true);
+});
 
-// // testing isEmpty on an empty list
-// // returns true
-// console.log(ll.isEmpty());
+test('add an element', () => {
+  const ll = LinkedList();
+  ll.add(10);
+  expect(ll.sizeOf()).toBe(1);
+  expect([...ll]).toEqual([10]);
+});
 
-// // adding element to the list
-// ll.add(10);
+test('add multiple elements', () => {
+  const ll = LinkedList();
+  ll.add(10);
+  ll.add(20);
+  ll.add(30);
+  ll.add(40);
+  ll.add(50);
+  expect(ll.sizeOf()).toBe(5);
+  expect([...ll]).toEqual([10, 20, 30, 40, 50]);
+});
 
-// // prints 10
-// ll.printList();
+test('remove an element', () => {
+  const ll = LinkedList();
+  ll.add(10);
+  ll.add(20);
+  ll.add(30);
+  ll.add(40);
+  ll.add(50);
+  ll.removeElement(30);
+  ll.removeElement(40);
+  expect([...ll]).toEqual([10, 20, 50]);
+});
 
-// // returns 1
-// console.log(ll.size_of_list());
+test('using indexOf to get the index of specified element', () => {
+  const ll = LinkedList();
+  ll.add(10);
+  ll.add(20);
+  ll.add(30);
+  ll.add(40);
+  ll.add(50);
+  const index = ll.indexOf(30);
+  expect(index).toBe(2);
+});
 
-// // adding more elements to the list
-// ll.add(20);
-// ll.add(30);
-// ll.add(40);
-// ll.add(50);
+test('insert an element into linkedList with a specified index', () => {
+  const ll = LinkedList();
+  ll.add(10);
+  ll.add(20);
+  ll.add(30);
+  ll.add(40);
+  ll.add(50);
+  ll.insertAt(60, 2);
+  expect([...ll]).toEqual([10, 20, 60, 30, 40, 50]);
+});
 
-// // returns 10 20 30 40 50
-// ll.printList();
-
-// // prints 50 from the list
-// console.log("is element removed ?" + ll.removeElement(50));
-
-// // prints 10 20 30 40
-// ll.printList();
-
-// // returns 3
-// console.log("Index of 40 " + ll.indexOf(40));
-
-// // insert 60 at second position
-// // ll contains 10 20 60 30 40
-// ll.insertAt(60, 2);
-
-// ll.printList();
-
-// // returns false
-// console.log("is List Empty ? " + ll.isEmpty());
-
-// // remove 3rd element from the list
-// console.log(ll.removeFrom(3));
-
-// // prints 10 20 60 40
-// ll.printList();
+test('remove an element by a given index', () => {
+  const ll = LinkedList();
+  ll.add(10);
+  ll.add(20);
+  ll.add(30);
+  ll.add(40);
+  ll.add(50);
+  ll.removeFrom(3);
+  expect([...ll]).toEqual([10, 20, 30, 50]);
+  expect(ll.isEmpty()).toBe(false);
+});
