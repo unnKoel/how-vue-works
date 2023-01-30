@@ -25,10 +25,10 @@ const destoryComponent = (componentNodeRef) => {
 
 const destoryChildComponentTree = (componentNodeRef) => {
   const { _children } = componentNodeRef;
-  _children.forEach((child) => {
+  for (let child of _children) {
     destoryChildComponentTree(child);
     deconstruct(child);
-  });
+  }
 
   delete componentNodeRef._children;
 };
