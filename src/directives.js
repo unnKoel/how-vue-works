@@ -2,7 +2,7 @@ import { get } from 'lodash';
 import { parse } from './template-parser';
 import Stack from './stack';
 import Queue from './queue';
-// import { destoryComponent, destoryChildComponentTree } from './lifecycle';
+import { destoryComponent, destoryChildComponentTree } from './lifecycle';
 
 const getValueByPath = (data, path) => {
   if (typeof data === 'object') {
@@ -166,7 +166,7 @@ const VIfDirective = (
       nextSibling = vIfTemplateRef.nextSibling;
       parentNode = vIfTemplateRef.parentNode;
       vIfTemplateRef?.parentNode?.removeChild(vIfTemplateRef);
-      // destoryChildComponentTree(curComponentNodeRef);
+      destoryChildComponentTree(curComponentNodeRef);
     }
   };
 
@@ -302,6 +302,7 @@ const VForDirective = (
       const { vForTemplateRef, alive } = vForTemplateParsedArtifactMemory[i];
       if (!alive) {
         vForTemplateRef.parentNode.removeChild(vForTemplateRef);
+        destoryComponent(curComponentNodeRef._children.elementAt(i));
         vForTemplateParsedArtifactMemory.splice(i, 1);
       } else {
         vForTemplateParsedArtifactMemory[i].alive = false;

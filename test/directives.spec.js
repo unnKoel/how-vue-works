@@ -9,6 +9,7 @@ import {
   VForDirective,
   vOnDirective,
 } from '../src/directives';
+import LinkedList from '../src/linked-list';
 import observe from '../src/observe';
 import Stack from '../src/stack';
 
@@ -196,7 +197,15 @@ describe('v-if directive', () => {
     });
 
     const stack = Stack();
-    const vIfDirective = VIfDirective(stack, [], vIfRootNode, attributes, data);
+    const vIfDirective = VIfDirective(
+      stack,
+      [],
+      vIfRootNode,
+      attributes,
+      data,
+      {},
+      { _children: LinkedList() }
+    );
 
     const template = `<span>hello welcome to {{directive}}</span>`;
     const label = { tag: 'div', vIf: true };
@@ -294,13 +303,27 @@ describe('v-for directive', () => {
 
     const label = { tag: 'div', vFor: true };
     const stack = Stack();
+
+    const children = LinkedList();
+    const componentNode = { _children: children };
+    children.add({ _parent: componentNode });
+    children.add({ _parent: componentNode });
+    children.add({ _parent: componentNode });
+    children.add({ _parent: componentNode });
+    children.add({ _parent: componentNode });
+    children.add({ _parent: componentNode });
+    children.add({ _parent: componentNode });
+    children.add({ _parent: componentNode });
+    children.add({ _parent: componentNode });
     const vForDirective = VForDirective(
       stack,
       [],
       vForRootNode,
       attributes,
       data,
-      label
+      label,
+      {},
+      componentNode
     );
 
     const template = `<span>Hi,{{item.name}}. your character is {{item.character}}</span>`;
@@ -350,13 +373,24 @@ describe('v-for directive', () => {
 
     const label = { tag: 'div', vFor: true };
     const stack = Stack();
+    const children = LinkedList();
+    const componentNode = { _children: children };
+    children.add({ _parent: componentNode });
+    children.add({ _parent: componentNode });
+    children.add({ _parent: componentNode });
+    children.add({ _parent: componentNode });
+    children.add({ _parent: componentNode });
+    children.add({ _parent: componentNode });
+
     const vForDirective = VForDirective(
       stack,
       [],
       vForRootNode,
       attributes,
       data,
-      label
+      label,
+      {},
+      componentNode
     );
 
     const template = `<span>Hi,{{item.name}}. your character is {{item.character}}</span>`;

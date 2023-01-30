@@ -1,3 +1,5 @@
+import LinkedList from './linked-list';
+
 const executeLifeCycleDidMounted = (componentNodeRef) => {
   componentNodeRef._beforeUnmounted =
     componentNodeRef._didMounted && componentNodeRef._didMounted();
@@ -23,14 +25,16 @@ const destoryComponent = (componentNodeRef) => {
   parentComponentNodeRef?._children.removeElement(componentNodeRef);
 };
 
-const destoryChildComponentTree = (componentNodeRef) => {
+const destoryChildComponentTree = (componentNodeRef, deep = 0) => {
   const { _children } = componentNodeRef;
   for (let child of _children) {
-    destoryChildComponentTree(child);
+    destoryChildComponentTree(child, ++deep);
     deconstruct(child);
   }
 
-  delete componentNodeRef._children;
+  if (--deep === 0) {
+    componentNodeRef._children = LinkedList();
+  }
 };
 
 export {

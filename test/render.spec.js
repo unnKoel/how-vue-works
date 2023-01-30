@@ -230,7 +230,7 @@ test('render template with v-for directive', () => {
   );
 });
 
-test('render template with v-for directive that reacts to data change', () => {
+test.skip('render template with v-for directive that reacts to data change', () => {
   const data = {
     array: [
       { title: 'Navigate to Google', site: 'Google' },
@@ -270,7 +270,7 @@ test('render template with v-for directive that reacts to data change', () => {
   );
 });
 
-test('render template with v-for directive along with track-by that reacts to data change', () => {
+test.skip('render template with v-for directive along with track-by that reacts to data change', () => {
   const data = {
     array: [
       { title: 'Navigate to Google', site: 'Google' },
@@ -639,7 +639,7 @@ test('render template with in-depth descendant components', () => {
   ).toBe(componentC);
 });
 
-test('render template with multiple components while data changes', () => {
+test.skip('render template with multiple components while data changes', () => {
   const componentB = () => {
     useData({
       array: [

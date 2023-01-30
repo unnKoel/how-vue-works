@@ -87,9 +87,9 @@ test('test destory the tree of child Component', () => {
   expect(childComponentNode._beforeUnmounted.mock.calls).toHaveLength(1);
   expect(descendantCompnentNode._beforeUnmounted.mock.calls).toHaveLength(1);
   expect(lastCompnentNode._beforeUnmounted.mock.calls).toHaveLength(1);
-  expect(parentComponentNode._children).toBe(undefined);
-  expect(childComponentNode._children).toBe(undefined);
-  expect(descendantCompnentNode._children).toBe(undefined);
+  expect(parentComponentNode._children.sizeOf()).toBe(0);
+  expect(childComponentNode._children.sizeOf()).toBe(1);
+  expect(descendantCompnentNode._children.sizeOf()).toBe(1);
 
   expect(destoryOrder).toEqual([3, 2, 1]);
 });
