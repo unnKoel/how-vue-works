@@ -2,7 +2,8 @@ import { get } from 'lodash';
 import { parse } from './template-parser';
 import Stack from './stack';
 import Queue from './queue';
-import { destoryComponent, destoryChildComponentTree } from './lifecycle';
+import { createComponent } from './components';
+import { destoryComponent } from './lifecycle';
 
 const getValueByPath = (data, path) => {
   if (typeof data === 'object') {
@@ -104,7 +105,6 @@ VBindDirective.getVBindAttributes = (attributes) =>
  * @todo the value of `v-if` should be evaluated as an expression.
  */
 const VIfDirective = (
-  componentStack,
   unsubsriptionEvents,
   node,
   attributes = {},
@@ -116,6 +116,8 @@ const VIfDirective = (
   let nextSibling = null;
   let parentNode = null;
   const vIfTemplateDirectiveQueue = Queue();
+  // put an mimic component node on top of stack to collect all components within `v-if` template.
+  let rootComponentOfVIf = createComponent(() => {});
 
   const vIfExpression = attributes['v-if'];
 
@@ -125,11 +127,16 @@ const VIfDirective = (
 
   const parseChildTemplate = (childTemplate, label) => {
     const vIfTemplateParseStack = Stack();
+    const componentStackWithinVIf = Stack();
+
+    componentStackWithinVIf.push(curComponentNodeRef);
+    componentStackWithinVIf.push(rootComponentOfVIf);
+
     vIfTemplateParseStack.push({ element: node, label });
     const { rootRef, index } = parse(
       childTemplate,
       vIfTemplateParseStack,
-      componentStack,
+      componentStackWithinVIf,
       vIfTemplateDirectiveQueue,
       unsubsriptionEvents,
       data,
@@ -166,7 +173,7 @@ const VIfDirective = (
       nextSibling = vIfTemplateRef.nextSibling;
       parentNode = vIfTemplateRef.parentNode;
       vIfTemplateRef?.parentNode?.removeChild(vIfTemplateRef);
-      destoryChildComponentTree(curComponentNodeRef);
+      destoryComponent(rootComponentOfVIf);
     }
   };
 
@@ -189,7 +196,6 @@ const VIfDirective = (
  * as a form like (item, index).
  */
 const VForDirective = (
-  componentStack,
   unsubsriptionEvents,
   node,
   attributes = {},
@@ -205,6 +211,8 @@ const VForDirective = (
   let nextSibling = null;
   let trackBy = '';
   const vForTemplateParsedArtifactMemory = [];
+  // put an mimic component node on top of stack to collect all components within `v-for` template.
+  const rootComponentOfVFor = createComponent(() => {});
 
   const isVFor = () => {
     return !!attributes['v-for'];
@@ -228,7 +236,13 @@ const VForDirective = (
 
   const parseChildTemplate = (childTemplate) => {
     vForTemplate = childTemplate;
-    const { index } = _parseChildTemplate(childTemplate, [], label, {});
+    const { index } = _parseChildTemplate(
+      childTemplate,
+      [],
+      label,
+      {},
+      Stack()
+    );
 
     return { vForTemplateEndIndex: index, vForPlaceholderRef: node };
   };
@@ -237,7 +251,8 @@ const VForDirective = (
     childTemplate,
     unsubsriptionEvents,
     label,
-    arrayItem
+    arrayItem,
+    componentStackWithinVFor
   ) => {
     const vForTemplateParseStack = Stack();
     const vForTemplateDirectiveQueue = Queue();
@@ -246,7 +261,7 @@ const VForDirective = (
     const { rootRef, index } = parse(
       childTemplate,
       vForTemplateParseStack,
-      componentStack,
+      componentStackWithinVFor,
       vForTemplateDirectiveQueue,
       unsubsriptionEvents,
       arrayItem,
@@ -302,7 +317,7 @@ const VForDirective = (
       const { vForTemplateRef, alive } = vForTemplateParsedArtifactMemory[i];
       if (!alive) {
         vForTemplateRef.parentNode.removeChild(vForTemplateRef);
-        destoryComponent(curComponentNodeRef._children.elementAt(i));
+        destoryComponent(rootComponentOfVFor._children.elementAt(i));
         vForTemplateParsedArtifactMemory.splice(i, 1);
       } else {
         vForTemplateParsedArtifactMemory[i].alive = false;
@@ -331,11 +346,15 @@ const VForDirective = (
 
       item = _prependItemName(item);
       if (!vForTemplateParsedArtifact) {
+        const componentStackWithinVFor = Stack();
+        componentStackWithinVFor.push(rootComponentOfVFor);
+
         vForTemplateParsedArtifact = _parseChildTemplate(
           vForTemplate,
           unsubsriptionEvents,
           label,
-          item
+          item,
+          componentStackWithinVFor
         );
       }
 
@@ -355,6 +374,7 @@ const VForDirective = (
         });
       }
     }
+    curComponentNodeRef._children.add(rootComponentOfVFor);
     _clear();
   };
 

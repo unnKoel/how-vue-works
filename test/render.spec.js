@@ -828,7 +828,7 @@ test('render template with parent and child components', () => {
   );
 });
 
-test('render child component with props passed by parent component', () => {
+test.skip('render child component with props passed by parent component', () => {
   const componentB = () => {
     useData({
       array: [

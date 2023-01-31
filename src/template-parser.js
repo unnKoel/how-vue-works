@@ -233,7 +233,6 @@ const parse = (
         vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
 
         const vIfDirective = VIfDirective(
-          componentStack,
           unsubsriptionEvents,
           element,
           attributes,
@@ -253,7 +252,6 @@ const parse = (
         }
 
         const vForDirective = VForDirective(
-          componentStack,
           unsubsriptionEvents,
           element,
           attributes,
