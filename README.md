@@ -58,9 +58,9 @@ offer later...
   - ✅ complete basic implementation of hooks involving `useData`, `useMethod`, `useEvents`, `useComponents` as a base.
   - ✅ implementation of props.
   - ✅ pub-sub pattern implementation working on communication between components.
-  - lifecycle functions of component.
-  - when unmount components, trigger the unsubscriptive callbacks to avoid risk of memory leak.
-  - when unmount components, trigger all descendant components to exectute unmount lifecycle function.
+  - ✅ lifecycle functions of component.
+  - ✅ when unmount components, trigger the unsubscriptive callbacks to avoid risk of memory leak.
+  - ✅ when unmount components, trigger all descendant components to exectute unmount lifecycle function.
 
 - slot
 
