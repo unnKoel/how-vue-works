@@ -17,7 +17,7 @@ const registerComponent = (tag, component) => {
   globalComponents[tag] = component;
 };
 
-const createComponent = (component) => {
+const createComponent = (component = () => {}) => {
   const componentNode = Object.create(Object.prototype);
   curComponentNodeRef = componentNode;
   const template = component();

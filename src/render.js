@@ -13,14 +13,7 @@ const render = (component, props = {}, container) => {
   componentStack.push(componentNode);
   let { dynamicProps = {}, staticProps = {} } = props;
 
-  const {
-    template = '',
-    data = {},
-    methods = {},
-    components = {},
-    _unsubsriptionEvents = [],
-    _propsDeclaration = {},
-  } = componentNode;
+  const { template = '', data = {}, _propsDeclaration = {} } = componentNode;
 
   dynamicProps = filterPropsByDeclaration(dynamicProps, _propsDeclaration);
   staticProps = filterPropsByDeclaration(staticProps, _propsDeclaration);
@@ -37,10 +30,8 @@ const render = (component, props = {}, container) => {
     htmlParseStack,
     componentStack,
     directiveQueue,
-    _unsubsriptionEvents,
     combinedDataAndProps,
-    methods,
-    components
+    componentNode
   );
 
   directiveQueue

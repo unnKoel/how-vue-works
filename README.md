@@ -135,4 +135,5 @@ take notes of questions I am encountering and thinking during this progarm.
   By this way of hooks, for developer they are able to write function only, this programming form is exactly what I prefer.
 
 - how to implement slots?
+
   Before render child component found in parent template, wrap up the block inside the scope of child component marks and compile it as a child template. then take the result of compilation as a parameter to render child component. In that process, using the compilation result of child template to replace the position `slot` resides.

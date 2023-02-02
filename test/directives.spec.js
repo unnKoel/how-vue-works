@@ -9,9 +9,8 @@ import {
   VForDirective,
   vOnDirective,
 } from '../src/directives';
-import LinkedList from '../src/linked-list';
 import observe from '../src/observe';
-import Stack from '../src/stack';
+import { createComponent } from '../src/components';
 
 describe('mustache directive', () => {
   test("check if it's a mustache braces", () => {
@@ -135,22 +134,14 @@ describe('v-bind directive', () => {
   });
 });
 
-describe.skip('v-if directive', () => {
+describe('v-if directive', () => {
   test("check if it's a v-if directive", () => {
     const vIfRootNode = document.createElement('div');
     const attributes = {
       'v-if': 'show',
     };
     const data = observe({ show: false });
-    const stack = Stack();
-    const vIfDirective = VIfDirective(
-      stack,
-      [],
-      vIfRootNode,
-      attributes,
-      data,
-      {}
-    );
+    const vIfDirective = VIfDirective(vIfRootNode, attributes, data, {});
     expect(vIfDirective.isVIf()).toBe(true);
   });
 
@@ -168,8 +159,13 @@ describe.skip('v-if directive', () => {
       directive: 'v-if',
     });
 
-    const stack = Stack();
-    const vIfDirective = VIfDirective(stack, [], vIfRootNode, attributes, data);
+    const componentNode = createComponent(() => {});
+    const vIfDirective = VIfDirective(
+      vIfRootNode,
+      attributes,
+      data,
+      componentNode
+    );
 
     const template = `<span>hello welcome to {{directive}}</span>`;
     const label = { tag: 'div', vIf: true };
@@ -196,15 +192,12 @@ describe.skip('v-if directive', () => {
       directive: 'v-if',
     });
 
-    const stack = Stack();
+    const componentNode = createComponent(() => {});
     const vIfDirective = VIfDirective(
-      stack,
-      [],
       vIfRootNode,
       attributes,
       data,
-      {},
-      { _children: LinkedList() }
+      componentNode
     );
 
     const template = `<span>hello welcome to {{directive}}</span>`;
@@ -219,14 +212,14 @@ describe.skip('v-if directive', () => {
     data.show = false;
     expect(parentNode.innerHTML).toBe('');
     data.show = true;
-    (data.directive = 'vue-if'),
-      expect(parentNode.innerHTML).toBe(
-        '<div class="a-is"><span>hello welcome to vue-if</span></div>'
-      );
+    data.directive = 'vue-if';
+    expect(parentNode.innerHTML).toBe(
+      '<div class="a-is"><span>hello welcome to vue-if</span></div>'
+    );
   });
 });
 
-describe.skip('v-for directive', () => {
+describe('v-for directive', () => {
   test("check if it's a v-for directive", () => {
     const vForRootNode = document.createElement('div');
     const attributes = {
@@ -234,14 +227,7 @@ describe.skip('v-for directive', () => {
     };
 
     const data = observe([]);
-    const stack = Stack();
-    const vForDirective = VForDirective(
-      stack,
-      [],
-      vForRootNode,
-      attributes,
-      data
-    );
+    const vForDirective = VForDirective(vForRootNode, attributes, data);
     expect(vForDirective.isVFor()).toBe(true);
   });
 
@@ -263,14 +249,13 @@ describe.skip('v-for directive', () => {
     });
 
     const label = { tag: 'div', vFor: true };
-    const stack = Stack();
+    const componentNodeRef = createComponent(() => {});
     const vForDirective = VForDirective(
-      stack,
-      [],
       vForRootNode,
       attributes,
       data,
-      label
+      label,
+      componentNodeRef
     );
 
     const template = `<span>Hi,{{item.name}}. your character is {{item.character}}</span>`;
@@ -302,27 +287,13 @@ describe.skip('v-for directive', () => {
     });
 
     const label = { tag: 'div', vFor: true };
-    const stack = Stack();
 
-    const children = LinkedList();
-    const componentNode = { _children: children };
-    children.add({ _parent: componentNode });
-    children.add({ _parent: componentNode });
-    children.add({ _parent: componentNode });
-    children.add({ _parent: componentNode });
-    children.add({ _parent: componentNode });
-    children.add({ _parent: componentNode });
-    children.add({ _parent: componentNode });
-    children.add({ _parent: componentNode });
-    children.add({ _parent: componentNode });
+    const componentNode = createComponent(() => {});
     const vForDirective = VForDirective(
-      stack,
-      [],
       vForRootNode,
       attributes,
       data,
       label,
-      {},
       componentNode
     );
 
@@ -372,24 +343,13 @@ describe.skip('v-for directive', () => {
     });
 
     const label = { tag: 'div', vFor: true };
-    const stack = Stack();
-    const children = LinkedList();
-    const componentNode = { _children: children };
-    children.add({ _parent: componentNode });
-    children.add({ _parent: componentNode });
-    children.add({ _parent: componentNode });
-    children.add({ _parent: componentNode });
-    children.add({ _parent: componentNode });
-    children.add({ _parent: componentNode });
+    const componentNode = createComponent();
 
     const vForDirective = VForDirective(
-      stack,
-      [],
       vForRootNode,
       attributes,
       data,
       label,
-      {},
       componentNode
     );
 

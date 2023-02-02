@@ -13,7 +13,6 @@ import {
 import { getComponent, getDynamicProps, getStaticProps } from './components';
 import render from './render';
 import { HtmlSytaxError } from './errors';
-import { curComponentNodeRef } from './components';
 
 const DIRECTIVES = ['v-bind', 'v-if', 'v-for', 'v-on', 'v-model', 'track-by'];
 
@@ -184,11 +183,15 @@ const parse = (
   htmlParseStack,
   componentStack,
   directiveQueue,
-  unsubsriptionEvents,
   data = {},
-  methods = {},
-  localEnrolledIncomponents = {}
+  curComponentNodeRef = {}
 ) => {
+  const {
+    components: localEnrolledIncomponents = {},
+    methods = {},
+    _unsubsriptionEvents: unsubsriptionEvents = [],
+  } = curComponentNodeRef;
+
   template = template.replace(/\n/g, '');
   let index = -1;
   let rootRef = htmlParseStack.peek()?.element ?? null;
@@ -233,11 +236,9 @@ const parse = (
         vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
 
         const vIfDirective = VIfDirective(
-          unsubsriptionEvents,
           element,
           attributes,
           data,
-          methods,
           curComponentNodeRef
         );
         if (vIfDirective.isVIf()) {
@@ -252,7 +253,6 @@ const parse = (
         }
 
         const vForDirective = VForDirective(
-          unsubsriptionEvents,
           element,
           attributes,
           data,
@@ -260,7 +260,6 @@ const parse = (
             tag,
             vFor: true,
           },
-          methods,
           curComponentNodeRef
         );
         if (vForDirective.isVFor()) {
