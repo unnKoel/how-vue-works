@@ -162,10 +162,10 @@ const VIfDirective = (node, attributes = {}, data, curComponentNodeRef) => {
         .getItems()
         .forEach((directive) => directive.handle(data));
     } else {
+      destoryComponent(rootComponentOfVIf);
       nextSibling = vIfTemplateRef.nextSibling;
       parentNode = vIfTemplateRef.parentNode;
       vIfTemplateRef?.parentNode?.removeChild(vIfTemplateRef);
-      destoryComponent(rootComponentOfVIf);
     }
   };
 
@@ -327,12 +327,11 @@ const VForDirective = (
     for (let i = length - 1; i >= 0; i--) {
       const { vForTemplateRef, alive } = vForTemplateParsedArtifactMemory[i];
       if (!alive) {
-        vForTemplateRef.parentNode?.removeChild?.(vForTemplateRef);
-        vForTemplateParsedArtifactMemory.splice(i, 1);
-
         if (rootComponentOfVFor._children.sizeOf() > 0) {
           destoryComponent(rootComponentOfVFor._children.elementAt(i));
         }
+        vForTemplateRef.parentNode?.removeChild?.(vForTemplateRef);
+        vForTemplateParsedArtifactMemory.splice(i, 1);
       } else {
         vForTemplateParsedArtifactMemory[i].alive = false;
       }
