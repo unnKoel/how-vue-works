@@ -4,7 +4,13 @@
 
 /* eslint-disable no-undef */
 import render, { componentStack, rootComponentNodeRef } from '../src/render';
-import { useComponents, useData, useMethods, useProps } from '../src/hooks';
+import {
+  useComponents,
+  useData,
+  useMethods,
+  useProps,
+  useRef,
+} from '../src/hooks';
 
 beforeEach(() => {
   document.body.innerHTML = '';
@@ -885,4 +891,103 @@ test('render child component with props passed by parent component', () => {
       .replace(/>\s+|\s+</g, (m) => m.trim())
       .replace(/\n/g, '')
   );
+});
+
+test('propogate events between parent and child components', () => {
+  const componentB = () => {
+    const ref = useRef();
+
+    useData({
+      array: [
+        { title: 'Navigate to Google', site: 'Google' },
+        { title: 'Navigate to Microsoft', site: 'Microsoft' },
+        { title: 'Navigate to Apple', site: 'Apple' },
+      ],
+      something: 'Vue',
+      text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
+    });
+
+    useProps(['descriptionDetail', 'static']);
+
+    useMethods({
+      onClick: jest.fn(() => {
+        ref.$emit('message', ref.data.something);
+      }),
+    });
+
+    return `
+      <div class="search-box" v-on:click="onClick">
+        <span>Search for {{something}}</span>
+        <span>{{static}}</span>
+        <div v-for="item in array" track-by="site">
+          <a href="www.google.com" v-bind:title="item.title" v-on:click="onClick">Navigate to {{item.site}}</a>
+        </div>
+        <p>{{text}}</p>
+        <p>{{descriptionDetail}}</p>
+      </div>`;
+  };
+
+  const componentA = () => {
+    useData({
+      title: 'what do you want to search?',
+      description: 'search for whatever you prefer without any doubt',
+    });
+
+    useComponents({
+      'component-b': componentB,
+    });
+
+    return `
+      <div id="root">
+        <h3>{{title}}</h3>
+        <component-b static="hi" v-bind:description-detail="description"></component-b>
+        <p>{{description}}</p>
+      </div>
+    `;
+  };
+
+  const mockEventReceive = jest.fn((message) => message);
+
+  const componentC = () => {
+    const ref = useRef();
+
+    ref.$on('message', mockEventReceive);
+
+    useComponents({
+      'component-a': componentA,
+    });
+
+    return `
+      <div class="c">
+        <component-a></component-a>
+      </div>
+    `;
+  };
+
+  const { rootRef } = render(componentC, {}, document.body);
+  expect(document.body.innerHTML).toBe(
+    `
+  <div class="c">  
+    <div id="root">
+      <h3>what do you want to search?</h3>
+      <div class="search-box">
+        <span>Search for Vue</span>
+        <span>hi</span>
+        <div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div>
+        <div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div>
+        <div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div>
+        <p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p>
+        <p>search for whatever you prefer without any doubt</p>
+      </div>
+      <p>search for whatever you prefer without any doubt</p>
+    </div>
+  </div>  
+  `
+      .replace(/>\s+|\s+</g, (m) => m.trim())
+      .replace(/\n/g, '')
+  );
+
+  rootRef.querySelector('.search-box').dispatchEvent(new Event('click'));
+  expect(mockEventReceive).toHaveBeenCalledTimes(1);
+  expect(mockEventReceive.mock.results[0].value).toBe('Vue');
 });

@@ -20,6 +20,11 @@ const registerComponent = (tag, component) => {
 const createComponent = (component = () => {}) => {
   const componentNode = Object.create(Object.prototype);
   curComponentNodeRef = componentNode;
+  createOn(componentNode);
+  createEmit(componentNode);
+  createBroadcast(componentNode);
+  createDispatch(componentNode);
+
   const template = component();
   componentNode.template = template;
   componentNode.component = component;
@@ -27,11 +32,6 @@ const createComponent = (component = () => {}) => {
   componentNode.__parent = null;
   componentNode._children = LinkedList();
   componentNode.$el = null;
-
-  createOn(componentNode);
-  createEmit(componentNode);
-  createBroadcast(componentNode);
-  createDispatch(componentNode);
 
   return componentNode;
 };

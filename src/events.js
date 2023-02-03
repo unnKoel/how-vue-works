@@ -46,16 +46,17 @@ const createDispatch = (componentNode) => {
 
 const broadcase = (curComponentNode, event, args) => {
   const { _children } = curComponentNode;
+  if (_children) {
+    for (let child of _children) {
+      const { _events = {} } = child;
+      const eventListeners = _events[event] ?? [];
+      for (let eventListener of eventListeners) {
+        const returnedValue = eventListener(...args);
+        if (returnedValue) return;
+      }
 
-  for (let child of _children) {
-    const { _events = {} } = child;
-    const eventListeners = _events[event] ?? [];
-    for (let eventListener of eventListeners) {
-      const returnedValue = eventListener(...args);
-      if (returnedValue) return;
+      broadcase(child, event, args);
     }
-
-    broadcase(child, event, args);
   }
 };
 
