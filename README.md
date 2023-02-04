@@ -61,6 +61,11 @@ offer later...
   - ✅ lifecycle functions of component.
   - ✅ when unmount components, trigger the unsubscriptive callbacks to avoid risk of memory leak.
   - ✅ when unmount components, trigger all descendant components to exectute unmount lifecycle function.
+  - tests
+    - ✅ testing on propogation of events happends in component tree.
+    - ✅ testing to validate event trigger.
+    - unsubscribe dom events.
+    - destruture components sub-tree and unmount lifecycle executes.
 
 - slot
 
