@@ -410,7 +410,12 @@ const VForDirective = (
  * - use inline js statement instead of binding directly to a method name.
  * - involve event midifiers.
  */
-const vOnDirective = (node, attributes = {}, methods = {}) => {
+const vOnDirective = (
+  node,
+  attributes = {},
+  isComponent = false,
+  curComponentNodeRef
+) => {
   const vonEvents = Object.entries(attributes).reduce(
     (acc, [attributeName, methodStatement]) => {
       const attributeNameMatch = attributeName.match(/^v-on\s*:\s*(\w+)/);
@@ -429,14 +434,23 @@ const vOnDirective = (node, attributes = {}, methods = {}) => {
   };
 
   if (isVon()) {
-    return vonEvents.map(({ eventType, methodStatement }) => {
-      const listener = methods[methodStatement];
-      if (typeof listener === 'function') {
-        node.addEventListener(eventType, listener);
-        return () => node.removeEventListener(eventType, listener);
-      }
+    if (!isComponent) {
+      return vonEvents.map(({ eventType, methodStatement }) => {
+        const listener = curComponentNodeRef?.methods?.[methodStatement];
+        if (typeof listener === 'function') {
+          node.addEventListener(eventType, listener);
+          return () => node.removeEventListener(eventType, listener);
+        }
 
-      return () => {};
+        return () => {};
+      });
+    }
+
+    vonEvents.forEach(({ eventType, methodStatement }) => {
+      const listener = curComponentNodeRef?.events?.[methodStatement];
+      if (typeof listener === 'function') {
+        curComponentNodeRef.$on(eventType, listener);
+      }
     });
   }
 

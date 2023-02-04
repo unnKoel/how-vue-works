@@ -10,6 +10,8 @@ import {
   createDispatch,
 } from './events';
 
+const DIRECTIVES_SUPPORTED = ['v-on'];
+
 const globalComponents = {};
 let curComponentNodeRef = null;
 
@@ -25,13 +27,19 @@ const createComponent = (component = () => {}) => {
   createBroadcast(componentNode);
   createDispatch(componentNode);
 
-  const template = component();
-  componentNode.template = template;
   componentNode.component = component;
   componentNode._unsubsriptionEvents = [];
   componentNode.__parent = null;
   componentNode._children = LinkedList();
   componentNode.$el = null;
+  componentNode.data = {};
+  componentNode.methods = {};
+  componentNode.events = {};
+  componentNode.components = {};
+  componentNode._propsDeclaration = [];
+
+  const template = component();
+  componentNode.template = template;
 
   return componentNode;
 };
@@ -106,6 +114,21 @@ const filterPropsByDeclaration = (props, declaration) => {
   return filteredProps;
 };
 
+const filterDirectiveSupported = (attributes) => {
+  const directiveSupported = {};
+  for (let attrName in attributes) {
+    if (
+      DIRECTIVES_SUPPORTED.some((directive) =>
+        new RegExp(directive).test(attrName)
+      )
+    ) {
+      directiveSupported[attrName] = attributes[attrName];
+    }
+  }
+
+  return directiveSupported;
+};
+
 export {
   curComponentNodeRef,
   getComponent,
@@ -114,4 +137,5 @@ export {
   getDynamicProps,
   getStaticProps,
   filterPropsByDeclaration,
+  filterDirectiveSupported,
 };

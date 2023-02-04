@@ -11,6 +11,8 @@ import {
 } from '../src/directives';
 import observe from '../src/observe';
 import { createComponent } from '../src/components';
+import { useEvents } from '../src/hooks';
+import { linkParentChildComponent } from '../src/template-parser';
 
 describe('mustache directive', () => {
   test("check if it's a mustache braces", () => {
@@ -435,8 +437,37 @@ describe('v-on directive', () => {
       'v-on:click': 'onClick',
     };
 
-    const unsubscriptions = vOnDirective(targetNode, attributes, methods);
+    const unsubscriptions = vOnDirective(targetNode, attributes, false, {
+      methods,
+    });
     expect(targetNode.addEventListener.mock.calls).toHaveLength(1);
     expect(unsubscriptions).toHaveLength(1);
+  });
+
+  test('event binding on element when v-on decorates on component', () => {
+    const targetNode = document.createElement('div');
+    const mockEventListener = jest.fn((event) => event);
+    const parentComponent = createComponent(() => {
+      useEvents({
+        onClick: mockEventListener,
+      });
+    });
+
+    const childComponentNode = createComponent();
+    linkParentChildComponent(parentComponent, childComponentNode);
+
+    const attributes = {
+      'v-on:click': 'onClick',
+    };
+
+    const unsubscriptions = vOnDirective(
+      targetNode,
+      attributes,
+      true,
+      parentComponent
+    );
+    childComponentNode.$emit('click');
+    expect(mockEventListener.mock.calls).toHaveLength(1);
+    expect(unsubscriptions).toHaveLength(0);
   });
 });

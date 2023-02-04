@@ -10,7 +10,12 @@ import {
   vOnDirective,
 } from './directives';
 
-import { getComponent, getDynamicProps, getStaticProps } from './components';
+import {
+  getComponent,
+  getDynamicProps,
+  getStaticProps,
+  filterDirectiveSupported,
+} from './components';
 import render from './render';
 import { HtmlSytaxError } from './errors';
 
@@ -188,7 +193,6 @@ const parse = (
 ) => {
   const {
     components: localEnrolledIncomponents = {},
-    methods = {},
     _unsubsriptionEvents: unsubsriptionEvents = [],
   } = curComponentNodeRef;
 
@@ -222,62 +226,64 @@ const parse = (
           };
           const { rootRef } = render(component, allProps);
           element = rootRef;
-          attributes = {};
+          attributes = filterDirectiveSupported(attributes);
         } else {
           element = createElement({ tag, attributes });
         }
 
-        const vBindDirective = VBindDirective(
-          element,
-          attributes,
-          data,
-          curComponentNodeRef
-        );
-        vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
+        if (Object.keys(attributes).length) {
+          const vBindDirective = VBindDirective(
+            element,
+            attributes,
+            data,
+            curComponentNodeRef
+          );
+          vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
 
-        const vIfDirective = VIfDirective(
-          element,
-          attributes,
-          data,
-          curComponentNodeRef
-        );
-        if (vIfDirective.isVIf()) {
-          const { vIfTemplateEndIndex, vIfTemplateRef } =
-            vIfDirective.parseChildTemplate(template.substring(++index), {
+          const vIfDirective = VIfDirective(
+            element,
+            attributes,
+            data,
+            curComponentNodeRef
+          );
+          if (vIfDirective.isVIf()) {
+            const { vIfTemplateEndIndex, vIfTemplateRef } =
+              vIfDirective.parseChildTemplate(template.substring(++index), {
+                tag,
+                vIf: true,
+              });
+            directiveQueue.enqueue(vIfDirective);
+            index += vIfTemplateEndIndex;
+            element = vIfTemplateRef;
+          }
+
+          const vForDirective = VForDirective(
+            element,
+            attributes,
+            data,
+            {
               tag,
-              vIf: true,
-            });
-          directiveQueue.enqueue(vIfDirective);
-          index += vIfTemplateEndIndex;
-          element = vIfTemplateRef;
-        }
+              vFor: true,
+            },
+            curComponentNodeRef
+          );
+          if (vForDirective.isVFor()) {
+            const { vForTemplateEndIndex, vForPlaceholderRef } =
+              vForDirective.parseChildTemplate(template.substring(++index));
+            directiveQueue.enqueue(vForDirective);
+            index += vForTemplateEndIndex;
+            element = vForPlaceholderRef;
+          }
 
-        const vForDirective = VForDirective(
-          element,
-          attributes,
-          data,
-          {
-            tag,
-            vFor: true,
-          },
-          curComponentNodeRef
-        );
-        if (vForDirective.isVFor()) {
-          const { vForTemplateEndIndex, vForPlaceholderRef } =
-            vForDirective.parseChildTemplate(template.substring(++index));
-          directiveQueue.enqueue(vForDirective);
-          index += vForTemplateEndIndex;
-          element = vForPlaceholderRef;
+          const subUnsubsriptionEvents = vOnDirective(
+            element,
+            attributes,
+            !!component,
+            curComponentNodeRef
+          );
+          subUnsubsriptionEvents.length &&
+            unsubsriptionEvents.push(...subUnsubsriptionEvents);
         }
-
-        const subUnsubsriptionEvents = vOnDirective(
-          element,
-          attributes,
-          methods,
-          curComponentNodeRef
-        );
-        subUnsubsriptionEvents.length &&
-          unsubsriptionEvents.push(...subUnsubsriptionEvents);
 
         htmlParseStack.push({ element, label: { tag } });
         rootRef = htmlParseStack.peek().element;
