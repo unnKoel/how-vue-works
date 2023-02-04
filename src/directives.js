@@ -109,8 +109,7 @@ const VIfDirective = (node, attributes = {}, data, curComponentNodeRef) => {
   let nextSibling = null;
   let parentNode = null;
   const vIfTemplateDirectiveQueue = Queue();
-  // put an mimic component node on top of stack to collect all components within `v-if` template.
-  let rootComponentOfVIf = createComponent(() => {});
+  let rootComponentOfVIf = null;
 
   const vIfExpression = attributes['v-if'];
 
@@ -122,6 +121,8 @@ const VIfDirective = (node, attributes = {}, data, curComponentNodeRef) => {
     const vIfTemplateParseStack = Stack();
     const componentStackWithinVIf = Stack();
 
+    // put an mimic component node on top of stack to collect all components within `v-if` template.
+    rootComponentOfVIf = createComponent(() => {});
     componentStackWithinVIf.push(curComponentNodeRef);
     componentStackWithinVIf.push(rootComponentOfVIf);
 
@@ -170,10 +171,12 @@ const VIfDirective = (node, attributes = {}, data, curComponentNodeRef) => {
   };
 
   (function reatToDataChange() {
-    const value = get(data, vIfExpression);
-    value?.watch(() => {
-      handle(data);
-    });
+    if (isVIf()) {
+      const value = get(data, vIfExpression);
+      value?.watch(() => {
+        handle(data);
+      });
+    }
   })();
 
   return {
@@ -389,10 +392,12 @@ const VForDirective = (
   };
 
   (function reatToDataChange() {
-    const array = getValueByPath(data, arrayKey);
-    array?.watch(() => {
-      handle(data);
-    });
+    if (isVFor()) {
+      const array = getValueByPath(data, arrayKey);
+      array?.watch(() => {
+        handle(data);
+      });
+    }
   })();
 
   return {
