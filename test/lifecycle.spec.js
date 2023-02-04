@@ -47,8 +47,11 @@ test('test unsubsriptionEvents', () => {
 });
 
 test('test destory component', () => {
-  const parentComponentNode = createComponent(() => {});
-  const childComponentNode = createComponent(() => {});
+  const parentComponentNode = createComponent();
+  const childComponentNode = createComponent();
+  const descendantCompnentNode = createComponent();
+  const lastCompnentNode = createComponent();
+
   const mockBeforeUnmounted = jest.fn();
   childComponentNode._beforeUnmounted = mockBeforeUnmounted;
   const mockUnsubscription1 = jest.fn();
@@ -57,23 +60,38 @@ test('test destory component', () => {
     mockUnsubscription1,
     mockUnsubscription2,
   ];
+
+  descendantCompnentNode._beforeUnmounted = mockBeforeUnmounted;
+  descendantCompnentNode._unsubsriptionEvents = [
+    mockUnsubscription1,
+    mockUnsubscription2,
+  ];
+
+  lastCompnentNode._beforeUnmounted = mockBeforeUnmounted;
+  lastCompnentNode._unsubsriptionEvents = [
+    mockUnsubscription1,
+    mockUnsubscription2,
+  ];
+
   linkParentChildComponent(parentComponentNode, childComponentNode);
+  linkParentChildComponent(childComponentNode, descendantCompnentNode);
+  linkParentChildComponent(descendantCompnentNode, lastCompnentNode);
 
   expect(parentComponentNode._children.elementAt(0)).toBe(childComponentNode);
   expect(parentComponentNode._children.sizeOf()).toBe(1);
   destoryComponent(childComponentNode);
-  expect(mockBeforeUnmounted.mock.calls).toHaveLength(1);
-  expect(mockUnsubscription1.mock.calls).toHaveLength(1);
-  expect(mockUnsubscription2.mock.calls).toHaveLength(1);
+  expect(mockBeforeUnmounted.mock.calls).toHaveLength(3);
+  expect(mockUnsubscription1.mock.calls).toHaveLength(3);
+  expect(mockUnsubscription2.mock.calls).toHaveLength(3);
   expect(parentComponentNode._children.sizeOf()).toBe(0);
   expect(parentComponentNode._children.elementAt(0)).toBe(null);
 });
 
 test('test destory the tree of child Component', () => {
-  const parentComponentNode = createComponent(() => {});
-  const childComponentNode = createComponent(() => {});
-  const descendantCompnentNode = createComponent(() => {});
-  const lastCompnentNode = createComponent(() => {});
+  const parentComponentNode = createComponent();
+  const childComponentNode = createComponent();
+  const descendantCompnentNode = createComponent();
+  const lastCompnentNode = createComponent();
   const destoryOrder = [];
   childComponentNode._beforeUnmounted = jest.fn(() => destoryOrder.push(1));
   descendantCompnentNode._beforeUnmounted = jest.fn(() => destoryOrder.push(2));
@@ -83,7 +101,7 @@ test('test destory the tree of child Component', () => {
   linkParentChildComponent(childComponentNode, descendantCompnentNode);
   linkParentChildComponent(descendantCompnentNode, lastCompnentNode);
 
-  destoryChildComponentTree(parentComponentNode);
+  destoryChildComponentTree(parentComponentNode, 0, true);
   expect(childComponentNode._beforeUnmounted.mock.calls).toHaveLength(1);
   expect(descendantCompnentNode._beforeUnmounted.mock.calls).toHaveLength(1);
   expect(lastCompnentNode._beforeUnmounted.mock.calls).toHaveLength(1);

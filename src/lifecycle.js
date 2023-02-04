@@ -20,19 +20,24 @@ const deconstruct = (componentNodeRef) => {
 };
 
 const destoryComponent = (componentNodeRef) => {
+  destoryChildComponentTree(componentNodeRef);
   deconstruct(componentNodeRef);
   const parentComponentNodeRef = componentNodeRef._parent;
   parentComponentNodeRef?._children.removeElement(componentNodeRef);
 };
 
-const destoryChildComponentTree = (componentNodeRef, deep = 0) => {
+const destoryChildComponentTree = (
+  componentNodeRef,
+  deep = 0,
+  clean = false
+) => {
   const { _children } = componentNodeRef;
   for (let child of _children) {
     destoryChildComponentTree(child, ++deep);
     deconstruct(child);
   }
 
-  if (--deep === 0) {
+  if (clean && --deep === 0) {
     componentNodeRef._children = LinkedList();
   }
 };

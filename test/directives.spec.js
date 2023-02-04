@@ -161,7 +161,7 @@ describe('v-if directive', () => {
       directive: 'v-if',
     });
 
-    const componentNode = createComponent(() => {});
+    const componentNode = createComponent();
     const vIfDirective = VIfDirective(
       vIfRootNode,
       attributes,
@@ -194,7 +194,7 @@ describe('v-if directive', () => {
       directive: 'v-if',
     });
 
-    const componentNode = createComponent(() => {});
+    const componentNode = createComponent();
     const vIfDirective = VIfDirective(
       vIfRootNode,
       attributes,
@@ -251,7 +251,7 @@ describe('v-for directive', () => {
     });
 
     const label = { tag: 'div', vFor: true };
-    const componentNodeRef = createComponent(() => {});
+    const componentNodeRef = createComponent();
     const vForDirective = VForDirective(
       vForRootNode,
       attributes,
@@ -290,7 +290,7 @@ describe('v-for directive', () => {
 
     const label = { tag: 'div', vFor: true };
 
-    const componentNode = createComponent(() => {});
+    const componentNode = createComponent();
     const vForDirective = VForDirective(
       vForRootNode,
       attributes,
