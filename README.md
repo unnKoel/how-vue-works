@@ -100,6 +100,18 @@ offer later...
 
   [How to Loop Through Array and Remove Items Without Breaking the For Loop](https://www.w3docs.com/snippets/javascript/how-to-loop-through-array-and-remove-items-without-breaking-the-for-loop.html)
 
+- how to dispatch an event programmatically?
+
+  [Creating and triggering events](https://developer.mozilla.org/en-US/docs/Web/Events/Creating_and_triggering_events)
+
+- bubble and capture phase in an event lifecycle.
+
+  [bubble and capture](https://zh.javascript.info/bubbling-and-capturing)
+
+- Detecting support for a given javascript event?
+
+  [Detecting support for a given JavaScript event?](https://stackoverflow.com/questions/2877393/detecting-support-for-a-given-javascript-event)
+
 ## Questions
 
 take notes of questions I am encountering and thinking during this progarm.
