@@ -7,7 +7,7 @@ import {
   VBindDirective,
   VIfDirective,
   VForDirective,
-  vOnDirective,
+  VOnDirective,
 } from './directives';
 
 import {
@@ -191,10 +191,7 @@ const parse = (
   data = {},
   curComponentNodeRef = {}
 ) => {
-  const {
-    components: localEnrolledIncomponents = {},
-    _unsubsriptionEvents: unsubsriptionEvents = [],
-  } = curComponentNodeRef;
+  const { components: localEnrolledIncomponents = {} } = curComponentNodeRef;
 
   template = template.replace(/\n/g, '');
   let index = -1;
@@ -244,7 +241,8 @@ const parse = (
             element,
             attributes,
             data,
-            curComponentNodeRef
+            curComponentNodeRef,
+            componentStack
           );
           if (vIfDirective.isVIf()) {
             const { vIfTemplateEndIndex, vIfTemplateRef } =
@@ -265,7 +263,8 @@ const parse = (
               tag,
               vFor: true,
             },
-            curComponentNodeRef
+            curComponentNodeRef,
+            componentStack
           );
           if (vForDirective.isVFor()) {
             const { vForTemplateEndIndex, vForPlaceholderRef } =
@@ -275,14 +274,15 @@ const parse = (
             element = vForPlaceholderRef;
           }
 
-          const subUnsubsriptionEvents = vOnDirective(
+          const vOnDirective = VOnDirective(
             element,
             attributes,
             !!component,
             curComponentNodeRef
           );
-          subUnsubsriptionEvents.length &&
-            unsubsriptionEvents.push(...subUnsubsriptionEvents);
+          if (vOnDirective.isVon()) {
+            directiveQueue.enqueue(vOnDirective);
+          }
         }
 
         htmlParseStack.push({ element, label: { tag } });
@@ -298,7 +298,7 @@ const parse = (
         rootRef = parentRef;
 
         const component = getComponent(localEnrolledIncomponents, tagEnd);
-        if (component) {
+        if (component || label?.vIf || label?.vFor) {
           structureComponentTree(componentStack);
         }
 
@@ -330,7 +330,7 @@ const parse = (
     }
   }
 
-  return { rootRef, index, unsubsriptionEvents };
+  return { rootRef, index };
 };
 
 export {

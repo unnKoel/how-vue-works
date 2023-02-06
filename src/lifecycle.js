@@ -19,11 +19,14 @@ const deconstruct = (componentNodeRef) => {
   executeLifeCycleBeforeUnmounted(componentNodeRef);
 };
 
-const destoryComponent = (componentNodeRef) => {
+const destoryComponent = (componentNodeRef, clean = false) => {
   destoryChildComponentTree(componentNodeRef);
   deconstruct(componentNodeRef);
-  const parentComponentNodeRef = componentNodeRef._parent;
-  parentComponentNodeRef?._children.removeElement(componentNodeRef);
+
+  if (clean) {
+    const parentComponentNodeRef = componentNodeRef._parent;
+    parentComponentNodeRef?._children.removeElement(componentNodeRef);
+  }
 };
 
 const destoryChildComponentTree = (

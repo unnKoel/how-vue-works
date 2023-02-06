@@ -79,7 +79,7 @@ test('test destory component', () => {
 
   expect(parentComponentNode._children.elementAt(0)).toBe(childComponentNode);
   expect(parentComponentNode._children.sizeOf()).toBe(1);
-  destoryComponent(childComponentNode);
+  destoryComponent(childComponentNode, true);
   expect(mockBeforeUnmounted.mock.calls).toHaveLength(3);
   expect(mockUnsubscription1.mock.calls).toHaveLength(3);
   expect(mockUnsubscription2.mock.calls).toHaveLength(3);

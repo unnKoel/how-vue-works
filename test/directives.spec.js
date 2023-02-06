@@ -7,12 +7,13 @@ import {
   VBindDirective,
   VIfDirective,
   VForDirective,
-  vOnDirective,
+  VOnDirective,
 } from '../src/directives';
 import observe from '../src/observe';
 import { createComponent } from '../src/components';
-import { useEvents } from '../src/hooks';
+import { useEvents, useMethods } from '../src/hooks';
 import { linkParentChildComponent } from '../src/template-parser';
+import Stack from '../src/stack';
 
 describe('mustache directive', () => {
   test("check if it's a mustache braces", () => {
@@ -162,11 +163,13 @@ describe('v-if directive', () => {
     });
 
     const componentNode = createComponent();
+    const componentStack = Stack();
     const vIfDirective = VIfDirective(
       vIfRootNode,
       attributes,
       data,
-      componentNode
+      componentNode,
+      componentStack
     );
 
     const template = `<span>hello welcome to {{directive}}</span>`;
@@ -195,11 +198,13 @@ describe('v-if directive', () => {
     });
 
     const componentNode = createComponent();
+    const componentStack = Stack();
     const vIfDirective = VIfDirective(
       vIfRootNode,
       attributes,
       data,
-      componentNode
+      componentNode,
+      componentStack
     );
 
     const template = `<span>hello welcome to {{directive}}</span>`;
@@ -229,7 +234,16 @@ describe('v-for directive', () => {
     };
 
     const data = observe([]);
-    const vForDirective = VForDirective(vForRootNode, attributes, data);
+    const componentNode = createComponent();
+    const componentStack = Stack();
+    const vForDirective = VForDirective(
+      vForRootNode,
+      attributes,
+      data,
+      {},
+      componentNode,
+      componentStack
+    );
     expect(vForDirective.isVFor()).toBe(true);
   });
 
@@ -252,12 +266,14 @@ describe('v-for directive', () => {
 
     const label = { tag: 'div', vFor: true };
     const componentNodeRef = createComponent();
+    const componentStack = Stack();
     const vForDirective = VForDirective(
       vForRootNode,
       attributes,
       data,
       label,
-      componentNodeRef
+      componentNodeRef,
+      componentStack
     );
 
     const template = `<span>Hi,{{item.name}}. your character is {{item.character}}</span>`;
@@ -291,12 +307,14 @@ describe('v-for directive', () => {
     const label = { tag: 'div', vFor: true };
 
     const componentNode = createComponent();
+    const componentStack = Stack();
     const vForDirective = VForDirective(
       vForRootNode,
       attributes,
       data,
       label,
-      componentNode
+      componentNode,
+      componentStack
     );
 
     const template = `<span>Hi,{{item.name}}. your character is {{item.character}}</span>`;
@@ -346,13 +364,14 @@ describe('v-for directive', () => {
 
     const label = { tag: 'div', vFor: true };
     const componentNode = createComponent();
-
+    const componentStack = Stack();
     const vForDirective = VForDirective(
       vForRootNode,
       attributes,
       data,
       label,
-      componentNode
+      componentNode,
+      componentStack
     );
 
     const template = `<span>Hi,{{item.name}}. your character is {{item.character}}</span>`;
@@ -417,31 +436,48 @@ describe('v-for directive', () => {
 describe('v-on directive', () => {
   test('no event binding when no v-on decorates on element', () => {
     const targetNode = document.createElement('div');
-    const methods = {
-      onClick: jest.fn((event) => event),
-    };
     const attributes = {};
+    const componentNode = createComponent(() => {
+      useMethods({
+        onClick: jest.fn((event) => event),
+      });
+    });
 
-    const unsubscriptions = vOnDirective(targetNode, attributes, methods);
-    expect(methods.onClick.mock.calls).toHaveLength(0);
-    expect(unsubscriptions).toHaveLength(0);
+    const vOnDirective = VOnDirective(
+      targetNode,
+      attributes,
+      false,
+      componentNode
+    );
+    vOnDirective.handle();
+    expect(componentNode.methods.onClick.mock.calls).toHaveLength(0);
+    expect(componentNode._unsubsriptionEvents).toHaveLength(0);
   });
 
   test('event binding on element when v-on decorates on elelent', () => {
     const targetNode = document.createElement('div');
     targetNode.addEventListener = jest.fn();
-    const methods = {
-      onClick: jest.fn((event) => event),
-    };
+    const onClick = jest.fn((event) => event);
     const attributes = {
       'v-on:click': 'onClick',
     };
 
-    const unsubscriptions = vOnDirective(targetNode, attributes, false, {
-      methods,
+    const componentNode = createComponent(() => {
+      useMethods({
+        onClick,
+      });
     });
+
+    const vOnDirective = VOnDirective(
+      targetNode,
+      attributes,
+      false,
+      componentNode
+    );
+    vOnDirective.handle();
+
     expect(targetNode.addEventListener.mock.calls).toHaveLength(1);
-    expect(unsubscriptions).toHaveLength(1);
+    expect(componentNode._unsubsriptionEvents).toHaveLength(1);
   });
 
   test('event binding on element when v-on decorates on component', () => {
@@ -460,14 +496,15 @@ describe('v-on directive', () => {
       'v-on:click': 'onClick',
     };
 
-    const unsubscriptions = vOnDirective(
+    const vOnDirective = VOnDirective(
       targetNode,
       attributes,
       true,
       parentComponent
     );
+    vOnDirective.handle();
     childComponentNode.$emit('click');
     expect(mockEventListener.mock.calls).toHaveLength(1);
-    expect(unsubscriptions).toHaveLength(0);
+    expect(parentComponent._unsubsriptionEvents).toHaveLength(0);
   });
 });

@@ -104,7 +104,13 @@ VBindDirective.getVBindAttributes = (attributes) =>
 /**
  * @todo the value of `v-if` should be evaluated as an expression.
  */
-const VIfDirective = (node, attributes = {}, data, curComponentNodeRef) => {
+const VIfDirective = (
+  node,
+  attributes = {},
+  data,
+  curComponentNodeRef,
+  componentStack
+) => {
   let vIfTemplateRef = null;
   let nextSibling = null;
   let parentNode = null;
@@ -119,18 +125,16 @@ const VIfDirective = (node, attributes = {}, data, curComponentNodeRef) => {
 
   const parseChildTemplate = (childTemplate, label) => {
     const vIfTemplateParseStack = Stack();
-    const componentStackWithinVIf = Stack();
 
     // put an mimic component node on top of stack to collect all components within `v-if` template.
     rootComponentOfVIf = createComponent(() => {});
-    componentStackWithinVIf.push(curComponentNodeRef);
-    componentStackWithinVIf.push(rootComponentOfVIf);
+    componentStack.push(rootComponentOfVIf);
 
     vIfTemplateParseStack.push({ element: node, label });
     const { rootRef, index } = parse(
       childTemplate,
       vIfTemplateParseStack,
-      componentStackWithinVIf,
+      componentStack,
       vIfTemplateDirectiveQueue,
       data,
       curComponentNodeRef
@@ -195,7 +199,8 @@ const VForDirective = (
   attributes = {},
   data,
   label,
-  curComponentNodeRef
+  curComponentNodeRef,
+  componentStack
 ) => {
   let arrayKey = '';
   let itemName = '';
@@ -242,41 +247,29 @@ const VForDirective = (
     const array = _getArray(data);
     const firstItem = array?.[0];
 
-    const componentStackWithinVFor = Stack();
-    array.length > 0 && componentStackWithinVFor.push(rootComponentOfVFor);
-
     const { index, vForTemplateRef, vForTemplateDirectiveQueue } =
-      _parseChildTemplate(
-        childTemplate,
-        label,
-        firstItem,
-        componentStackWithinVFor
-      );
+      _parseChildTemplate(childTemplate, label, firstItem);
 
     array.length > 0 &&
       vForTemplateParsedArtifactMemory.push({
         vForTemplateRef,
         vForTemplateDirectiveQueue,
-        trackByValue: firstItem[trackBy] ?? '',
+        trackByValue: firstItem?.[trackBy] ?? '',
       });
 
     return { vForTemplateEndIndex: index, vForPlaceholderRef: node };
   };
 
-  const _parseChildTemplate = (
-    childTemplate,
-    label,
-    arrayItem,
-    componentStackWithinVFor
-  ) => {
+  const _parseChildTemplate = (childTemplate, label, arrayItem) => {
     const vForTemplateParseStack = Stack();
     const vForTemplateDirectiveQueue = Queue();
 
     vForTemplateParseStack.push({ element: node.cloneNode(), label });
+    componentStack.push(rootComponentOfVFor);
     const { rootRef, index } = parse(
       childTemplate,
       vForTemplateParseStack,
-      componentStackWithinVFor,
+      componentStack,
       vForTemplateDirectiveQueue,
       arrayItem,
       curComponentNodeRef
@@ -331,7 +324,7 @@ const VForDirective = (
       const { vForTemplateRef, alive } = vForTemplateParsedArtifactMemory[i];
       if (!alive) {
         if (rootComponentOfVFor._children.sizeOf() > 0) {
-          destoryComponent(rootComponentOfVFor._children.elementAt(i));
+          destoryComponent(rootComponentOfVFor._children.elementAt(i), true);
         }
         vForTemplateRef.parentNode?.removeChild?.(vForTemplateRef);
         vForTemplateParsedArtifactMemory.splice(i, 1);
@@ -360,14 +353,10 @@ const VForDirective = (
 
       item = _prependItemName(item);
       if (!vForTemplateParsedArtifact) {
-        const componentStackWithinVFor = Stack();
-        componentStackWithinVFor.push(rootComponentOfVFor);
-
         vForTemplateParsedArtifact = _parseChildTemplate(
           vForTemplate,
           label,
-          item,
-          componentStackWithinVFor
+          item
         );
       }
 
@@ -388,6 +377,7 @@ const VForDirective = (
       }
     }
     curComponentNodeRef._children.add(rootComponentOfVFor);
+    rootComponentOfVFor._parent = curComponentNodeRef;
     _clear();
   };
 
@@ -415,7 +405,7 @@ const VForDirective = (
  * - use inline js statement instead of binding directly to a method name.
  * - involve event midifiers.
  */
-const vOnDirective = (
+const VOnDirective = (
   node,
   attributes = {},
   isComponent = false,
@@ -438,17 +428,20 @@ const vOnDirective = (
     return vonEvents.length !== 0;
   };
 
-  if (isVon()) {
+  const handle = () => {
     if (!isComponent) {
-      return vonEvents.map(({ eventType, methodStatement }) => {
-        const listener = curComponentNodeRef?.methods?.[methodStatement];
-        if (typeof listener === 'function') {
-          node.addEventListener(eventType, listener);
-          return () => node.removeEventListener(eventType, listener);
-        }
+      curComponentNodeRef._unsubsriptionEvents.push(
+        ...vonEvents.map(({ eventType, methodStatement }) => {
+          const listener = curComponentNodeRef?.methods?.[methodStatement];
+          if (typeof listener === 'function') {
+            node.addEventListener(eventType, listener);
+            return () => node.removeEventListener(eventType, listener);
+          }
 
-        return () => {};
-      });
+          return () => {};
+        })
+      );
+      return;
     }
 
     vonEvents.forEach(({ eventType, methodStatement }) => {
@@ -457,9 +450,12 @@ const vOnDirective = (
         curComponentNodeRef.$on(eventType, listener);
       }
     });
-  }
+  };
 
-  return [];
+  return {
+    isVon,
+    handle,
+  };
 };
 
 export {
@@ -467,5 +463,5 @@ export {
   VBindDirective,
   VIfDirective,
   VForDirective,
-  vOnDirective,
+  VOnDirective,
 };

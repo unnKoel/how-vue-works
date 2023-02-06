@@ -15,7 +15,9 @@ const createOn = (componentNode) => {
       componentNode._events[event] = [];
     }
 
-    componentNode._events[event].push(eventListener);
+    const listeners = componentNode._events[event];
+    const has = listeners.find((listener) => listener === eventListener);
+    !has && listeners.push(eventListener);
   };
 
   componentNode.$on = on;
