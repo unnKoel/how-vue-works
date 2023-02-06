@@ -13,6 +13,22 @@ import {
   useRef,
 } from '../src/hooks';
 
+const getComponentTree = (componentNodeRef, item) => {
+  if (!item) item = {};
+  item.component = componentNodeRef.component.name;
+
+  const { _children } = componentNodeRef;
+  let i = 0;
+  for (let child of _children) {
+    if (!item.children) item.children = [];
+    item.children[i] = {};
+    getComponentTree(child, item.children[i]);
+    i++;
+  }
+
+  return item;
+};
+
 beforeEach(() => {
   document.body.innerHTML = '';
   while (!componentStack.isEmpty()) {
@@ -578,7 +594,7 @@ test('render template with parent and multiple child components', () => {
   );
 });
 
-test.skip('render template with in-depth descendant components', () => {
+test('render template with in-depth descendant components', () => {
   const componentB = () => {
     useData({
       array: [
@@ -664,11 +680,11 @@ test.skip('render template with in-depth descendant components', () => {
             <li>1</li>
             <li>2</li>
             <li>3</li>
-          </ul>  
+          </ul>
         </div>
       </div>
       <p>search for whatever you prefer without any doubt</p>
-    </div>  
+    </div>
     `
       .replace(/>\s+|\s+</g, (m) => m.trim())
       .replace(/\n/g, '')
@@ -682,6 +698,10 @@ test.skip('render template with in-depth descendant components', () => {
   );
   expect(
     rootComponentNodeRef._children.elementAt(0)._children.elementAt(0).component
+      .name
+  ).toBe('VFor');
+  expect(
+    rootComponentNodeRef._children.elementAt(0)._children.elementAt(1).component
   ).toBe(componentC);
 });
 
@@ -1222,4 +1242,268 @@ test('destruture sub-tree components and execute unmount lifecycle in v-if block
   // expect(mockEventReceive.mock.results[0].value).toBe('Vue');
 });
 
-test('', () => {});
+test('check correctness of component tree in case of sibling or inside elment with v-for', () => {
+  const componentD = () => {
+    return `
+      <span>componentD</span>
+    `;
+  };
+
+  const componentB = () => {
+    useData({
+      array: [
+        { title: 'Navigate to Google', site: 'Google' },
+        { title: 'Navigate to Microsoft', site: 'Microsoft' },
+        { title: 'Navigate to Apple', site: 'Apple' },
+      ],
+      something: 'Vue',
+      text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
+    });
+
+    useComponents({
+      'component-c': componentC,
+      'component-d': componentD,
+    });
+
+    useMethods({
+      onClick: jest.fn((event) => event),
+    });
+
+    return `
+      <div class="search-box" v-on:click="onClick">
+        <span>Search for {{something}}</span>
+        <div v-for="item in array" track-by="site">
+          <a href="www.google.com" v-bind:title="item.title" v-on:click="onClick">Navigate to {{item.site}}</a>
+          <component-c></component-c>
+          <component-d></component-d>
+        </div>
+        <p>{{text}}</p>
+        <component-c></component-c>
+        <component-d></component-d>
+      </div>`;
+  };
+
+  const componentC = () => {
+    useData({
+      list: [1, 2, 3],
+    });
+
+    useComponents({
+      'component-d': componentD,
+    });
+
+    return `
+      <div class="list">
+        <ul>
+          <li v-for="item in list">
+            {{item}}
+            <component-d></component-d>
+          </li>
+        </ul>
+        <component-d></component-d>
+      </div>
+    `;
+  };
+
+  const componentA = () => {
+    useData({
+      title: 'what do you want to search?',
+      description: 'search for whatever you prefer without any doubt',
+    });
+
+    useComponents({
+      'component-b': componentB,
+    });
+
+    return `
+      <div id="root">
+        <h3>{{title}}</h3>
+        <component-b></component-b>
+        <p>{{description}}</p>
+      </div>
+    `;
+  };
+
+  render(componentA, {}, document.body);
+  expect(document.body.innerHTML).toBe(
+    `
+    <div id="root">
+      <h3>what do you want to search?</h3>
+      <div class="search-box">
+        <span>Search for Vue</span>
+        <div>
+            <a href="www.google.com" title="Navigate to Google">Navigate to Google</a>
+            <div class="list">
+              <ul>
+                <li>1<span>componentD</span></li>
+                <li>2<span>componentD</span></li>
+                <li>3<span>componentD</span></li>
+              </ul>
+              <span>componentD</span>
+            </div>
+            <span>componentD</span>
+        </div>
+        <div>
+            <a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a>
+            <div class="list">
+              <ul>
+                <li>1<span>componentD</span></li>
+                <li>2<span>componentD</span></li>
+                <li>3<span>componentD</span></li>
+              </ul>
+              <span>componentD</span>
+            </div>
+            <span>componentD</span>
+        </div>
+        <div>
+            <a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a>
+            <div class="list">
+              <ul>
+                <li>1<span>componentD</span></li>
+                <li>2<span>componentD</span></li>
+                <li>3<span>componentD</span></li>
+              </ul>
+              <span>componentD</span>
+            </div>
+            <span>componentD</span>
+        </div>
+        <p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p>
+        <div class="list">
+          <ul>
+            <li>1<span>componentD</span></li>
+            <li>2<span>componentD</span></li>
+            <li>3<span>componentD</span></li>
+          </ul>
+          <span>componentD</span>
+        </div>
+        <span>componentD</span>
+      </div>
+      <p>search for whatever you prefer without any doubt</p>
+    </div>
+    `
+      .replace(/>\s+|\s+</g, (m) => m.trim())
+      .replace(/\n/g, '')
+  );
+
+  expect(rootComponentNodeRef.component).toBe(componentA);
+  expect(componentStack.items).toHaveLength(1);
+  expect(rootComponentNodeRef._children.sizeOf()).toBe(1);
+  expect(rootComponentNodeRef._children.elementAt(0).component).toBe(
+    componentB
+  );
+  expect(getComponentTree(rootComponentNodeRef)).toEqual({
+    component: 'componentA',
+    children: [
+      {
+        component: 'componentB',
+        children: [
+          {
+            component: 'VFor',
+            children: [
+              {
+                component: 'componentC',
+                children: [
+                  {
+                    component: 'VFor',
+                    children: [
+                      {
+                        component: 'componentD',
+                      },
+                      {
+                        component: 'componentD',
+                      },
+                      {
+                        component: 'componentD',
+                      },
+                    ],
+                  },
+                  {
+                    component: 'componentD',
+                  },
+                ],
+              },
+              {
+                component: 'componentD',
+              },
+              {
+                component: 'componentC',
+                children: [
+                  {
+                    component: 'VFor',
+                    children: [
+                      {
+                        component: 'componentD',
+                      },
+                      {
+                        component: 'componentD',
+                      },
+                      {
+                        component: 'componentD',
+                      },
+                    ],
+                  },
+                  {
+                    component: 'componentD',
+                  },
+                ],
+              },
+              {
+                component: 'componentD',
+              },
+              {
+                component: 'componentC',
+                children: [
+                  {
+                    component: 'VFor',
+                    children: [
+                      {
+                        component: 'componentD',
+                      },
+                      {
+                        component: 'componentD',
+                      },
+                      {
+                        component: 'componentD',
+                      },
+                    ],
+                  },
+                  {
+                    component: 'componentD',
+                  },
+                ],
+              },
+              {
+                component: 'componentD',
+              },
+            ],
+          },
+          {
+            component: 'componentC',
+            children: [
+              {
+                component: 'VFor',
+                children: [
+                  {
+                    component: 'componentD',
+                  },
+                  {
+                    component: 'componentD',
+                  },
+                  {
+                    component: 'componentD',
+                  },
+                ],
+              },
+              {
+                component: 'componentD',
+              },
+            ],
+          },
+          {
+            component: 'componentD',
+          },
+        ],
+      },
+    ],
+  });
+});

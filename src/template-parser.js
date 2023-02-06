@@ -133,6 +133,8 @@ const structureTree = (linkParentChild, htmlParseStack, tagEnd) => {
 };
 
 const linkParentChildComponent = (parentComponentNode, componentNode) => {
+  if (componentNode._parent === parentComponentNode) return;
+
   if (parentComponentNode) {
     parentComponentNode._children.add(componentNode);
   }

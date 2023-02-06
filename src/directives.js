@@ -127,7 +127,7 @@ const VIfDirective = (
     const vIfTemplateParseStack = Stack();
 
     // put an mimic component node on top of stack to collect all components within `v-if` template.
-    rootComponentOfVIf = createComponent(() => {});
+    rootComponentOfVIf = createComponent(function VIf() {});
     componentStack.push(rootComponentOfVIf);
 
     vIfTemplateParseStack.push({ element: node, label });
@@ -217,7 +217,7 @@ const VForDirective = (
 
   if (isVFor()) {
     // put an mimic component node on top of stack to collect all components within `v-for` template.
-    rootComponentOfVFor = createComponent(() => {});
+    rootComponentOfVFor = createComponent(function VFor() {});
 
     const expression = attributes['v-for'];
     [itemName, arrayKey] = expression.split('in');
@@ -376,8 +376,6 @@ const VForDirective = (
         });
       }
     }
-    curComponentNodeRef._children.add(rootComponentOfVFor);
-    rootComponentOfVFor._parent = curComponentNodeRef;
     _clear();
   };
 
