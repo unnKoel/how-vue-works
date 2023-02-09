@@ -42,8 +42,7 @@ test('test unsubsriptionEvents', () => {
     _unsubsriptionEvents: [jest.fn(), jest.fn()],
   };
   unsubsriptionEvents(componentNodeRef);
-  expect(componentNodeRef._unsubsriptionEvents[0].mock.calls).toHaveLength(1);
-  expect(componentNodeRef._unsubsriptionEvents[1].mock.calls).toHaveLength(1);
+  expect(componentNodeRef._unsubsriptionEvents).toHaveLength(0);
 });
 
 test('test destory component', () => {

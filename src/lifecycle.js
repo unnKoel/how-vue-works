@@ -12,6 +12,7 @@ const executeLifeCycleBeforeUnmounted = (componentNodeRef) => {
 const unsubsriptionEvents = (componentNodeRef) => {
   const { _unsubsriptionEvents = [] } = componentNodeRef;
   _unsubsriptionEvents.forEach((unsubsriptionEvent) => unsubsriptionEvent());
+  componentNodeRef._unsubsriptionEvents = [];
 };
 
 const deconstruct = (componentNodeRef) => {
