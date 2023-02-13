@@ -112,6 +112,12 @@ offer later...
 
   [Detecting support for a given JavaScript event?](https://stackoverflow.com/questions/2877393/detecting-support-for-a-given-javascript-event)
 
+- what's the microtasks and macrotasks?
+
+  [Event loop: microtasks and macrotasks](https://javascript.info/event-loop#use-case-3-doing-something-after-the-event)
+
+  [What are micro tasks and macro tasks in the event loop?] (https://medium.com/globant/what-are-micro-tasks-and-macro-tasks-in-the-event-loop-29bc0abdd445)
+
 ## Questions
 
 take notes of questions I am encountering and thinking during this progarm.
