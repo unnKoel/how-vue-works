@@ -118,6 +118,9 @@ offer later...
 
   [What are micro tasks and macro tasks in the event loop?] (https://medium.com/globant/what-are-micro-tasks-and-macro-tasks-in-the-event-loop-29bc0abdd445)
 
+- what's the memory leak in javascript?
+  [How to escape from memory leaks in Javascript](https://blog.logrocket.com/escape-memory-leaks-javascript/)
+
 ## Questions
 
 take notes of questions I am encountering and thinking during this progarm.
