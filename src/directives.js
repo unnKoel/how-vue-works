@@ -3,7 +3,7 @@ import { parse } from './template-parser';
 import Stack from './stack';
 import Queue from './queue';
 import { createComponent } from './components';
-import { destoryComponent } from './lifecycle';
+import { destoryComponent, activateComponent } from './lifecycle';
 
 const getValueByPath = (data, path) => {
   if (typeof data === 'object') {
@@ -29,7 +29,7 @@ const MustacheDirective = (textNode, text = '', data, curComponentNodeRef) => {
 
     paths?.forEach((path) => {
       const value =
-        getValueByPath(data, path) || getValueByPath(curComponentNodeRef, path);
+        getValueByPath(data, path) ?? getValueByPath(curComponentNodeRef, path);
       interpolatedText = interpolatedText.replace(
         new RegExp(`{{\\s*${path}\\s*}}`),
         value
@@ -67,7 +67,7 @@ const VBindDirective = (node, attributes = {}, data, curComponentNodeRef) => {
     vBindAttributes.forEach(({ attributeKey, path }) => {
       node.setAttribute(
         attributeKey,
-        getValueByPath(data, path) || getValueByPath(curComponentNodeRef, path)
+        getValueByPath(data, path) ?? getValueByPath(curComponentNodeRef, path)
       );
     });
   };
@@ -156,9 +156,9 @@ const VIfDirective = (
     }
   };
 
-  const handle = (data) => {
+  const handle = (data, isUpdate) => {
     const value =
-      getValueByPath(data, vIfExpression) ||
+      getValueByPath(data, vIfExpression) ??
       getValueByPath(curComponentNodeRef, vIfExpression);
 
     if (value) {
@@ -166,8 +166,9 @@ const VIfDirective = (
       vIfTemplateDirectiveQueue
         .getItems()
         .forEach((directive) => directive.handle(data));
+      isUpdate && activateComponent(rootComponentOfVIf);
     } else {
-      destoryComponent(rootComponentOfVIf);
+      isUpdate && destoryComponent(rootComponentOfVIf);
       nextSibling = vIfTemplateRef.nextSibling;
       parentNode = vIfTemplateRef.parentNode;
       vIfTemplateRef?.parentNode?.removeChild(vIfTemplateRef);
@@ -178,7 +179,7 @@ const VIfDirective = (
     if (isVIf()) {
       const value = get(data, vIfExpression);
       value?.watch(() => {
-        handle(data);
+        handle(data, true);
       });
     }
   })();
@@ -236,7 +237,7 @@ const VForDirective = (
 
   const _getArray = (data) => {
     const array =
-      getValueByPath(data, arrayKey) ||
+      getValueByPath(data, arrayKey) ??
       getValueByPath(curComponentNodeRef, arrayKey);
 
     return array;
@@ -442,18 +443,23 @@ const VOnDirective = (
       return;
     }
 
-    vonEvents.forEach(({ eventType, methodStatement }) => {
-      const listener = curComponentNodeRef?.events?.[methodStatement];
-      if (typeof listener === 'function') {
-        curComponentNodeRef.$on(eventType, listener);
-      }
-    });
+    curComponentNodeRef._unsubsriptionEvents.push(
+      ...vonEvents.map(({ eventType, methodStatement }) => {
+        const listener = curComponentNodeRef?.events?.[methodStatement];
+        if (typeof listener === 'function') {
+          curComponentNodeRef.$on(eventType, listener);
+          return () => curComponentNodeRef.$off(eventType, listener);
+        }
+
+        return () => {};
+      })
+    );
   };
 
-  return {
-    isVon,
-    handle,
-  };
+  if (isVon()) {
+    handle();
+    curComponentNodeRef._subscribeEvents.push(() => handle());
+  }
 };
 
 export {

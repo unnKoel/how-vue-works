@@ -20,7 +20,16 @@ const createOn = (componentNode) => {
     !has && listeners.push(eventListener);
   };
 
+  const off = (event, eventListener) => {
+    const listeners = componentNode?._events?.[event];
+    const index = listeners?.findIndex(
+      (listener) => listener === eventListener
+    );
+    listeners.splice(index, 1);
+  };
+
   componentNode.$on = on;
+  componentNode.$off = off;
   return componentNode;
 };
 

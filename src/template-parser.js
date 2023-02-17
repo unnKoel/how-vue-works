@@ -276,15 +276,7 @@ const parse = (
             element = vForPlaceholderRef;
           }
 
-          const vOnDirective = VOnDirective(
-            element,
-            attributes,
-            !!component,
-            curComponentNodeRef
-          );
-          if (vOnDirective.isVon()) {
-            directiveQueue.enqueue(vOnDirective);
-          }
+          VOnDirective(element, attributes, !!component, curComponentNodeRef);
         }
 
         htmlParseStack.push({ element, label: { tag } });

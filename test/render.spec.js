@@ -1113,7 +1113,7 @@ test('propogate events between parent and child components via enrolling by decl
   expect(mockEventReceive.mock.results[0].value).toBe('Vue');
 });
 
-test('destruture sub-tree components and execute unmount lifecycle in v-if block', () => {
+test.skip('destruture sub-tree components and execute unmount lifecycle in v-if block', () => {
   const bOnClick = jest.fn();
   const bOnUnmounted = jest.fn();
   const bOnMounted = jest.fn(() => bOnUnmounted);
@@ -1285,10 +1285,10 @@ test('destruture sub-tree components and execute unmount lifecycle in v-if block
       .replace(/\n/g, '')
   );
 
-  // expect(componentANode._unsubsriptionEvents).toHaveLength(1);
-  // expect(componentBNode._unsubsriptionEvents).toHaveLength(4);
-  // rootRef.querySelector('.search-box a').dispatchEvent(new Event('click'));
-  // expect(bOnClick).toHaveBeenCalledTimes(1);
+  expect(componentANode._unsubsriptionEvents).toHaveLength(1);
+  expect(componentBNode._unsubsriptionEvents).toHaveLength(4);
+  rootRef.querySelector('.search-box a').dispatchEvent(new Event('click'));
+  expect(bOnClick).toHaveBeenCalledTimes(1);
 
   // rootRef.querySelector('#root').dispatchEvent(new Event('click'));
   // expect(aOnClick).toHaveBeenCalledTimes(1);

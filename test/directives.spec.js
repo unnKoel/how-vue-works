@@ -434,7 +434,7 @@ describe('v-for directive', () => {
 });
 
 describe('v-on directive', () => {
-  test('no event binding when no v-on decorates on element', () => {
+  test('no event binding when no v-on diretive on element', () => {
     const targetNode = document.createElement('div');
     const attributes = {};
     const componentNode = createComponent(() => {
@@ -443,20 +443,13 @@ describe('v-on directive', () => {
       });
     });
 
-    const vOnDirective = VOnDirective(
-      targetNode,
-      attributes,
-      false,
-      componentNode
-    );
-    vOnDirective.handle();
+    VOnDirective(targetNode, attributes, false, componentNode);
     expect(componentNode.methods.onClick.mock.calls).toHaveLength(0);
     expect(componentNode._unsubsriptionEvents).toHaveLength(0);
   });
 
-  test('event binding on element when v-on decorates on elelent', () => {
+  test('event binding on element when v-on diretive on elelent', () => {
     const targetNode = document.createElement('div');
-    targetNode.addEventListener = jest.fn();
     const onClick = jest.fn((event) => event);
     const attributes = {
       'v-on:click': 'onClick',
@@ -468,19 +461,19 @@ describe('v-on directive', () => {
       });
     });
 
-    const vOnDirective = VOnDirective(
-      targetNode,
-      attributes,
-      false,
-      componentNode
-    );
-    vOnDirective.handle();
-
-    expect(targetNode.addEventListener.mock.calls).toHaveLength(1);
+    VOnDirective(targetNode, attributes, false, componentNode);
+    targetNode.dispatchEvent(new Event('click'));
+    expect(onClick.mock.calls).toHaveLength(1);
     expect(componentNode._unsubsriptionEvents).toHaveLength(1);
+
+    componentNode._unsubsriptionEvents.forEach((unsubsriptionEvent) =>
+      unsubsriptionEvent()
+    );
+    targetNode.dispatchEvent(new Event('click'));
+    expect(onClick.mock.calls).toHaveLength(1);
   });
 
-  test('event binding on element when v-on decorates on component', () => {
+  test('event binding on element when v-on diretive on component', () => {
     const targetNode = document.createElement('div');
     const mockEventListener = jest.fn((event) => event);
     const parentComponent = createComponent(() => {
@@ -496,15 +489,14 @@ describe('v-on directive', () => {
       'v-on:click': 'onClick',
     };
 
-    const vOnDirective = VOnDirective(
-      targetNode,
-      attributes,
-      true,
-      parentComponent
-    );
-    vOnDirective.handle();
+    VOnDirective(targetNode, attributes, true, parentComponent);
     childComponentNode.$emit('click');
     expect(mockEventListener.mock.calls).toHaveLength(1);
-    expect(parentComponent._unsubsriptionEvents).toHaveLength(0);
+    expect(parentComponent._unsubsriptionEvents).toHaveLength(1);
+    parentComponent._unsubsriptionEvents.forEach((unsubsriptionEvent) =>
+      unsubsriptionEvent()
+    );
+    childComponentNode.$emit('click');
+    expect(mockEventListener.mock.calls).toHaveLength(1);
   });
 });

@@ -29,6 +29,7 @@ const createComponent = (component = () => {}) => {
 
   componentNode.component = component;
   componentNode._unsubsriptionEvents = [];
+  componentNode._subscribeEvents = [];
   componentNode._parent = null;
   componentNode._children = LinkedList();
   componentNode.$el = null;

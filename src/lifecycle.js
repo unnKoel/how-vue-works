@@ -15,6 +15,11 @@ const unsubsriptionEvents = (componentNodeRef) => {
   componentNodeRef._unsubsriptionEvents = [];
 };
 
+const subscribeEvents = (componentNodeRef) => {
+  const { _subscribeEvents = [] } = componentNodeRef;
+  _subscribeEvents.forEach((subscribeEvents) => subscribeEvents());
+};
+
 const deconstruct = (componentNodeRef) => {
   unsubsriptionEvents(componentNodeRef);
   executeLifeCycleBeforeUnmounted(componentNodeRef);
@@ -46,10 +51,25 @@ const destoryChildComponentTree = (
   }
 };
 
+const construct = (componentNodeRef) => {
+  subscribeEvents(componentNodeRef);
+  executeLifeCycleDidMounted(componentNodeRef);
+};
+
+const activateComponent = (componentNodeRef) => {
+  construct(componentNodeRef);
+
+  const { _children } = componentNodeRef;
+  for (let child of _children) {
+    construct(child);
+  }
+};
+
 export {
   executeLifeCycleDidMounted,
   executeLifeCycleBeforeUnmounted,
   destoryComponent,
   destoryChildComponentTree,
   unsubsriptionEvents,
+  activateComponent,
 };

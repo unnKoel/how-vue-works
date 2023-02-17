@@ -3,31 +3,31 @@ function Queue() {
 
   const enqueue = (element) => {
     items.push(element);
-  }
+  };
 
   const dequeue = () => {
     return items.shift();
-  }
+  };
 
   const peek = () => {
     return items[0];
-  }
+  };
 
   const length = () => {
-    return items.length - 1;
-  }
+    return items.length;
+  };
 
   const isEmpty = () => {
     return items.length === 0;
-  }
+  };
 
   const getItems = () => {
     return items;
-  }
+  };
 
   const clear = () => {
     items = [];
-  }
+  };
 
   return {
     enqueue,
@@ -37,7 +37,7 @@ function Queue() {
     isEmpty,
     getItems,
     clear,
-  }
+  };
 }
 
 export default Queue;
