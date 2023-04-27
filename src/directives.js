@@ -457,7 +457,7 @@ const VOnDirective = (
   };
 
   if (isVon()) {
-    handle();
+    // handle();
     curComponentNodeRef._subscribeEvents.push(() => handle());
   }
 };

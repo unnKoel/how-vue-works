@@ -14,6 +14,7 @@ import { createComponent } from '../src/components';
 import { useEvents, useMethods } from '../src/hooks';
 import { linkParentChildComponent } from '../src/template-parser';
 import Stack from '../src/stack';
+import { subscribeEvents, unsubsriptionEvents } from '../src/lifecycle';
 
 describe('mustache directive', () => {
   test("check if it's a mustache braces", () => {
@@ -462,13 +463,12 @@ describe('v-on directive', () => {
     });
 
     VOnDirective(targetNode, attributes, false, componentNode);
+    subscribeEvents(componentNode);
     targetNode.dispatchEvent(new Event('click'));
     expect(onClick.mock.calls).toHaveLength(1);
     expect(componentNode._unsubsriptionEvents).toHaveLength(1);
 
-    componentNode._unsubsriptionEvents.forEach((unsubsriptionEvent) =>
-      unsubsriptionEvent()
-    );
+    unsubsriptionEvents(componentNode);
     targetNode.dispatchEvent(new Event('click'));
     expect(onClick.mock.calls).toHaveLength(1);
   });
@@ -490,12 +490,11 @@ describe('v-on directive', () => {
     };
 
     VOnDirective(targetNode, attributes, true, parentComponent);
+    subscribeEvents(parentComponent);
     childComponentNode.$emit('click');
     expect(mockEventListener.mock.calls).toHaveLength(1);
     expect(parentComponent._unsubsriptionEvents).toHaveLength(1);
-    parentComponent._unsubsriptionEvents.forEach((unsubsriptionEvent) =>
-      unsubsriptionEvent()
-    );
+    unsubsriptionEvents(parentComponent);
     childComponentNode.$emit('click');
     expect(mockEventListener.mock.calls).toHaveLength(1);
   });

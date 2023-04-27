@@ -71,5 +71,6 @@ export {
   destoryComponent,
   destoryChildComponentTree,
   unsubsriptionEvents,
+  subscribeEvents,
   activateComponent,
 };
