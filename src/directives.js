@@ -2,7 +2,7 @@ import { get } from 'lodash';
 import { parse } from './template-parser';
 import Stack from './stack';
 import Queue from './queue';
-import { createComponent } from './components';
+import { createComponent, extendComponent } from './components';
 import { destoryComponent, activateComponent } from './lifecycle';
 
 const getValueByPath = (data, path) => {
@@ -28,12 +28,8 @@ const MustacheDirective = (textNode, text = '', data, curComponentNodeRef) => {
     let interpolatedText = text;
 
     paths?.forEach((path) => {
-      const value =
-        getValueByPath(data, path) ?? getValueByPath(curComponentNodeRef, path);
-      interpolatedText = interpolatedText.replace(
-        new RegExp(`{{\\s*${path}\\s*}}`),
-        value
-      );
+      const value = getValueByPath(data, path) ?? getValueByPath(curComponentNodeRef, path);
+      interpolatedText = interpolatedText.replace(new RegExp(`{{\\s*${path}\\s*}}`), value);
     });
 
     textNode.nodeValue = interpolatedText;
@@ -65,10 +61,7 @@ const VBindDirective = (node, attributes = {}, data, curComponentNodeRef) => {
 
   const handle = (data) => {
     vBindAttributes.forEach(({ attributeKey, path }) => {
-      node.setAttribute(
-        attributeKey,
-        getValueByPath(data, path) ?? getValueByPath(curComponentNodeRef, path)
-      );
+      node.setAttribute(attributeKey, getValueByPath(data, path) ?? getValueByPath(curComponentNodeRef, path));
     });
   };
 
@@ -104,13 +97,7 @@ VBindDirective.getVBindAttributes = (attributes) =>
 /**
  * @todo the value of `v-if` should be evaluated as an expression.
  */
-const VIfDirective = (
-  node,
-  attributes = {},
-  data,
-  curComponentNodeRef,
-  componentStack
-) => {
+const VIfDirective = (node, attributes = {}, data, curComponentNodeRef, componentStack) => {
   let vIfTemplateRef = null;
   let nextSibling = null;
   let parentNode = null;
@@ -127,7 +114,7 @@ const VIfDirective = (
     const vIfTemplateParseStack = Stack();
 
     // put an mimic component node on top of stack to collect all components within `v-if` template.
-    rootComponentOfVIf = createComponent(function VIf() {});
+    rootComponentOfVIf = extendComponent(function VIf() {}, curComponentNodeRef);
     componentStack.push(rootComponentOfVIf);
 
     vIfTemplateParseStack.push({ element: node, label });
@@ -137,7 +124,7 @@ const VIfDirective = (
       componentStack,
       vIfTemplateDirectiveQueue,
       data,
-      curComponentNodeRef
+      rootComponentOfVIf
     );
     vIfTemplateRef = rootRef;
 
@@ -156,19 +143,15 @@ const VIfDirective = (
     }
   };
 
-  const handle = (data, isUpdate) => {
-    const value =
-      getValueByPath(data, vIfExpression) ??
-      getValueByPath(curComponentNodeRef, vIfExpression);
+  const handle = (data) => {
+    const value = getValueByPath(data, vIfExpression) ?? getValueByPath(curComponentNodeRef, vIfExpression);
 
     if (value) {
       _insertVIfTemplateRef(vIfTemplateRef);
-      vIfTemplateDirectiveQueue
-        .getItems()
-        .forEach((directive) => directive.handle(data));
-      isUpdate && activateComponent(rootComponentOfVIf);
+      vIfTemplateDirectiveQueue.getItems().forEach((directive) => directive.handle(data));
+      activateComponent(rootComponentOfVIf);
     } else {
-      isUpdate && destoryComponent(rootComponentOfVIf);
+      destoryComponent(rootComponentOfVIf);
       nextSibling = vIfTemplateRef.nextSibling;
       parentNode = vIfTemplateRef.parentNode;
       vIfTemplateRef?.parentNode?.removeChild(vIfTemplateRef);
@@ -179,7 +162,7 @@ const VIfDirective = (
     if (isVIf()) {
       const value = get(data, vIfExpression);
       value?.watch(() => {
-        handle(data, true);
+        handle(data);
       });
     }
   })();
@@ -195,14 +178,7 @@ const VIfDirective = (
  * @todo the items looped over in `v-for` can be deconstructed
  * as a form like (item, index).
  */
-const VForDirective = (
-  node,
-  attributes = {},
-  data,
-  label,
-  curComponentNodeRef,
-  componentStack
-) => {
+const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, componentStack) => {
   let arrayKey = '';
   let itemName = '';
   let vForTemplate = '';
@@ -236,9 +212,7 @@ const VForDirective = (
   };
 
   const _getArray = (data) => {
-    const array =
-      getValueByPath(data, arrayKey) ??
-      getValueByPath(curComponentNodeRef, arrayKey);
+    const array = getValueByPath(data, arrayKey) ?? getValueByPath(curComponentNodeRef, arrayKey);
 
     return array;
   };
@@ -248,8 +222,7 @@ const VForDirective = (
     const array = _getArray(data);
     const firstItem = array?.[0];
 
-    const { index, vForTemplateRef, vForTemplateDirectiveQueue } =
-      _parseChildTemplate(childTemplate, label, firstItem);
+    const { index, vForTemplateRef, vForTemplateDirectiveQueue } = _parseChildTemplate(childTemplate, label, firstItem);
 
     array.length > 0 &&
       vForTemplateParsedArtifactMemory.push({
@@ -299,16 +272,14 @@ const VForDirective = (
 
   const _findVForTemplateParsedArtifactInMemory = (index, trackByValue) => {
     let vForTemplateParsedArtifact = null;
-    const { trackByValue: prevTrackByValue } =
-      vForTemplateParsedArtifactMemory[index] ?? {};
+    const { trackByValue: prevTrackByValue } = vForTemplateParsedArtifactMemory[index] ?? {};
 
     if (prevTrackByValue === trackByValue) {
       vForTemplateParsedArtifact = vForTemplateParsedArtifactMemory[index];
     } else {
       vForTemplateParsedArtifact =
         vForTemplateParsedArtifactMemory.find(
-          ({ trackByValue: prevTrackByValue }) =>
-            prevTrackByValue === trackByValue
+          ({ trackByValue: prevTrackByValue }) => prevTrackByValue === trackByValue
         ) ?? null;
     }
 
@@ -346,27 +317,17 @@ const VForDirective = (
       const trackByValue = item[trackBy] ?? '';
 
       if (trackBy && trackByValue) {
-        vForTemplateParsedArtifact = _findVForTemplateParsedArtifactInMemory(
-          i,
-          trackByValue
-        );
+        vForTemplateParsedArtifact = _findVForTemplateParsedArtifactInMemory(i, trackByValue);
       }
 
       item = _prependItemName(item);
       if (!vForTemplateParsedArtifact) {
-        vForTemplateParsedArtifact = _parseChildTemplate(
-          vForTemplate,
-          label,
-          item
-        );
+        vForTemplateParsedArtifact = _parseChildTemplate(vForTemplate, label, item);
       }
 
-      const { vForTemplateRef, vForTemplateDirectiveQueue, alive } =
-        vForTemplateParsedArtifact;
+      const { vForTemplateRef, vForTemplateDirectiveQueue, alive } = vForTemplateParsedArtifact;
       _insertVForTemplateRef(vForTemplateRef);
-      vForTemplateDirectiveQueue
-        .getItems()
-        .forEach((directive) => directive.handle(item));
+      vForTemplateDirectiveQueue.getItems().forEach((directive) => directive.handle(item));
       // for one without alive, meaning that it's newly created, so needed to push into memory cache.
       if (!alive) {
         vForTemplateParsedArtifactMemory.push({
@@ -398,30 +359,22 @@ const VForDirective = (
 };
 
 /**
- * This verison just implement with providing a method name to bind.
+ * This verison just implement a method name to bind.
  *
  * @todo
  * - use inline js statement instead of binding directly to a method name.
  * - involve event midifiers.
  */
-const VOnDirective = (
-  node,
-  attributes = {},
-  isComponent = false,
-  curComponentNodeRef
-) => {
-  const vonEvents = Object.entries(attributes).reduce(
-    (acc, [attributeName, methodStatement]) => {
-      const attributeNameMatch = attributeName.match(/^v-on\s*:\s*(\w+)/);
-      if (attributeNameMatch !== null) {
-        const eventType = attributeNameMatch[1]?.trim();
-        acc.push({ eventType, methodStatement });
-      }
+const VOnDirective = (node, attributes = {}, isComponent = false, curComponentNodeRef) => {
+  const vonEvents = Object.entries(attributes).reduce((acc, [attributeName, methodStatement]) => {
+    const attributeNameMatch = attributeName.match(/^v-on\s*:\s*(\w+)/);
+    if (attributeNameMatch !== null) {
+      const eventType = attributeNameMatch[1]?.trim();
+      acc.push({ eventType, methodStatement });
+    }
 
-      return acc;
-    },
-    []
-  );
+    return acc;
+  }, []);
 
   const isVon = () => {
     return vonEvents.length !== 0;
@@ -462,10 +415,4 @@ const VOnDirective = (
   }
 };
 
-export {
-  MustacheDirective,
-  VBindDirective,
-  VIfDirective,
-  VForDirective,
-  VOnDirective,
-};
+export { MustacheDirective, VBindDirective, VIfDirective, VForDirective, VOnDirective };

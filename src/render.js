@@ -3,7 +3,7 @@ import Stack from './stack';
 import Queue from './queue';
 import { createComponent, filterPropsByDeclaration } from './components';
 import { assign } from './observe';
-import { executeLifeCycleDidMounted } from './lifecycle';
+import { construct } from './lifecycle';
 
 let rootComponentNodeRef = null;
 const componentStack = Stack();
@@ -34,21 +34,16 @@ const render = (component, props = {}, container) => {
     componentNode
   );
 
-  directiveQueue
-    .getItems()
-    .forEach((directive) => directive.handle(combinedDataAndProps));
+  directiveQueue.getItems().forEach((directive) => directive.handle(combinedDataAndProps));
 
   if (container) {
-    (typeof container === 'string'
-      ? document.querySelector(container)
-      : container
-    ).append(rootRef);
+    (typeof container === 'string' ? document.querySelector(container) : container).append(rootRef);
 
     rootComponentNodeRef = componentNode;
   }
 
   componentNode.$el = rootRef;
-  executeLifeCycleDidMounted(componentNode);
+  construct(componentNode);
 
   return { rootRef, componentNode };
 };
