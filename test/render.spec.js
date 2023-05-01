@@ -4,15 +4,7 @@
 
 /* eslint-disable no-undef */
 import render, { componentStack, rootComponentNodeRef } from '../src/render';
-import {
-  useComponents,
-  useData,
-  useEffect,
-  useEvents,
-  useMethods,
-  useProps,
-  useRef,
-} from '../src/hooks';
+import { useComponents, useData, useEffect, useEvents, useMethods, useProps, useRef } from '../src/hooks';
 
 const getComponentTree = (componentNodeRef, item) => {
   if (!item) item = {};
@@ -62,9 +54,7 @@ test('render template with mustache braces', () => {
   };
 
   render(component, {}, document.body);
-  expect(document.body.innerHTML).toBe(
-    '<div class="root"><a href="www.google.com">Navtigate to Google</a></div>'
-  );
+  expect(document.body.innerHTML).toBe('<div class="root"><a href="www.google.com">Navtigate to Google</a></div>');
 });
 
 test('render template with mustache braces that reacts to data change', () => {
@@ -83,14 +73,10 @@ test('render template with mustache braces that reacts to data change', () => {
   };
 
   render(component, {}, document.body);
-  expect(document.body.innerHTML).toBe(
-    '<div class="root"><a href="www.google.com">Navigate to Google</a></div>'
-  );
+  expect(document.body.innerHTML).toBe('<div class="root"><a href="www.google.com">Navigate to Google</a></div>');
   data.site = 'Microsoft';
   data.url = 'www.microsoft.com';
-  expect(document.body.innerHTML).toBe(
-    '<div class="root"><a href="www.microsoft.com">Navigate to Microsoft</a></div>'
-  );
+  expect(document.body.innerHTML).toBe('<div class="root"><a href="www.microsoft.com">Navigate to Microsoft</a></div>');
 });
 
 test('render template with v-bind directive', () => {
@@ -349,9 +335,7 @@ test('render template with v-for directive working in array contains premitive t
   };
 
   render(component, {}, document.body);
-  expect(document.body.innerHTML).toBe(
-    '<div class="list"><ul><li>1</li><li>2</li><li>3</li></ul></div>'
-  );
+  expect(document.body.innerHTML).toBe('<div class="list"><ul><li>1</li><li>2</li><li>3</li></ul></div>');
 });
 
 test('render template with v-on directive to bind event', () => {
@@ -478,9 +462,11 @@ test('render template with parent and child components', () => {
     '<div id="root"><h3>what do you want to search?</h3><div class="search-box"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div><p>search for whatever you prefer without any doubt</p></div>'
   );
   expect(rootComponentNodeRef.component).toBe(componentA);
-  expect(rootComponentNodeRef._children.elementAt(0).component).toBe(
-    componentB
-  );
+  for (const a of rootComponentNodeRef._children.elementAt(0)._children) {
+    console.log(a);
+  }
+  expect(rootComponentNodeRef._children.elementAt(0).component).toBe(componentB);
+  expect(rootComponentNodeRef._children.elementAt(0)._children.sizeOf()).toBe(3);
 });
 
 test('render template with parent and multiple child components', () => {
@@ -584,15 +570,9 @@ test('render template with parent and multiple child components', () => {
   expect(rootComponentNodeRef.component).toBe(componentA);
   expect(componentStack.items).toHaveLength(1);
   expect(rootComponentNodeRef._children.sizeOf()).toBe(3);
-  expect(rootComponentNodeRef._children.elementAt(0).component).toBe(
-    componentB
-  );
-  expect(rootComponentNodeRef._children.elementAt(1).component).toBe(
-    componentC
-  );
-  expect(rootComponentNodeRef._children.elementAt(2).component).toBe(
-    componentC
-  );
+  expect(rootComponentNodeRef._children.elementAt(0).component).toBe(componentB);
+  expect(rootComponentNodeRef._children.elementAt(1).component).toBe(componentC);
+  expect(rootComponentNodeRef._children.elementAt(2).component).toBe(componentC);
 });
 
 test('render template with in-depth descendant components', () => {
@@ -694,16 +674,9 @@ test('render template with in-depth descendant components', () => {
   expect(rootComponentNodeRef.component).toBe(componentA);
   expect(componentStack.items).toHaveLength(1);
   expect(rootComponentNodeRef._children.sizeOf()).toBe(1);
-  expect(rootComponentNodeRef._children.elementAt(0).component).toBe(
-    componentB
-  );
-  expect(
-    rootComponentNodeRef._children.elementAt(0)._children.elementAt(0).component
-      .name
-  ).toBe('VFor');
-  expect(
-    rootComponentNodeRef._children.elementAt(0)._children.elementAt(1).component
-  ).toBe(componentC);
+  expect(rootComponentNodeRef._children.elementAt(0).component).toBe(componentB);
+  expect(rootComponentNodeRef._children.elementAt(0)._children.elementAt(0).component.name).toBe('VFor');
+  expect(rootComponentNodeRef._children.elementAt(0)._children.elementAt(1).component).toBe(componentC);
 });
 
 test('render template with multiple components while data changes', () => {
@@ -1233,13 +1206,8 @@ test.skip('destruture sub-tree components and execute unmount lifecycle in v-if 
 
   rootRef.querySelector('#root').dispatchEvent(new Event('click'));
   expect(aOnClick).toHaveBeenCalledTimes(1);
-  const componentANode = rootComponentNodeRef._children
-    .elementAt(0)
-    ._children.elementAt(0);
-  const componentBNode = rootComponentNodeRef._children
-    .elementAt(0)
-    ._children.elementAt(0)
-    ._children.elementAt(0);
+  const componentANode = rootComponentNodeRef._children.elementAt(0)._children.elementAt(0);
+  const componentBNode = rootComponentNodeRef._children.elementAt(0)._children.elementAt(0)._children.elementAt(0);
   expect(componentANode._unsubsriptionEvents).toHaveLength(1);
   expect(componentBNode._unsubsriptionEvents).toHaveLength(4);
 
@@ -1440,9 +1408,7 @@ test('check correctness of component tree in case of elements siblings or inside
   expect(rootComponentNodeRef.component).toBe(componentA);
   expect(componentStack.items).toHaveLength(1);
   expect(rootComponentNodeRef._children.sizeOf()).toBe(1);
-  expect(rootComponentNodeRef._children.elementAt(0).component).toBe(
-    componentB
-  );
+  expect(rootComponentNodeRef._children.elementAt(0).component).toBe(componentB);
   expect(getComponentTree(rootComponentNodeRef)).toEqual({
     component: 'componentA',
     children: [

@@ -2,8 +2,8 @@ import { get } from 'lodash';
 import { parse } from './template-parser';
 import Stack from './stack';
 import Queue from './queue';
-import { createComponent, extendComponent } from './components';
-import { destoryComponent, activateComponent } from './lifecycle';
+import { extendComponent } from './components';
+import { destoryComponent, activateComponent, construct } from './lifecycle';
 
 const getValueByPath = (data, path) => {
   if (typeof data === 'object') {
@@ -185,7 +185,6 @@ const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, 
   let parentNode = null;
   let nextSibling = null;
   let trackBy = '';
-  let rootComponentOfVFor = null;
   const vForTemplateParsedArtifactMemory = [];
 
   const isVFor = () => {
@@ -193,9 +192,6 @@ const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, 
   };
 
   if (isVFor()) {
-    // put an mimic component node on top of stack to collect all components within `v-for` template.
-    rootComponentOfVFor = createComponent(function VFor() {});
-
     const expression = attributes['v-for'];
     [itemName, arrayKey] = expression.split('in');
 
@@ -222,13 +218,18 @@ const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, 
     const array = _getArray(data);
     const firstItem = array?.[0];
 
-    const { index, vForTemplateRef, vForTemplateDirectiveQueue } = _parseChildTemplate(childTemplate, label, firstItem);
+    const { index, vForTemplateRef, vForTemplateDirectiveQueue, rootComponentOfVFor } = _parseChildTemplate(
+      childTemplate,
+      label,
+      firstItem
+    );
 
     array.length > 0 &&
       vForTemplateParsedArtifactMemory.push({
         vForTemplateRef,
         vForTemplateDirectiveQueue,
         trackByValue: firstItem?.[trackBy] ?? '',
+        rootComponentOfVFor,
       });
 
     return { vForTemplateEndIndex: index, vForPlaceholderRef: node };
@@ -237,6 +238,8 @@ const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, 
   const _parseChildTemplate = (childTemplate, label, arrayItem) => {
     const vForTemplateParseStack = Stack();
     const vForTemplateDirectiveQueue = Queue();
+    // put an mimic component node on top of stack to collect all components within `v-for` template.
+    const rootComponentOfVFor = extendComponent(function VFor() {}, curComponentNodeRef);
 
     vForTemplateParseStack.push({ element: node.cloneNode(), label });
     componentStack.push(rootComponentOfVFor);
@@ -246,10 +249,10 @@ const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, 
       componentStack,
       vForTemplateDirectiveQueue,
       arrayItem,
-      curComponentNodeRef
+      rootComponentOfVFor
     );
 
-    return { vForTemplateRef: rootRef, vForTemplateDirectiveQueue, index };
+    return { vForTemplateRef: rootRef, vForTemplateDirectiveQueue, index, rootComponentOfVFor };
   };
 
   const _substitutePlaceholderNode = (node) => {
@@ -293,11 +296,9 @@ const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, 
   const _clear = () => {
     let length = vForTemplateParsedArtifactMemory.length;
     for (let i = length - 1; i >= 0; i--) {
-      const { vForTemplateRef, alive } = vForTemplateParsedArtifactMemory[i];
+      const { vForTemplateRef, alive, rootComponentOfVFor } = vForTemplateParsedArtifactMemory[i];
       if (!alive) {
-        if (rootComponentOfVFor._children.sizeOf() > 0) {
-          destoryComponent(rootComponentOfVFor._children.elementAt(i), true);
-        }
+        destoryComponent(rootComponentOfVFor, true);
         vForTemplateRef.parentNode?.removeChild?.(vForTemplateRef);
         vForTemplateParsedArtifactMemory.splice(i, 1);
       } else {
@@ -325,7 +326,7 @@ const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, 
         vForTemplateParsedArtifact = _parseChildTemplate(vForTemplate, label, item);
       }
 
-      const { vForTemplateRef, vForTemplateDirectiveQueue, alive } = vForTemplateParsedArtifact;
+      const { vForTemplateRef, vForTemplateDirectiveQueue, alive, rootComponentOfVFor } = vForTemplateParsedArtifact;
       _insertVForTemplateRef(vForTemplateRef);
       vForTemplateDirectiveQueue.getItems().forEach((directive) => directive.handle(item));
       // for one without alive, meaning that it's newly created, so needed to push into memory cache.
@@ -335,7 +336,10 @@ const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, 
           vForTemplateDirectiveQueue,
           trackByValue,
           alive: true,
+          rootComponentOfVFor,
         });
+
+        construct(rootComponentOfVFor);
       }
     }
     _clear();
