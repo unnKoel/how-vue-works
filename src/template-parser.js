@@ -2,20 +2,9 @@
  * This is a tool to parse html tag and produce vitual dom or a render function
  * which creates real dom structure.
  */
-import {
-  MustacheDirective,
-  VBindDirective,
-  VIfDirective,
-  VForDirective,
-  VOnDirective,
-} from './directives';
+import { MustacheDirective, VBindDirective, VIfDirective, VForDirective, VOnDirective } from './directives';
 
-import {
-  getComponent,
-  getDynamicProps,
-  getStaticProps,
-  filterDirectiveSupported,
-} from './components';
+import { getComponent, getDynamicProps, getStaticProps, filterDirectiveSupported } from './components';
 import render from './render';
 import { HtmlSytaxError } from './errors';
 
@@ -142,17 +131,20 @@ const linkParentChildComponent = (parentComponentNode, componentNode) => {
   componentNode._parent = parentComponentNode;
 };
 
-const structureComponentTree = (componentStack) => {
-  const childComponentNode = componentStack.pop();
+const structureComponentTree = (componentStack, curComponentNodeRef) => {
+  let childComponentNode = null;
 
-  let parentComponentNode = componentStack.peek();
-  if (parentComponentNode) {
-    linkParentChildComponent(parentComponentNode, childComponentNode);
-  } else {
-    parentComponentNode = childComponentNode;
+  while (childComponentNode !== curComponentNodeRef) {
+    childComponentNode = componentStack.pop();
+    console.log(childComponentNode);
+    let parentComponentNode = componentStack.peek();
+    // if (childComponentNode === undefined) break;
+    if (parentComponentNode) {
+      linkParentChildComponent(parentComponentNode, childComponentNode);
+    } else {
+      parentComponentNode = childComponentNode;
+    }
   }
-
-  return parentComponentNode;
 };
 
 const createElement = ({ tag, attributes }) => {
@@ -174,25 +166,8 @@ const linkParentChild = (parentRef, childRef) => {
 /**
  * parse html template.
  * @todo abstract the end mark of tag to validate correctness of html.
- *
- * @param {*} template
- * @param {*} htmlParseStack
- * @param {*} componentStack
- * @param {*} directiveQueue
- * @param {*} unsubsriptionEvents
- * @param {*} data
- * @param {*} methods
- * @param {*} localEnrolledIncomponents
- * @returns
  */
-const parse = (
-  template = '',
-  htmlParseStack,
-  componentStack,
-  directiveQueue,
-  data = {},
-  curComponentNodeRef = {}
-) => {
+const parse = (template = '', htmlParseStack, componentStack, directiveQueue, data = {}, curComponentNodeRef = {}) => {
   const { components: localEnrolledIncomponents = {} } = curComponentNodeRef;
 
   template = template.replace(/\n/g, '');
@@ -206,14 +181,8 @@ const parse = (
       const siblingChar = template.at(index + 1);
       // current char is the begining of tag.
       if (siblingChar !== '/') {
-        const { tag, index: indexOfStartTagName } = abstractTag(
-          template,
-          index
-        );
-        let { attributes, index: indexOfStartTag } = abstractAttributes(
-          template,
-          indexOfStartTagName
-        );
+        const { tag, index: indexOfStartTagName } = abstractTag(template, index);
+        let { attributes, index: indexOfStartTag } = abstractAttributes(template, indexOfStartTagName);
         index = indexOfStartTag - 1;
         let element = null;
         const component = getComponent(localEnrolledIncomponents, tag);
@@ -231,27 +200,18 @@ const parse = (
         }
 
         if (Object.keys(attributes).length) {
-          const vBindDirective = VBindDirective(
-            element,
-            attributes,
-            data,
-            curComponentNodeRef
-          );
+          const vBindDirective = VBindDirective(element, attributes, data, curComponentNodeRef);
           vBindDirective.isVBind() && directiveQueue.enqueue(vBindDirective);
 
-          const vIfDirective = VIfDirective(
-            element,
-            attributes,
-            data,
-            curComponentNodeRef,
-            componentStack
-          );
+          const vIfDirective = VIfDirective(element, attributes, data, curComponentNodeRef, componentStack);
           if (vIfDirective.isVIf()) {
-            const { vIfTemplateEndIndex, vIfTemplateRef } =
-              vIfDirective.parseChildTemplate(template.substring(++index), {
+            const { vIfTemplateEndIndex, vIfTemplateRef } = vIfDirective.parseChildTemplate(
+              template.substring(++index),
+              {
                 tag,
                 vIf: true,
-              });
+              }
+            );
             directiveQueue.enqueue(vIfDirective);
             index += vIfTemplateEndIndex;
             element = vIfTemplateRef;
@@ -269,8 +229,9 @@ const parse = (
             componentStack
           );
           if (vForDirective.isVFor()) {
-            const { vForTemplateEndIndex, vForPlaceholderRef } =
-              vForDirective.parseChildTemplate(template.substring(++index));
+            const { vForTemplateEndIndex, vForPlaceholderRef } = vForDirective.parseChildTemplate(
+              template.substring(++index)
+            );
             directiveQueue.enqueue(vForDirective);
             index += vForTemplateEndIndex;
             element = vForPlaceholderRef;
@@ -284,19 +245,15 @@ const parse = (
       } else {
         const { tagEnd, index: tagEndIndex } = abstractTagEnd(template, index);
         // current char is the ending of tag.
-        const { parentRef, label } = structureTree(
-          linkParentChild,
-          htmlParseStack,
-          tagEnd
-        );
+        const { parentRef, label } = structureTree(linkParentChild, htmlParseStack, tagEnd);
         rootRef = parentRef;
 
         const component = getComponent(localEnrolledIncomponents, tagEnd);
         if (component || label?.vIf || label?.vFor) {
-          structureComponentTree(componentStack);
+          structureComponentTree(componentStack, curComponentNodeRef);
         }
 
-        if (label?.vIf || label?.vFor) {
+        if (label?.vIf || label?.vFor || label?.vItemOfFor) {
           return { rootRef, index: index - 1 };
         }
         index = tagEndIndex - 1;
@@ -308,14 +265,8 @@ const parse = (
       if (text !== '') {
         const textNode = document.createTextNode(text);
         linkParentChild(rootRef, textNode);
-        const mustacheInstance = MustacheDirective(
-          textNode,
-          text,
-          data,
-          curComponentNodeRef
-        );
-        mustacheInstance.isMustache() &&
-          directiveQueue.enqueue(mustacheInstance);
+        const mustacheInstance = MustacheDirective(textNode, text, data, curComponentNodeRef);
+        mustacheInstance.isMustache() && directiveQueue.enqueue(mustacheInstance);
       }
     } else if (char === '/' && template.at(index + 1) === '>') {
       // <br /> or <br/>
@@ -327,12 +278,4 @@ const parse = (
   return { rootRef, index };
 };
 
-export {
-  abstractTag,
-  abstractAttributes,
-  abstractText,
-  abstractTagEnd,
-  linkParentChildComponent,
-  parse,
-  DIRECTIVES,
-};
+export { abstractTag, abstractAttributes, abstractText, abstractTagEnd, linkParentChildComponent, parse, DIRECTIVES };

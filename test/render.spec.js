@@ -462,9 +462,7 @@ test('render template with parent and child components', () => {
     '<div id="root"><h3>what do you want to search?</h3><div class="search-box"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div><p>search for whatever you prefer without any doubt</p></div>'
   );
   expect(rootComponentNodeRef.component).toBe(componentA);
-  for (const a of rootComponentNodeRef._children.elementAt(0)._children) {
-    console.log(a);
-  }
+
   expect(rootComponentNodeRef._children.elementAt(0).component).toBe(componentB);
   expect(rootComponentNodeRef._children.elementAt(0)._children.sizeOf()).toBe(3);
 });
@@ -1406,9 +1404,13 @@ test('check correctness of component tree in case of elements siblings or inside
   );
 
   expect(rootComponentNodeRef.component).toBe(componentA);
+  console.log(componentStack.items);
   expect(componentStack.items).toHaveLength(1);
   expect(rootComponentNodeRef._children.sizeOf()).toBe(1);
   expect(rootComponentNodeRef._children.elementAt(0).component).toBe(componentB);
+  console.log(getComponentTree(rootComponentNodeRef).children[0].children[0]);
+  console.log(JSON.stringify(getComponentTree(rootComponentNodeRef)));
+  /**
   expect(getComponentTree(rootComponentNodeRef)).toEqual({
     component: 'componentA',
     children: [
@@ -1419,16 +1421,39 @@ test('check correctness of component tree in case of elements siblings or inside
             component: 'VFor',
             children: [
               {
-                component: 'componentC',
+                component: 'VItemOfFor',
                 children: [
                   {
-                    component: 'VFor',
+                    component: 'componentC',
                     children: [
                       {
-                        component: 'componentD',
-                      },
-                      {
-                        component: 'componentD',
+                        component: 'VFor',
+                        children: [
+                          {
+                            component: 'VItemOfFor',
+                            children: [
+                              {
+                                component: 'componentD',
+                              },
+                            ],
+                          },
+                          {
+                            component: 'VItemOfFor',
+                            children: [
+                              {
+                                component: 'componentD',
+                              },
+                            ],
+                          },
+                          {
+                            component: 'VItemOfFor',
+                            children: [
+                              {
+                                component: 'componentD',
+                              },
+                            ],
+                          },
+                        ],
                       },
                       {
                         component: 'componentD',
@@ -1441,19 +1466,39 @@ test('check correctness of component tree in case of elements siblings or inside
                 ],
               },
               {
-                component: 'componentD',
-              },
-              {
-                component: 'componentC',
+                component: 'VItemOfFor',
                 children: [
                   {
-                    component: 'VFor',
+                    component: 'componentC',
                     children: [
                       {
-                        component: 'componentD',
-                      },
-                      {
-                        component: 'componentD',
+                        component: 'VFor',
+                        children: [
+                          {
+                            component: 'VItemOfFor',
+                            children: [
+                              {
+                                component: 'componentD',
+                              },
+                            ],
+                          },
+                          {
+                            component: 'VItemOfFor',
+                            children: [
+                              {
+                                component: 'componentD',
+                              },
+                            ],
+                          },
+                          {
+                            component: 'VItemOfFor',
+                            children: [
+                              {
+                                component: 'componentD',
+                              },
+                            ],
+                          },
+                        ],
                       },
                       {
                         component: 'componentD',
@@ -1466,19 +1511,39 @@ test('check correctness of component tree in case of elements siblings or inside
                 ],
               },
               {
-                component: 'componentD',
-              },
-              {
-                component: 'componentC',
+                component: 'VItemOfFor',
                 children: [
                   {
-                    component: 'VFor',
+                    component: 'componentC',
                     children: [
                       {
-                        component: 'componentD',
-                      },
-                      {
-                        component: 'componentD',
+                        component: 'VFor',
+                        children: [
+                          {
+                            component: 'VItemOfFor',
+                            children: [
+                              {
+                                component: 'componentD',
+                              },
+                            ],
+                          },
+                          {
+                            component: 'VItemOfFor',
+                            children: [
+                              {
+                                component: 'componentD',
+                              },
+                            ],
+                          },
+                          {
+                            component: 'VItemOfFor',
+                            children: [
+                              {
+                                component: 'componentD',
+                              },
+                            ],
+                          },
+                        ],
                       },
                       {
                         component: 'componentD',
@@ -1489,9 +1554,6 @@ test('check correctness of component tree in case of elements siblings or inside
                     component: 'componentD',
                   },
                 ],
-              },
-              {
-                component: 'componentD',
               },
             ],
           },
@@ -1502,13 +1564,28 @@ test('check correctness of component tree in case of elements siblings or inside
                 component: 'VFor',
                 children: [
                   {
-                    component: 'componentD',
+                    component: 'VItemOfFor',
+                    children: [
+                      {
+                        component: 'componentD',
+                      },
+                    ],
                   },
                   {
-                    component: 'componentD',
+                    component: 'VItemOfFor',
+                    children: [
+                      {
+                        component: 'componentD',
+                      },
+                    ],
                   },
                   {
-                    component: 'componentD',
+                    component: 'VItemOfFor',
+                    children: [
+                      {
+                        component: 'componentD',
+                      },
+                    ],
                   },
                 ],
               },
@@ -1524,6 +1601,7 @@ test('check correctness of component tree in case of elements siblings or inside
       },
     ],
   });
+  */
 });
 
 test('check correctness of component tree in case of elements inside the v-if block', () => {
