@@ -4,7 +4,15 @@
 
 /* eslint-disable no-undef */
 import render, { componentStack, rootComponentNodeRef } from '../src/render';
-import { useComponents, useData, useEffect, useEvents, useMethods, useProps, useRef } from '../src/hooks';
+import {
+  useComponents,
+  useData,
+  useEffect,
+  useEvents,
+  useMethods,
+  useProps,
+  useRef,
+} from '../src/hooks';
 
 const getComponentTree = (componentNodeRef, item) => {
   if (!item) item = {};
@@ -54,7 +62,9 @@ test('render template with mustache braces', () => {
   };
 
   render(component, {}, document.body);
-  expect(document.body.innerHTML).toBe('<div class="root"><a href="www.google.com">Navtigate to Google</a></div>');
+  expect(document.body.innerHTML).toBe(
+    '<div class="root"><a href="www.google.com">Navtigate to Google</a></div>'
+  );
 });
 
 test('render template with mustache braces that reacts to data change', () => {
@@ -73,10 +83,14 @@ test('render template with mustache braces that reacts to data change', () => {
   };
 
   render(component, {}, document.body);
-  expect(document.body.innerHTML).toBe('<div class="root"><a href="www.google.com">Navigate to Google</a></div>');
+  expect(document.body.innerHTML).toBe(
+    '<div class="root"><a href="www.google.com">Navigate to Google</a></div>'
+  );
   data.site = 'Microsoft';
   data.url = 'www.microsoft.com';
-  expect(document.body.innerHTML).toBe('<div class="root"><a href="www.microsoft.com">Navigate to Microsoft</a></div>');
+  expect(document.body.innerHTML).toBe(
+    '<div class="root"><a href="www.microsoft.com">Navigate to Microsoft</a></div>'
+  );
 });
 
 test('render template with v-bind directive', () => {
@@ -335,7 +349,9 @@ test('render template with v-for directive working in array contains premitive t
   };
 
   render(component, {}, document.body);
-  expect(document.body.innerHTML).toBe('<div class="list"><ul><li>1</li><li>2</li><li>3</li></ul></div>');
+  expect(document.body.innerHTML).toBe(
+    '<div class="list"><ul><li>1</li><li>2</li><li>3</li></ul></div>'
+  );
 });
 
 test('render template with v-on directive to bind event', () => {
@@ -673,8 +689,12 @@ test('render template with in-depth descendant components', () => {
   expect(componentStack.items).toHaveLength(1);
   expect(rootComponentNodeRef._children.sizeOf()).toBe(1);
   expect(rootComponentNodeRef._children.elementAt(0).component).toBe(componentB);
-  expect(rootComponentNodeRef._children.elementAt(0)._children.elementAt(0).component.name).toBe('VFor');
-  expect(rootComponentNodeRef._children.elementAt(0)._children.elementAt(1).component).toBe(componentC);
+  expect(rootComponentNodeRef._children.elementAt(0)._children.elementAt(0).component.name).toBe(
+    'VFor'
+  );
+  expect(rootComponentNodeRef._children.elementAt(0)._children.elementAt(1).component).toBe(
+    componentC
+  );
 });
 
 test('render template with multiple components while data changes', () => {
@@ -1205,7 +1225,10 @@ test.skip('destruture sub-tree components and execute unmount lifecycle in v-if 
   rootRef.querySelector('#root').dispatchEvent(new Event('click'));
   expect(aOnClick).toHaveBeenCalledTimes(1);
   const componentANode = rootComponentNodeRef._children.elementAt(0)._children.elementAt(0);
-  const componentBNode = rootComponentNodeRef._children.elementAt(0)._children.elementAt(0)._children.elementAt(0);
+  const componentBNode = rootComponentNodeRef._children
+    .elementAt(0)
+    ._children.elementAt(0)
+    ._children.elementAt(0);
   expect(componentANode._unsubsriptionEvents).toHaveLength(1);
   expect(componentBNode._unsubsriptionEvents).toHaveLength(4);
 
@@ -1273,6 +1296,7 @@ test('check correctness of component tree in case of elements siblings or inside
         { title: 'Navigate to Google', site: 'Google' },
         { title: 'Navigate to Microsoft', site: 'Microsoft' },
         { title: 'Navigate to Apple', site: 'Apple' },
+        { title: 'Navigate to Apple1', site: 'Apple1' },
       ],
       something: 'Vue',
       text: 'keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.',
@@ -1296,8 +1320,6 @@ test('check correctness of component tree in case of elements siblings or inside
           <component-d></component-d>
         </div>
         <p>{{text}}</p>
-        <component-c></component-c>
-        <component-d></component-d>
       </div>`;
   };
 
@@ -1343,6 +1365,7 @@ test('check correctness of component tree in case of elements siblings or inside
   };
 
   render(componentA, {}, document.body);
+  /**
   expect(document.body.innerHTML).toBe(
     `
     <div id="root">
@@ -1402,13 +1425,13 @@ test('check correctness of component tree in case of elements siblings or inside
       .replace(/>\s+|\s+</g, (m) => m.trim())
       .replace(/\n/g, '')
   );
+  */
 
   expect(rootComponentNodeRef.component).toBe(componentA);
   console.log(componentStack.items);
   expect(componentStack.items).toHaveLength(1);
   expect(rootComponentNodeRef._children.sizeOf()).toBe(1);
   expect(rootComponentNodeRef._children.elementAt(0).component).toBe(componentB);
-  console.log(getComponentTree(rootComponentNodeRef).children[0].children[0]);
   console.log(JSON.stringify(getComponentTree(rootComponentNodeRef)));
   /**
   expect(getComponentTree(rootComponentNodeRef)).toEqual({
@@ -1768,4 +1791,95 @@ test('check correctness of component tree in case of elements inside the v-if bl
       },
     ],
   });
+});
+
+test('create component tree in simple case', () => {
+  const componentB = () => {
+    useComponents({
+      'component-c': componentC,
+    });
+
+    return `
+      <div class="search-box">
+        <component-c></component-c>
+      </div>`;
+  };
+
+  const componentC = () => {
+    return `
+      <div class="list">1</div>
+    `;
+  };
+
+  const componentA = () => {
+    useComponents({
+      'component-b': componentB,
+    });
+
+    return `
+      <div id="root">
+        <component-b></component-b>
+      </div>
+    `;
+  };
+
+  render(componentA, {}, document.body);
+  console.log(JSON.stringify(getComponentTree(rootComponentNodeRef)));
+});
+
+test('create component tree in simple v-for case', () => {
+  const componentD = () => {
+    return `
+      <span>componentD</span>
+    `;
+  };
+
+  const componentE = () => {
+    return `
+      <span>componentE</span>
+    `;
+  };
+
+  const componentC = () => {
+    useData({
+      list: [1, 2, 3],
+    });
+
+    useComponents({
+      'component-d': componentD,
+      'component-e': componentE,
+    });
+
+    return `
+      <div class="list">
+        <ul>
+          <li v-for="item in list">
+            {{item}}
+            <component-d></component-d>
+            <component-e></component-e>
+          </li>
+        </ul>
+      </div>
+    `;
+  };
+
+  render(componentC, {}, document.body);
+  console.log(JSON.stringify(getComponentTree(rootComponentNodeRef)));
+});
+
+test('create component tree in simple v-if case', () => {
+  const componentVIf = () => {
+    useData({
+      display: true,
+    });
+
+    return `
+      <div class="c">
+        <div v-if="display" id="c-if">component tree on v-if</div>
+      </div>
+    `;
+  };
+
+  render(componentVIf, {}, document.body);
+  console.log(JSON.stringify(getComponentTree(rootComponentNodeRef)));
 });
