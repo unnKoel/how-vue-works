@@ -1,7 +1,6 @@
-import LinkedList from './linked-list';
-
 const executeLifeCycleDidMounted = (componentNodeRef) => {
-  componentNodeRef._beforeUnmounted = componentNodeRef._didMounted && componentNodeRef._didMounted();
+  componentNodeRef._beforeUnmounted =
+    componentNodeRef._didMounted && componentNodeRef._didMounted();
 };
 
 const executeLifeCycleBeforeUnmounted = (componentNodeRef) => {
@@ -24,25 +23,19 @@ const deconstruct = (componentNodeRef) => {
   executeLifeCycleBeforeUnmounted(componentNodeRef);
 };
 
-const destoryComponent = (componentNodeRef, clean = false) => {
+const destoryComponent = (componentNodeRef) => {
   destoryChildComponentTree(componentNodeRef);
   deconstruct(componentNodeRef);
 
-  if (clean) {
-    const parentComponentNodeRef = componentNodeRef._parent;
-    parentComponentNodeRef?._children.removeElement(componentNodeRef);
-  }
+  const parentComponentNodeRef = componentNodeRef._parent;
+  parentComponentNodeRef?._children.removeElement(componentNodeRef);
 };
 
-const destoryChildComponentTree = (componentNodeRef, deep = 0, clean = false) => {
+const destoryChildComponentTree = (componentNodeRef) => {
   const { _children } = componentNodeRef;
   for (let child of _children) {
-    destoryChildComponentTree(child, ++deep);
+    destoryChildComponentTree(child);
     deconstruct(child);
-  }
-
-  if (clean && --deep === 0) {
-    componentNodeRef._children = LinkedList();
   }
 };
 
@@ -56,7 +49,7 @@ const activateComponent = (componentNodeRef) => {
 
   const { _children } = componentNodeRef;
   for (let child of _children) {
-    construct(child);
+    activateComponent(child);
   }
 };
 

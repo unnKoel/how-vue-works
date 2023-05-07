@@ -3,7 +3,7 @@ import { parse } from './template-parser';
 import Stack from './stack';
 import Queue from './queue';
 import { extendComponent } from './components';
-import { destoryComponent, activateComponent, construct } from './lifecycle';
+import { destoryComponent, activateComponent } from './lifecycle';
 
 const getValueByPath = (data, path) => {
   if (typeof data === 'object') {
@@ -235,6 +235,7 @@ const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, 
         trackByValue: firstItem?.[trackBy] ?? '',
         componentItemOfVFor,
       });
+    activateComponent(componentItemOfVFor);
 
     return { vForTemplateEndIndex: index, vForPlaceholderRef: node };
   };
@@ -247,7 +248,6 @@ const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, 
 
     vForTemplateParseStack.push({ element: node.cloneNode(), label });
     componentStack.push([componentVFor, componentItemOfVFor]);
-    // componentStack.push(componentItemOfVFor);
     const { rootRef, index } = parse(
       childTemplate,
       vForTemplateParseStack,
@@ -303,7 +303,7 @@ const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, 
     for (let i = length - 1; i >= 0; i--) {
       const { vForTemplateRef, alive, componentItemOfVFor } = vForTemplateParsedArtifactMemory[i];
       if (!alive) {
-        destoryComponent(componentItemOfVFor, true);
+        destoryComponent(componentItemOfVFor);
         vForTemplateRef.parentNode?.removeChild?.(vForTemplateRef);
         vForTemplateParsedArtifactMemory.splice(i, 1);
       } else {
@@ -345,7 +345,7 @@ const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, 
           componentItemOfVFor,
         });
 
-        construct(componentItemOfVFor);
+        activateComponent(componentItemOfVFor);
       }
     }
     _clear();
@@ -369,11 +369,11 @@ const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, 
 };
 
 /**
- * This verison just implement a method name to bind.
+ * This version just implements a method name to bind.
  *
  * @todo
- * - use inline js statement instead of binding directly to a method name.
- * - involve event midifiers.
+ * - Use inline js expression instead of binding directly to a method name.
+ * - Involve event midifiers.
  */
 const VOnDirective = (node, attributes = {}, isComponent = false, curComponentNodeRef) => {
   const vonEvents = Object.entries(attributes).reduce((acc, [attributeName, methodStatement]) => {

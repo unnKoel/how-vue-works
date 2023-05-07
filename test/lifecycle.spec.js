@@ -55,22 +55,13 @@ test('test destory component', () => {
   childComponentNode._beforeUnmounted = mockBeforeUnmounted;
   const mockUnsubscription1 = jest.fn();
   const mockUnsubscription2 = jest.fn();
-  childComponentNode._unsubsriptionEvents = [
-    mockUnsubscription1,
-    mockUnsubscription2,
-  ];
+  childComponentNode._unsubsriptionEvents = [mockUnsubscription1, mockUnsubscription2];
 
   descendantCompnentNode._beforeUnmounted = mockBeforeUnmounted;
-  descendantCompnentNode._unsubsriptionEvents = [
-    mockUnsubscription1,
-    mockUnsubscription2,
-  ];
+  descendantCompnentNode._unsubsriptionEvents = [mockUnsubscription1, mockUnsubscription2];
 
   lastCompnentNode._beforeUnmounted = mockBeforeUnmounted;
-  lastCompnentNode._unsubsriptionEvents = [
-    mockUnsubscription1,
-    mockUnsubscription2,
-  ];
+  lastCompnentNode._unsubsriptionEvents = [mockUnsubscription1, mockUnsubscription2];
 
   linkParentChildComponent(parentComponentNode, childComponentNode);
   linkParentChildComponent(childComponentNode, descendantCompnentNode);
@@ -78,7 +69,7 @@ test('test destory component', () => {
 
   expect(parentComponentNode._children.elementAt(0)).toBe(childComponentNode);
   expect(parentComponentNode._children.sizeOf()).toBe(1);
-  destoryComponent(childComponentNode, true);
+  destoryComponent(childComponentNode);
   expect(mockBeforeUnmounted.mock.calls).toHaveLength(3);
   expect(mockUnsubscription1.mock.calls).toHaveLength(3);
   expect(mockUnsubscription2.mock.calls).toHaveLength(3);
@@ -100,11 +91,11 @@ test('test destory the tree of child Component', () => {
   linkParentChildComponent(childComponentNode, descendantCompnentNode);
   linkParentChildComponent(descendantCompnentNode, lastCompnentNode);
 
-  destoryChildComponentTree(parentComponentNode, 0, true);
+  destoryChildComponentTree(parentComponentNode);
   expect(childComponentNode._beforeUnmounted.mock.calls).toHaveLength(1);
   expect(descendantCompnentNode._beforeUnmounted.mock.calls).toHaveLength(1);
   expect(lastCompnentNode._beforeUnmounted.mock.calls).toHaveLength(1);
-  expect(parentComponentNode._children.sizeOf()).toBe(0);
+  expect(parentComponentNode._children.sizeOf()).toBe(1);
   expect(childComponentNode._children.sizeOf()).toBe(1);
   expect(descendantCompnentNode._children.sizeOf()).toBe(1);
 

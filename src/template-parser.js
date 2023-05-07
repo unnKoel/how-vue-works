@@ -144,6 +144,8 @@ const linkParentChildComponent = (parentComponentNode, componentNode) => {
 
 const structureComponentTree = (componentStack) => {
   let childComponentNode = componentStack.pop();
+  // support taking a group of component as a union, that's useful to insert
+  // VFor and VForItem into component tree simutaneously.
   if (Array.isArray(childComponentNode)) {
     childComponentNode = childComponentNode.reduceRight((previous, current) => {
       linkParentChildComponent(current, previous);
