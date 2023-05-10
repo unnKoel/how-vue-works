@@ -1,21 +1,34 @@
 const executeLifeCycleDidMounted = (componentNodeRef) => {
-  componentNodeRef._beforeUnmounted =
-    componentNodeRef._didMounted && componentNodeRef._didMounted();
+  if (!componentNodeRef._mounted) {
+    componentNodeRef._beforeUnmounted =
+      componentNodeRef._didMounted && componentNodeRef._didMounted();
+
+    componentNodeRef._mounted = true;
+  }
 };
 
 const executeLifeCycleBeforeUnmounted = (componentNodeRef) => {
-  componentNodeRef._beforeUnmounted && componentNodeRef._beforeUnmounted();
+  if (componentNodeRef._mounted) {
+    componentNodeRef._beforeUnmounted && componentNodeRef._beforeUnmounted();
+    componentNodeRef._mounted = false;
+  }
 };
 
 const unsubsriptionEvents = (componentNodeRef) => {
-  const { _unsubsriptionEvents = [] } = componentNodeRef;
-  _unsubsriptionEvents.forEach((unsubsriptionEvent) => unsubsriptionEvent());
-  componentNodeRef._unsubsriptionEvents = [];
+  if (componentNodeRef._eventBind) {
+    const { _unsubsriptionEvents = [] } = componentNodeRef;
+    _unsubsriptionEvents.forEach((unsubsriptionEvent) => unsubsriptionEvent());
+    componentNodeRef._unsubsriptionEvents = [];
+    componentNodeRef._eventBind = false;
+  }
 };
 
 const subscribeEvents = (componentNodeRef) => {
-  const { _subscribeEvents = [] } = componentNodeRef;
-  _subscribeEvents.forEach((subscribeEvents) => subscribeEvents());
+  if (!componentNodeRef._eventBind) {
+    const { _subscribeEvents = [] } = componentNodeRef;
+    _subscribeEvents.forEach((subscribeEvents) => subscribeEvents());
+    componentNodeRef._eventBind = true;
+  }
 };
 
 const deconstruct = (componentNodeRef) => {

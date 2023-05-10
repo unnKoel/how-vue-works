@@ -29,10 +29,13 @@ describe('test function executeLifeCycleDidMounted', () => {
 });
 
 test('test executeLifeCycleBeforeUnmounted', () => {
+  const mockBeforeUnmounted = jest.fn();
+
   const componentNodeRef = {
-    _beforeUnmounted: jest.fn(),
+    _didMounted: jest.fn(() => mockBeforeUnmounted),
   };
 
+  executeLifeCycleDidMounted(componentNodeRef);
   executeLifeCycleBeforeUnmounted(componentNodeRef);
   expect(componentNodeRef._beforeUnmounted.mock.calls).toHaveLength(1);
 });
@@ -41,6 +44,8 @@ test('test unsubsriptionEvents', () => {
   const componentNodeRef = {
     _unsubsriptionEvents: [jest.fn(), jest.fn()],
   };
+
+  componentNodeRef._eventBind = true;
   unsubsriptionEvents(componentNodeRef);
   expect(componentNodeRef._unsubsriptionEvents).toHaveLength(0);
 });
@@ -56,12 +61,18 @@ test('test destory component', () => {
   const mockUnsubscription1 = jest.fn();
   const mockUnsubscription2 = jest.fn();
   childComponentNode._unsubsriptionEvents = [mockUnsubscription1, mockUnsubscription2];
+  childComponentNode._mounted = true;
+  childComponentNode._eventBind = true;
 
   descendantCompnentNode._beforeUnmounted = mockBeforeUnmounted;
   descendantCompnentNode._unsubsriptionEvents = [mockUnsubscription1, mockUnsubscription2];
+  descendantCompnentNode._mounted = true;
+  descendantCompnentNode._eventBind = true;
 
   lastCompnentNode._beforeUnmounted = mockBeforeUnmounted;
   lastCompnentNode._unsubsriptionEvents = [mockUnsubscription1, mockUnsubscription2];
+  lastCompnentNode._mounted = true;
+  lastCompnentNode._eventBind = true;
 
   linkParentChildComponent(parentComponentNode, childComponentNode);
   linkParentChildComponent(childComponentNode, descendantCompnentNode);
@@ -77,15 +88,18 @@ test('test destory component', () => {
   expect(parentComponentNode._children.elementAt(0)).toBe(null);
 });
 
-test('test destory the tree of child Component', () => {
+test('test destory the tree of child component', () => {
   const parentComponentNode = createComponent();
   const childComponentNode = createComponent();
   const descendantCompnentNode = createComponent();
   const lastCompnentNode = createComponent();
   const destoryOrder = [];
   childComponentNode._beforeUnmounted = jest.fn(() => destoryOrder.push(1));
+  childComponentNode._mounted = true;
   descendantCompnentNode._beforeUnmounted = jest.fn(() => destoryOrder.push(2));
+  descendantCompnentNode._mounted = true;
   lastCompnentNode._beforeUnmounted = jest.fn(() => destoryOrder.push(3));
+  lastCompnentNode._mounted = true;
 
   linkParentChildComponent(parentComponentNode, childComponentNode);
   linkParentChildComponent(childComponentNode, descendantCompnentNode);

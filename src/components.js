@@ -34,6 +34,8 @@ const createComponent = (component = () => {}) => {
   componentNode.events = {};
   componentNode.components = {};
   componentNode._propsDeclaration = [];
+  componentNode._mounted = false;
+  componentNode._eventBind = false;
 
   const template = component();
   componentNode.template = template;
