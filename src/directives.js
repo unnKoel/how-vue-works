@@ -420,7 +420,6 @@ const VOnDirective = (node, attributes = {}, isComponent = false, curComponentNo
   };
 
   if (isVon()) {
-    // handle();
     curComponentNodeRef._subscribeEvents.push(() => handle());
   }
 };

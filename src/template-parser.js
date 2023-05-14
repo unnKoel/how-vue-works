@@ -18,6 +18,7 @@ import {
 } from './components';
 import render from './render';
 import { HtmlSytaxError } from './errors';
+import Slot from './slot';
 
 const DIRECTIVES = ['v-bind', 'v-if', 'v-for', 'v-on', 'v-model', 'track-by'];
 
@@ -216,6 +217,11 @@ const parse = (
         let element = null;
         const component = getComponent(localEnrolledIncomponents, tag);
         if (component) {
+          const slot = Slot(data, curComponentNodeRef, componentStack);
+          const { slotTemplateEndIndex } = slot.parseTemplate(template.substring(++index), {
+            tag,
+            slot: true,
+          });
           component.tag = tag;
           const allProps = {
             dynamicProps: getDynamicProps(attributes, data),
@@ -223,6 +229,7 @@ const parse = (
           };
           const { rootRef } = render(component, allProps);
           element = rootRef;
+          index += slotTemplateEndIndex;
           attributes = filterDirectiveSupported(attributes);
         } else {
           element = createElement({ tag, attributes });
@@ -284,13 +291,14 @@ const parse = (
         rootRef = parentRef;
 
         const component = getComponent(localEnrolledIncomponents, tagEnd);
-        if (component || label?.vIf || label?.vFor) {
+        if ((component && !label?.slot) || label?.vIf || label?.vFor) {
           structureComponentTree(componentStack);
         }
 
-        if (label?.vIf || label?.vFor) {
+        if ((component && label?.slot) || label?.vIf || label?.vFor) {
           return { rootRef, index: index - 1 };
         }
+
         index = tagEndIndex - 1;
       }
     } else if (char === '>' && template.at(index + 1) !== '<') {

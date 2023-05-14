@@ -32,6 +32,7 @@ offer later...
     In addtion, correspondingly React might build its own event system based on virtual dom without the native unlike Vue. Later I will validate this point.
 
   - v-model
+    `v-model` is the combination of `v-bind` and `v-on` on functionality, so don't consider to implement it, instead involve kind of custom directive in to leave it outside for extension
 
 - ✅ data observer.
 
@@ -43,13 +44,13 @@ offer later...
 
   - test completely on Array's navtive functions like `pop`, `push`, `unshift`,`reverse` and so forth.
 
-- ✅ make directive reactive to data chage.
+- make directive reactive to data chage.
 
-  - make dom updates related to mustache direactive `{{}}` reactive to data change.
-  - make dom updates related to directive `v-bind` reactive to data change.
-  - make dom updates related to directive `v-if` reactive to data change.
-  - make dom updates related to directive `v-for` reactive to data change.
-  - mplement `track-by` feature on `v-for` for better performance on rending array.
+  - ✅ make dom updates related to mustache direactive `{{}}` reactive to data change.
+  - ✅ make dom updates related to directive `v-bind` reactive to data change.
+  - ✅ make dom updates related to directive `v-if` reactive to data change.
+  - ✅ make dom updates related to directive `v-for` reactive to data change.
+  - ✅ mplement `track-by` feature on `v-for` for better performance on rending array.
 
 - component tree.
 
@@ -64,10 +65,12 @@ offer later...
   - tests
     - ✅ testing on propogation of events happends in component tree.
     - ✅ testing to validate event trigger.
-    - unsubscribe dom events.
-    - destruture components sub-tree and unmount lifecycle executes.
+    - ✅ unsubscribe dom events.
+    - ✅ destruture components sub-tree and unmount lifecycle executes.
 
 - slot
+  - regular slot
+  - named slot
 
 ## bugs
 
@@ -162,4 +165,4 @@ take notes of questions I am encountering and thinking during this progarm.
 
 - how to implement slots?
 
-  Before render child component found in parent template, wrap up the block inside the scope of child component marks and compile it as a child template. then take the result of compilation as a parameter to render child component. In that process, using the compilation result of child template to replace the position `slot` resides.
+  Before render child component found in parent template, wrap up the block inside child component tags and compile it as a child template. then take compilation result as a parameter to render child component. In this process, using the compilation result of child template to replace the position `slot` resides.
