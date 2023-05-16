@@ -1,23 +1,17 @@
 /* eslint-disable no-undef */
-import {
-  abstractTag,
-  abstractAttributes,
-  abstractText,
-  abstractTagEnd,
-} from '../src/template-parser';
+import { extractTag, extractAttributes, extractText, extractTagEnd } from '../src/template-parser';
 
-test('abstract tag from html template', () => {
+test('extract tag from html template', () => {
   const template = '<strong>progressive framework</strong>';
-  const { tag, index } = abstractTag(template, 0);
+  const { tag, index } = extractTag(template, 0);
   expect(tag).toBe('strong');
   expect(index).toBe(7);
 });
 
-test('abstract attributes from tag', () => {
-  const template =
-    '<p class="cat" style="color: blue; font-size: 17px">progressive framework</p>';
-  const { tag, index: indexAftertag } = abstractTag(template, 0);
-  const { attributes } = abstractAttributes(template, indexAftertag);
+test('extract attributes from tag', () => {
+  const template = '<p class="cat" style="color: blue; font-size: 17px">progressive framework</p>';
+  const { tag, index: indexAftertag } = extractTag(template, 0);
+  const { attributes } = extractAttributes(template, indexAftertag);
 
   expect(tag).toBe('p');
   expect(attributes).toStrictEqual({
@@ -26,28 +20,20 @@ test('abstract attributes from tag', () => {
   });
 });
 
-test('abstract text node from html template', () => {
-  const template =
-    '<p class="cat" style="color: blue; font-size: 17px">progressive framework</p>';
-  const { index: indexAftertag } = abstractTag(template, 0);
-  const { index: indexAfterAttribute } = abstractAttributes(
-    template,
-    indexAftertag
-  );
-  const { text } = abstractText(template, indexAfterAttribute);
+test('extract text node from html template', () => {
+  const template = '<p class="cat" style="color: blue; font-size: 17px">progressive framework</p>';
+  const { index: indexAftertag } = extractTag(template, 0);
+  const { index: indexAfterAttribute } = extractAttributes(template, indexAftertag);
+  const { text } = extractText(template, indexAfterAttribute);
   expect(text).toBe('progressive framework');
 });
 
-test('abstract tag end from html template', () => {
-  const template =
-    '<p class="cat" style="color: blue; font-size: 17px">progressive framework</p>';
-  const { tag, index: indexAftertag } = abstractTag(template, 0);
-  const { attributes, index: indexAfterAttribute } = abstractAttributes(
-    template,
-    indexAftertag
-  );
-  const { text, index } = abstractText(template, indexAfterAttribute);
-  const { tagEnd, index: tagEndIndex } = abstractTagEnd(template, index);
+test('extract tag end from html template', () => {
+  const template = '<p class="cat" style="color: blue; font-size: 17px">progressive framework</p>';
+  const { tag, index: indexAftertag } = extractTag(template, 0);
+  const { attributes, index: indexAfterAttribute } = extractAttributes(template, indexAftertag);
+  const { text, index } = extractText(template, indexAfterAttribute);
+  const { tagEnd, index: tagEndIndex } = extractTagEnd(template, index);
 
   expect(tag).toBe('p');
   expect(text).toBe('progressive framework');
@@ -59,23 +45,20 @@ test('abstract tag end from html template', () => {
   expect(template[tagEndIndex]).toBe('>');
 });
 
-test('abstract text node with spaces at both begining and end', () => {
+test('extract text node with spaces at both begining and end', () => {
   const template =
     '<p class="cat" style="color: blue; font-size: 17px">   progressive framework   </p>';
-  const { index: indexAftertag } = abstractTag(template, 0);
-  const { index: indexAfterAttribute } = abstractAttributes(
-    template,
-    indexAftertag
-  );
-  const { text } = abstractText(template, indexAfterAttribute);
+  const { index: indexAftertag } = extractTag(template, 0);
+  const { index: indexAfterAttribute } = extractAttributes(template, indexAftertag);
+  const { text } = extractText(template, indexAfterAttribute);
   expect(text).toBe('progressive framework');
 });
 
-test('abstract "br" tag from html template', () => {
+test('extract "br" tag from html template', () => {
   let template = '<br>progressive framework';
-  expect(abstractTag(template, 0).tag).toBe('br');
+  expect(extractTag(template, 0).tag).toBe('br');
   template = '<br />progressive framework';
-  expect(abstractTag(template, 0).tag).toBe('br');
+  expect(extractTag(template, 0).tag).toBe('br');
   template = '<br/>progressive framework';
-  expect(abstractTag(template, 0).tag).toBe('br');
+  expect(extractTag(template, 0).tag).toBe('br');
 });

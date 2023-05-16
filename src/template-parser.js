@@ -22,7 +22,7 @@ import Slot from './slot';
 
 const DIRECTIVES = ['v-bind', 'v-if', 'v-for', 'v-on', 'v-model', 'track-by'];
 
-const abstractTag = (template, index) => {
+const extractTag = (template, index) => {
   if (template.at(index) !== '<') {
     throw new HtmlSytaxError("tag should be started with '<'");
   }
@@ -39,7 +39,7 @@ const abstractTag = (template, index) => {
   return { tag: tag.join(''), index };
 };
 
-const abstractTagEnd = (template, index) => {
+const extractTagEnd = (template, index) => {
   if (template.at(index) !== '<' && template.at(index + 1) !== '/') {
     throw new HtmlSytaxError("tag-end should be started with '/'");
   }
@@ -55,7 +55,7 @@ const abstractTagEnd = (template, index) => {
   return { tagEnd: tagEnd.join(''), index };
 };
 
-const abstractAttributes = (template, index) => {
+const extractAttributes = (template, index) => {
   const attributes = {};
   let char = template.at(index);
   let key = [];
@@ -96,7 +96,7 @@ const abstractAttributes = (template, index) => {
   };
 };
 
-const abstractText = (template, index) => {
+const extractText = (template, index) => {
   if (template.at(index) !== '>') {
     throw new HtmlSytaxError("text should be after '>'");
   }
@@ -185,7 +185,7 @@ const linkParentChild = (parentRef, childRef) => {
 
 /**
  * parse html template.
- * @todo abstract the end mark of tag to validate correctness of html.
+ * @todo extract the end mark of tag to validate correctness of html.
  */
 const parse = (
   template = '',
@@ -208,8 +208,8 @@ const parse = (
       const siblingChar = template.at(index + 1);
       // current char is the begining of tag.
       if (siblingChar !== '/') {
-        const { tag, index: indexOfStartTagName } = abstractTag(template, index);
-        let { attributes, index: indexOfStartTag } = abstractAttributes(
+        const { tag, index: indexOfStartTagName } = extractTag(template, index);
+        let { attributes, index: indexOfStartTag } = extractAttributes(
           template,
           indexOfStartTagName
         );
@@ -285,7 +285,7 @@ const parse = (
         htmlParseStack.push({ element, label: { tag } });
         rootRef = htmlParseStack.peek().element;
       } else {
-        const { tagEnd, index: tagEndIndex } = abstractTagEnd(template, index);
+        const { tagEnd, index: tagEndIndex } = extractTagEnd(template, index);
         // current char is the ending of tag.
         const { parentRef, label } = structureTree(linkParentChild, htmlParseStack, tagEnd);
         rootRef = parentRef;
@@ -303,7 +303,7 @@ const parse = (
       }
     } else if (char === '>' && template.at(index + 1) !== '<') {
       // text
-      const { text, index: indexOfText } = abstractText(template, index);
+      const { text, index: indexOfText } = extractText(template, index);
       index = indexOfText - 1;
       if (text !== '') {
         const textNode = document.createTextNode(text);
@@ -322,10 +322,10 @@ const parse = (
 };
 
 export {
-  abstractTag,
-  abstractAttributes,
-  abstractText,
-  abstractTagEnd,
+  extractTag,
+  extractAttributes,
+  extractText,
+  extractTagEnd,
   linkParentChildComponent,
   parse,
   DIRECTIVES,
