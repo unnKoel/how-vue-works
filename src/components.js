@@ -14,7 +14,7 @@ const registerComponent = (tag, component) => {
   globalComponents[tag] = component;
 };
 
-const createComponent = (component = () => {}) => {
+const createComponent = (component = () => {}, slot) => {
   const componentNode = Object.create(Object.prototype);
   curComponentNodeRef = componentNode;
   componentNode.component = component;
@@ -36,6 +36,7 @@ const createComponent = (component = () => {}) => {
   componentNode._propsDeclaration = [];
   componentNode._mounted = false;
   componentNode._eventBind = false;
+  componentNode._slot = slot;
 
   const template = component();
   componentNode.template = template;

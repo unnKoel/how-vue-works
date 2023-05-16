@@ -195,7 +195,8 @@ const parse = (
   data = {},
   curComponentNodeRef = {}
 ) => {
-  const { components: localEnrolledIncomponents = {} } = curComponentNodeRef;
+  // eslint-disable-next-line no-unused-vars
+  const { components: localEnrolledIncomponents = {}, slot } = curComponentNodeRef;
 
   template = template.replace(/\n/g, '');
   let index = -1;
@@ -227,7 +228,7 @@ const parse = (
             dynamicProps: getDynamicProps(attributes, data),
             staticProps: getStaticProps(attributes),
           };
-          const { rootRef } = render(component, allProps);
+          const { rootRef } = render(component, { props: allProps, slot });
           element = rootRef;
           index += slotTemplateEndIndex;
           attributes = filterDirectiveSupported(attributes);

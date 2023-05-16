@@ -8,8 +8,8 @@ import { construct } from './lifecycle';
 let rootComponentNodeRef = null;
 const componentStack = Stack();
 
-const render = (component, props = {}, container) => {
-  const componentNode = createComponent(component);
+const render = (component, { props = {}, slot }, container) => {
+  const componentNode = createComponent(component, slot);
   componentStack.push(componentNode);
   let { dynamicProps = {}, staticProps = {} } = props;
 
