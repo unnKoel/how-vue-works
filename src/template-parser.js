@@ -198,7 +198,7 @@ const parse = (
   curComponentNodeRef = {}
 ) => {
   // eslint-disable-next-line no-unused-vars
-  const { components: localEnrolledIncomponents = {}, slot } = curComponentNodeRef;
+  const { components: localEnrolledIncomponents = {}, _slot } = curComponentNodeRef;
 
   template = template.replace(/\n/g, '');
   let index = -1;
@@ -238,8 +238,8 @@ const parse = (
           element = createElement({ tag, attributes });
         }
 
-        if (slot) {
-          element = slot.parseSlotTag(element);
+        if (_slot) {
+          element = _slot.parseSlotTag(element);
         }
 
         if (Object.keys(attributes).length) {

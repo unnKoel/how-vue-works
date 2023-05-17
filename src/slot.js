@@ -8,7 +8,7 @@ const Slot = (data, curComponentNodeRef, componentStack) => {
   const wrapperElement = document.createElement('div');
   const directiveQueue = Queue();
   // eslint-disable-next-line no-unused-vars
-  let rootRef = null;
+  let templateNodes = [];
 
   const parseTemplate = (slotTemplate, label) => {
     const htmlParseStack = Stack();
@@ -22,13 +22,24 @@ const Slot = (data, curComponentNodeRef, componentStack) => {
       curComponentNodeRef
     );
 
-    rootRef = parsedRootRef;
+    templateNodes = Array.from(parsedRootRef.childNodes);
+    directiveQueue.getItems().forEach((directive) => directive.handle(data));
+
     return { slotTemplateEndIndex: index };
   };
 
+  const _getSlotName = (element) => element.attributes['name']?.value;
+
+  const _hasSlotName = (element, slotName) => element.attributes['slot']?.value === slotName;
+
   const parseSlotTag = (element) => {
     if (element.nodeName.toLowerCase() !== SLOT_TAG_NAME) return element;
-    return Array.from(rootRef.childNodes);
+    const slotName = _getSlotName(element);
+    if (slotName) {
+      return templateNodes.filter((node) => _hasSlotName(node, slotName));
+    }
+
+    return templateNodes.filter((node) => _hasSlotName(node, undefined));
   };
 
   return {
