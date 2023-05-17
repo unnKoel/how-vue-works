@@ -2,6 +2,8 @@ import { parse } from './template-parser';
 import Stack from './stack';
 import Queue from './queue';
 
+const SLOT_TAG_NAME = 'slot';
+
 const Slot = (data, curComponentNodeRef, componentStack) => {
   const wrapperElement = document.createElement('div');
   const directiveQueue = Queue();
@@ -24,11 +26,14 @@ const Slot = (data, curComponentNodeRef, componentStack) => {
     return { slotTemplateEndIndex: index };
   };
 
-  const checkoutSlot = () => {};
+  const parseSlotTag = (element) => {
+    if (element.nodeName.toLowerCase() !== SLOT_TAG_NAME) return element;
+    return Array.from(rootRef.childNodes);
+  };
 
   return {
     parseTemplate,
-    checkoutSlot,
+    parseSlotTag,
   };
 };
 

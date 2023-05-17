@@ -123,9 +123,11 @@ const structureTree = (linkParentChild, htmlParseStack, tagEnd) => {
     throw new HtmlSytaxError('The start and end of tag should be same.');
   }
 
+  const children = Array.isArray(child) ? child : [child];
+
   let { element: parentRef } = htmlParseStack.peek() ?? {};
   if (parentRef) {
-    linkParentChild(parentRef, child);
+    children.forEach((child) => linkParentChild(parentRef, child));
   } else {
     parentRef = child;
   }
@@ -234,6 +236,10 @@ const parse = (
           attributes = filterDirectiveSupported(attributes);
         } else {
           element = createElement({ tag, attributes });
+        }
+
+        if (slot) {
+          element = slot.parseSlotTag(element);
         }
 
         if (Object.keys(attributes).length) {
