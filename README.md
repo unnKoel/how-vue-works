@@ -69,8 +69,8 @@ offer later...
     - ✅ destruture components sub-tree and unmount lifecycle executes.
 
 - slot
-  - regular slot
-  - named slot
+  - ✅ regular slot
+  - ✅ named slot
 
 ## bugs
 
