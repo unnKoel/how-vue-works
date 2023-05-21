@@ -69,8 +69,11 @@ offer later...
     - ✅ destruture components sub-tree and unmount lifecycle executes.
 
 - slot
+
   - ✅ regular slot
   - ✅ named slot
+
+- update as a batch.
 
 ## bugs
 
@@ -166,3 +169,11 @@ take notes of questions I am encountering and thinking during this progarm.
 - how to implement slots?
 
   Before render child component found in parent template, wrap up the block inside child component tags and compile it as a child template. then take compilation result as a parameter to render child component. In this process, using the compilation result of child template to replace the position `slot` resides.
+
+## Reference
+
+- [Automatic Batching in React 18: What You Should Know](https://blog.bitsrc.io/automatic-batching-in-react-18-what-you-should-know-d50141dc096e)
+- [Batch Update analysis](https://zhuanlan.zhihu.com/p/28532725)
+- [Dive into react - batchUpdate](https://zhuanlan.zhihu.com/p/78516581)
+- [React Transaction](https://github.com/facebook/react/blob/b1768b5a48d1f82e4ef4150e0036c5f846d3758a/src/renderers/shared/stack/reconciler/Transaction.js#L19-L54)
+- [react18 parsing: The implementation of Automatic Batching](https://juejin.cn/post/7196313603426910269)

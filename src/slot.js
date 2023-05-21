@@ -7,7 +7,6 @@ const SLOT_TAG_NAME = 'slot';
 const Slot = (data, curComponentNodeRef, componentStack) => {
   const wrapperElement = document.createElement('div');
   const directiveQueue = Queue();
-  // eslint-disable-next-line no-unused-vars
   let templateNodes = [];
 
   const parseTemplate = (slotTemplate, label) => {
