@@ -4,6 +4,7 @@ import Stack from './stack';
 import Queue from './queue';
 import { extendComponent } from './components';
 import { destoryComponent, activateComponent } from './lifecycle';
+import batchQueue from './batch-update';
 
 const getValueByPath = (data, path) => {
   if (typeof data === 'object') {
@@ -15,6 +16,7 @@ const getValueByPath = (data, path) => {
 
 // Identify mustache braces to interpolate the value into text.
 const MustacheDirective = (textNode, text = '', data, curComponentNodeRef) => {
+  const directiveInstanceId = batchQueue.generateWatcherId();
   let paths = [];
   const isMustache = () => /{{\s*\w+(?:\.\w+)*\s*}}/.test(text);
 
@@ -39,9 +41,11 @@ const MustacheDirective = (textNode, text = '', data, curComponentNodeRef) => {
     paths?.forEach((path) => {
       if (typeof data === 'object') {
         const value = get(data, path);
-        value?.watch(() => {
+        const watcher = () => {
           handle(data);
-        });
+        };
+        watcher.id = directiveInstanceId;
+        value?.watch(() => batchQueue.queueWatcher(watcher));
       }
     });
   })();
@@ -53,6 +57,7 @@ const MustacheDirective = (textNode, text = '', data, curComponentNodeRef) => {
 };
 
 const VBindDirective = (node, attributes = {}, data, curComponentNodeRef) => {
+  const directiveInstanceId = batchQueue.generateWatcherId();
   const vBindAttributes = VBindDirective.getVBindAttributes(attributes);
 
   const isVBind = () => {
@@ -72,9 +77,11 @@ const VBindDirective = (node, attributes = {}, data, curComponentNodeRef) => {
     vBindAttributes?.forEach(({ path }) => {
       if (typeof data === 'object') {
         const value = get(data, path);
-        value?.watch(() => {
+        const watcher = () => {
           handle(data);
-        });
+        };
+        watcher.id = directiveInstanceId;
+        value?.watch(() => batchQueue.queueWatcher(watcher));
       }
     });
   })();
@@ -101,6 +108,7 @@ VBindDirective.getVBindAttributes = (attributes) =>
  * @todo the value of `v-if` should be evaluated as an expression.
  */
 const VIfDirective = (node, attributes = {}, data, curComponentNodeRef, componentStack) => {
+  const directiveInstanceId = batchQueue.generateWatcherId();
   let vIfTemplateRef = null;
   let nextSibling = null;
   let parentNode = null;
@@ -166,9 +174,11 @@ const VIfDirective = (node, attributes = {}, data, curComponentNodeRef, componen
   (function reatToDataChange() {
     if (isVIf()) {
       const value = get(data, vIfExpression);
-      value?.watch(() => {
+      const watcher = () => {
         handle(data);
-      });
+      };
+      watcher.id = directiveInstanceId;
+      value?.watch(() => batchQueue.queueWatcher(watcher));
     }
   })();
 
@@ -184,6 +194,7 @@ const VIfDirective = (node, attributes = {}, data, curComponentNodeRef, componen
  * as a form like (item, index).
  */
 const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, componentStack) => {
+  const directiveInstanceId = batchQueue.generateWatcherId();
   let arrayKey = '';
   let itemName = '';
   let vForTemplate = '';
@@ -354,9 +365,11 @@ const VForDirective = (node, attributes = {}, data, label, curComponentNodeRef, 
   (function reatToDataChange() {
     if (isVFor()) {
       const array = getValueByPath(data, arrayKey);
-      array?.watch(() => {
+      const watcher = () => {
         handle(data);
-      });
+      };
+      watcher.id = directiveInstanceId;
+      array?.watch(() => batchQueue.queueWatcher(watcher));
     }
   })();
 
