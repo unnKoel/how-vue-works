@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-/* eslint-disable no-undef */
+
 import {
   MustacheDirective,
   VBindDirective,
@@ -48,12 +48,10 @@ describe('mustache directive', () => {
     const mustacheDirective = MustacheDirective(textNode, text, data);
 
     mustacheDirective.handle(data);
-    expect(textNode.nodeValue).toBe(
-      "hello, Addy. Welcome to directive's world"
-    );
+    expect(textNode.nodeValue).toBe("hello, Addy. Welcome to directive's world");
   });
 
-  test('test template with mustache braces react to data change', () => {
+  test('test template with mustache braces react to data change', async () => {
     const text = "hello, {{ name  }}. Welcome to {{field}}'s world";
     const textNode = document.createTextNode(text);
 
@@ -64,13 +62,13 @@ describe('mustache directive', () => {
     const mustacheDirective = MustacheDirective(textNode, text, data);
 
     mustacheDirective.handle(data);
-    expect(textNode.nodeValue).toBe(
-      "hello, Addy. Welcome to directive's world"
-    );
+    expect(textNode.nodeValue).toBe("hello, Addy. Welcome to directive's world");
 
     data.field = 'vue';
+    await new Promise(process.nextTick);
     expect(textNode.nodeValue).toBe("hello, Addy. Welcome to vue's world");
     data.name = 'common';
+    await new Promise(process.nextTick);
     expect(textNode.nodeValue).toBe("hello, common. Welcome to vue's world");
   });
 });
@@ -116,7 +114,7 @@ describe('v-bind directive', () => {
     expect(node.getAttribute('title')).toBe('how to create a node');
   });
 
-  test('test attributes bound react to data change', () => {
+  test('test attributes bound react to data change', async () => {
     const node = document.createElement('span');
     const attributes = {
       'v-bind : title ': 'article.title',
@@ -132,9 +130,8 @@ describe('v-bind directive', () => {
     vBindDirective.handle(data);
     expect(node.getAttribute('title')).toBe('how to create a node');
     data.article.title = 'how to create a reactive node to data change';
-    expect(node.getAttribute('title')).toBe(
-      'how to create a reactive node to data change'
-    );
+    await new Promise(process.nextTick);
+    expect(node.getAttribute('title')).toBe('how to create a reactive node to data change');
   });
 });
 
@@ -165,13 +162,7 @@ describe('v-if directive', () => {
 
     const componentNode = createComponent();
     const componentStack = Stack();
-    const vIfDirective = VIfDirective(
-      vIfRootNode,
-      attributes,
-      data,
-      componentNode,
-      componentStack
-    );
+    const vIfDirective = VIfDirective(vIfRootNode, attributes, data, componentNode, componentStack);
 
     const template = `<span>hello welcome to {{directive}}</span>`;
     const label = { tag: 'div', vIf: true };
@@ -179,12 +170,10 @@ describe('v-if directive', () => {
     vIfDirective.parseChildTemplate(template, label);
 
     vIfDirective.handle(data);
-    expect(parentNode.innerHTML).toBe(
-      '<div class="a-is"><span>hello welcome to v-if</span></div>'
-    );
+    expect(parentNode.innerHTML).toBe('<div class="a-is"><span>hello welcome to v-if</span></div>');
   });
 
-  test('test v-if template reacts to data change', () => {
+  test('test v-if template reacts to data change', async () => {
     const parentNode = document.createElement('div');
     const vIfRootNode = document.createElement('div');
     vIfRootNode.setAttribute('class', 'a-is');
@@ -200,13 +189,7 @@ describe('v-if directive', () => {
 
     const componentNode = createComponent();
     const componentStack = Stack();
-    const vIfDirective = VIfDirective(
-      vIfRootNode,
-      attributes,
-      data,
-      componentNode,
-      componentStack
-    );
+    const vIfDirective = VIfDirective(vIfRootNode, attributes, data, componentNode, componentStack);
 
     const template = `<span>hello welcome to {{directive}}</span>`;
     const label = { tag: 'div', vIf: true };
@@ -214,13 +197,13 @@ describe('v-if directive', () => {
     vIfDirective.parseChildTemplate(template, label);
 
     vIfDirective.handle(data);
-    expect(parentNode.innerHTML).toBe(
-      '<div class="a-is"><span>hello welcome to v-if</span></div>'
-    );
+    expect(parentNode.innerHTML).toBe('<div class="a-is"><span>hello welcome to v-if</span></div>');
     data.show = false;
+    await new Promise(process.nextTick);
     expect(parentNode.innerHTML).toBe('');
     data.show = true;
     data.directive = 'vue-if';
+    await new Promise(process.nextTick);
     expect(parentNode.innerHTML).toBe(
       '<div class="a-is"><span>hello welcome to vue-if</span></div>'
     );
@@ -288,7 +271,7 @@ describe('v-for directive', () => {
     );
   });
 
-  test('test v-for template reacts to data change', () => {
+  test('test v-for template reacts to data change', async () => {
     const parentNode = document.createElement('div');
     const vForRootNode = document.createElement('div');
     parentNode.appendChild(vForRootNode);
@@ -333,19 +316,21 @@ describe('v-for directive', () => {
       name: 'solid.js',
       character: 'react syntax with compliation',
     });
+    await new Promise(process.nextTick);
     expect(parentNode.innerHTML).toBe(
       '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,react. your character is virtual dom</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div><div><span>Hi,solid.js. your character is react syntax with compliation</span></div>'
     );
     expect(vForDirective.vForTemplateParsedArtifactMemory).toHaveLength(4);
 
     data.array.splice(1, 1);
+    await new Promise(process.nextTick);
     expect(parentNode.innerHTML).toBe(
       '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div><div><span>Hi,solid.js. your character is react syntax with compliation</span></div>'
     );
     expect(vForDirective.vForTemplateParsedArtifactMemory).toHaveLength(3);
   });
 
-  test('test track-by works with v-for on data changing', () => {
+  test('test track-by works with v-for on data changing', async () => {
     const parentNode = document.createElement('div');
     const vForRootNode = document.createElement('div');
     parentNode.appendChild(vForRootNode);
@@ -391,46 +376,38 @@ describe('v-for directive', () => {
       name: 'solid.js',
       character: 'react syntax with compliation',
     });
+    await new Promise(process.nextTick);
     expect(parentNode.innerHTML).toBe(
       '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,react. your character is virtual dom</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div><div><span>Hi,solid.js. your character is react syntax with compliation</span></div>'
     );
     expect(vForDirective.vForTemplateParsedArtifactMemory).toHaveLength(4);
-    expect(vForDirective.vForTemplateParsedArtifactMemory[2] === svelte).toBe(
-      true
-    );
+    expect(vForDirective.vForTemplateParsedArtifactMemory[2] === svelte).toBe(true);
     const solidJs = vForDirective.vForTemplateParsedArtifactMemory[3];
 
     data.array.splice(1, 1);
+    await new Promise(process.nextTick);
     expect(parentNode.innerHTML).toBe(
       '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div><div><span>Hi,solid.js. your character is react syntax with compliation</span></div>'
     );
     expect(vForDirective.vForTemplateParsedArtifactMemory).toHaveLength(3);
-    expect(vForDirective.vForTemplateParsedArtifactMemory[1] === svelte).toBe(
-      true
-    );
-    expect(vForDirective.vForTemplateParsedArtifactMemory[2] === solidJs).toBe(
-      true
-    );
+    expect(vForDirective.vForTemplateParsedArtifactMemory[1] === svelte).toBe(true);
+    expect(vForDirective.vForTemplateParsedArtifactMemory[2] === solidJs).toBe(true);
 
     data.array.push({ name: 'react', character: 'virtual dom' });
+    await new Promise(process.nextTick);
     expect(parentNode.innerHTML).toBe(
       '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,svelte. your character is no virtual dom</span></div><div><span>Hi,solid.js. your character is react syntax with compliation</span></div><div><span>Hi,react. your character is virtual dom</span></div>'
     );
-    expect(vForDirective.vForTemplateParsedArtifactMemory[1] === svelte).toBe(
-      true
-    );
-    expect(vForDirective.vForTemplateParsedArtifactMemory[2] === solidJs).toBe(
-      true
-    );
+    expect(vForDirective.vForTemplateParsedArtifactMemory[1] === svelte).toBe(true);
+    expect(vForDirective.vForTemplateParsedArtifactMemory[2] === solidJs).toBe(true);
 
     const react = vForDirective.vForTemplateParsedArtifactMemory[3];
     data.array.splice(1, 2);
+    await new Promise(process.nextTick);
     expect(parentNode.innerHTML).toBe(
       '<div><span>Hi,vue. your character is template</span></div><div><span>Hi,react. your character is virtual dom</span></div>'
     );
-    expect(vForDirective.vForTemplateParsedArtifactMemory[1] === react).toBe(
-      true
-    );
+    expect(vForDirective.vForTemplateParsedArtifactMemory[1] === react).toBe(true);
   });
 });
 

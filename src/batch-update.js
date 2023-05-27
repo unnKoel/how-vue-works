@@ -34,6 +34,7 @@ const batchQueue = (() => {
   const flushSchedulerQueue = () => {
     if (index > queue.length - 1) {
       queue.length = 0;
+      index = 0;
       waiting = false;
       flushing = false;
       return;

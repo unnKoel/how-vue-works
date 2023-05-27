@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import observe, { assign } from '../src/observe';
 
 test('test if watch works in case of change of primitive data', () => {
@@ -257,15 +256,9 @@ describe('Array in watch', () => {
     data.groups.watch(mockWatcher);
     data.groups.unshift({ order: 0 });
     expect(mockWatcher.mock.calls).toHaveLength(1);
-    expect(
-      Object.getOwnPropertyDescriptor(data.groups[0], 'order').set
-    ).not.toBe(undefined);
-    expect(
-      Object.getOwnPropertyDescriptor(data.groups[0], 'order').set
-    ).toBeInstanceOf(Function);
-    expect(
-      Object.getOwnPropertyDescriptor(data.groups[0], 'order').get
-    ).toBeInstanceOf(Function);
+    expect(Object.getOwnPropertyDescriptor(data.groups[0], 'order').set).not.toBe(undefined);
+    expect(Object.getOwnPropertyDescriptor(data.groups[0], 'order').set).toBeInstanceOf(Function);
+    expect(Object.getOwnPropertyDescriptor(data.groups[0], 'order').get).toBeInstanceOf(Function);
     expect(mockWatcher.mock.results[0].value).toStrictEqual([
       { order: 0 },
       { order: 1 },

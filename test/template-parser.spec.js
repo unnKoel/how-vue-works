@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import { extractTag, extractAttributes, extractText, extractTagEnd } from '../src/template-parser';
 
 test('extract tag from html template', () => {

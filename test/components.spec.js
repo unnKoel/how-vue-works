@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import {
   curComponentNodeRef,
   getComponent,
@@ -10,13 +9,7 @@ import {
 } from '../src/components';
 import observe from '../src/observe';
 
-import {
-  useMethods,
-  useData,
-  useComponents,
-  useEvents,
-  useRef,
-} from '../src/hooks';
+import { useMethods, useData, useComponents, useEvents, useRef } from '../src/hooks';
 
 test('test getting component', () => {
   const ComponentA = jest.fn();
@@ -155,9 +148,9 @@ describe('test prop declarations', () => {
       number: 4,
       game: 'hide and find',
     });
-    expect(
-      Object.getOwnPropertyDescriptor(filteredProps, 'playground').set
-    ).toBeInstanceOf(Function);
+    expect(Object.getOwnPropertyDescriptor(filteredProps, 'playground').set).toBeInstanceOf(
+      Function
+    );
 
     declaration = ['playground', 'game'];
     filteredProps = filterPropsByDeclaration(props, declaration);
@@ -207,9 +200,7 @@ describe('test prop declarations', () => {
     expect(filteredProps).toEqual({
       number: 4,
     });
-    expect(
-      Object.getOwnPropertyDescriptor(filteredProps, 'number').set
-    ).toBeInstanceOf(Function);
+    expect(Object.getOwnPropertyDescriptor(filteredProps, 'number').set).toBeInstanceOf(Function);
   });
 
   test('declarations as a object with validator', () => {
@@ -261,9 +252,9 @@ describe('test prop declarations', () => {
       playground: 'PG2',
       game: 'hide and find',
     });
-    expect(
-      Object.getOwnPropertyDescriptor(filteredProps, 'playground').set
-    ).toBeInstanceOf(Function);
+    expect(Object.getOwnPropertyDescriptor(filteredProps, 'playground').set).toBeInstanceOf(
+      Function
+    );
 
     declaration = {
       playground: {
@@ -283,8 +274,8 @@ describe('test prop declarations', () => {
       playground: 'PG2',
       game: 'hide and find',
     });
-    expect(
-      Object.getOwnPropertyDescriptor(filteredProps, 'playground').set
-    ).toBeInstanceOf(Function);
+    expect(Object.getOwnPropertyDescriptor(filteredProps, 'playground').set).toBeInstanceOf(
+      Function
+    );
   });
 });

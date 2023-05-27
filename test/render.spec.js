@@ -2,7 +2,6 @@
  * @jest-environment jsdom
  */
 
-/* eslint-disable no-undef */
 import render, { componentStack, rootComponentNodeRef } from '../src/render';
 import {
   useComponents,
@@ -67,7 +66,7 @@ test('render template with mustache braces', () => {
   );
 });
 
-test('render template with mustache braces that reacts to data change', () => {
+test('render template with mustache braces that reacts to data change', async () => {
   const data = {
     site: 'Google',
     url: 'www.google.com',
@@ -88,6 +87,7 @@ test('render template with mustache braces that reacts to data change', () => {
   );
   data.site = 'Microsoft';
   data.url = 'www.microsoft.com';
+  await new Promise(process.nextTick);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><a href="www.microsoft.com">Navigate to Microsoft</a></div>'
   );
@@ -113,7 +113,7 @@ test('render template with v-bind directive', () => {
   );
 });
 
-test('render template with v-bind directive that reacts to data change', () => {
+test('render template with v-bind directive that reacts to data change', async () => {
   const data = {
     site: 'Google',
     title: 'Navigate to Google',
@@ -136,6 +136,7 @@ test('render template with v-bind directive that reacts to data change', () => {
   data.site = 'Microsoft';
   data.title = 'Navigate to Microsoft';
   data.url = 'www.microsoft.com';
+  await new Promise(process.nextTick);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><a href="www.microsoft.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div>'
   );
@@ -189,7 +190,7 @@ test('render template with v-if=true directive', () => {
   );
 });
 
-test('render template with v-if directive that reacts to data change', () => {
+test('render template with v-if directive that reacts to data change', async () => {
   const data = {
     show: true,
     site: 'Google',
@@ -216,11 +217,13 @@ test('render template with v-if directive that reacts to data change', () => {
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
   data.show = false;
+  await new Promise(process.nextTick);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
   data.show = true;
   data.something = 'React';
+  await new Promise(process.nextTick);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for React</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
@@ -254,7 +257,7 @@ test('render template with v-for directive', () => {
   );
 });
 
-test('render template with v-for directive that reacts to data change', () => {
+test('render template with v-for directive that reacts to data change', async () => {
   const data = {
     array: [
       { title: 'Navigate to Google', site: 'Google' },
@@ -284,17 +287,19 @@ test('render template with v-for directive that reacts to data change', () => {
   );
 
   data.array.push({ title: 'Navigate to Alibaba', site: 'alibaba' });
+  await new Promise(process.nextTick);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><div><a href="www.google.com" title="Navigate to Alibaba">Navigate to alibaba</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
 
   data.array.splice(1, 1);
+  await new Promise(process.nextTick);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><div><a href="www.google.com" title="Navigate to Alibaba">Navigate to alibaba</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
 });
 
-test('render template with v-for directive along with track-by that reacts to data change', () => {
+test('render template with v-for directive along with track-by that reacts to data change', async () => {
   const data = {
     array: [
       { title: 'Navigate to Google', site: 'Google' },
@@ -324,11 +329,13 @@ test('render template with v-for directive along with track-by that reacts to da
   );
 
   data.array.push({ title: 'Navigate to Alibaba', site: 'alibaba' });
+  await new Promise(process.nextTick);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Microsoft">Navigate to Microsoft</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><div><a href="www.google.com" title="Navigate to Alibaba">Navigate to alibaba</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
 
   data.array.splice(1, 1);
+  await new Promise(process.nextTick);
   expect(document.body.innerHTML).toBe(
     '<div class="root"><span>Search for Vue</span><div><a href="www.google.com" title="Navigate to Google">Navigate to Google</a></div><div><a href="www.google.com" title="Navigate to Apple">Navigate to Apple</a></div><div><a href="www.google.com" title="Navigate to Alibaba">Navigate to alibaba</a></div><p>keep in mind catching and cherishing the subtle and fleeting feeling just right when you achieve something challenges youself.</p></div>'
   );
@@ -709,7 +716,7 @@ test('render template with in-depth descendant components', () => {
   );
 });
 
-test('render template with multiple components while data changes', () => {
+test('render template with multiple components while data changes', async () => {
   const componentB = () => {
     useData({
       array: [
@@ -808,6 +815,7 @@ test('render template with multiple components while data changes', () => {
   );
 
   data.list.push(4);
+  await new Promise(process.nextTick);
   expect(document.body.innerHTML).toBe(
     `<div id="root">
       <h3>what do you want to search?</h3>
@@ -1116,7 +1124,7 @@ test('propogate events between parent and child components via enrolling by decl
   expect(mockEventReceive.mock.results[0].value).toBe('Vue');
 });
 
-test('destruture sub-tree components and execute unmount lifecycle in v-if block', () => {
+test('destruture sub-tree components and execute unmount lifecycle in v-if block', async () => {
   const bOnClick = jest.fn();
   const bOnUnmounted = jest.fn();
   const bOnMounted = jest.fn(() => bOnUnmounted);
@@ -1245,6 +1253,7 @@ test('destruture sub-tree components and execute unmount lifecycle in v-if block
   expect(componentBNode._unsubsriptionEvents).toHaveLength(1);
 
   rootRef.dispatchEvent(new Event('click'));
+  await new Promise(process.nextTick);
   expect(document.body.innerHTML).toBe(
     `
   <div class="c">
@@ -1262,6 +1271,7 @@ test('destruture sub-tree components and execute unmount lifecycle in v-if block
 
   display = true;
   rootRef.dispatchEvent(new Event('click'));
+  await new Promise(process.nextTick);
   expect(document.body.innerHTML).toBe(
     `
   <div class="c"> 
@@ -1637,7 +1647,7 @@ test('check correctness of component tree in case of elements siblings or inside
   });
 });
 
-test('check correctness of component tree in case of elements inside the v-if block', () => {
+test('check correctness of component tree in case of elements inside the v-if block', async () => {
   const componentB = () => {
     const ref = useRef();
 
@@ -1780,6 +1790,7 @@ test('check correctness of component tree in case of elements inside the v-if bl
   });
 
   rootRef.querySelector('#c-if').dispatchEvent(new Event('click'));
+  await new Promise(process.nextTick);
   expect(document.body.innerHTML).toBe(
     `
   <div class="c">

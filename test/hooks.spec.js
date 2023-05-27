@@ -1,17 +1,6 @@
-/* eslint-disable no-undef */
-import {
-  useMethods,
-  useEvents,
-  useData,
-  useComponents,
-  useRef,
-  useEffect,
-} from '../src/hooks';
+import { useMethods, useEvents, useData, useComponents, useRef, useEffect } from '../src/hooks';
 
-import {
-  curComponentNodeRef,
-  clearCurComponentNodeRef,
-} from '../src/components';
+import { curComponentNodeRef, clearCurComponentNodeRef } from '../src/components';
 
 jest.mock('../src/components', () => {
   const originalModule = jest.requireActual('../src/components');

@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import LinkedList from '../src/linked-list';
 
 test('whether it is empty', () => {

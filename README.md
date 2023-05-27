@@ -177,3 +177,4 @@ take notes of questions I am encountering and thinking during this progarm.
 - [Dive into react - batchUpdate](https://zhuanlan.zhihu.com/p/78516581)
 - [React Transaction](https://github.com/facebook/react/blob/b1768b5a48d1f82e4ef4150e0036c5f846d3758a/src/renderers/shared/stack/reconciler/Transaction.js#L19-L54)
 - [react18 parsing: The implementation of Automatic Batching](https://juejin.cn/post/7196313603426910269)
+- [How to make Jest wait for all asynchronous code to finish execution before expecting an assertion](https://stackoverflow.com/questions/44741102/how-to-make-jest-wait-for-all-asynchronous-code-to-finish-execution-before-expec)

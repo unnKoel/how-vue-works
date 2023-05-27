@@ -1,10 +1,4 @@
-/* eslint-disable no-undef */
-import {
-  createOn,
-  createEmit,
-  createBroadcast,
-  createDispatch,
-} from '../src/events';
+import { createOn, createEmit, createBroadcast, createDispatch } from '../src/events';
 import LinkedList from '../src/linked-list';
 
 test('test create event `on` function as event register on component node', () => {

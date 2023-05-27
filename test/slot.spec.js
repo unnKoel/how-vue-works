@@ -2,8 +2,6 @@
  * @jest-environment jsdom
  */
 
-/* eslint-disable no-undef */
-
 import render, { componentStack } from '../src/render';
 import { useComponents, useData } from '../src/hooks';
 
