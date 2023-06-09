@@ -31,7 +31,7 @@ offer later...
 
     In addtion, correspondingly React might build its own event system based on virtual dom without the native unlike Vue. Later I will validate this point.
 
-  - v-model
+  - ( **cancel**) v-model
     `v-model` is the combination of `v-bind` and `v-on` on functionality, so don't consider to implement it, instead involve kind of custom directive in to leave it outside for extension
 
 - ✅ data observer.
@@ -73,7 +73,7 @@ offer later...
   - ✅ regular slot
   - ✅ named slot
 
-- update as a batch.
+- ✅ update as a batch.
 
 ## bugs
 
@@ -81,8 +81,8 @@ offer later...
 - ✅ Tags like \<br /> couldn't be parsed yet.
 - ✅ \>, < should not be considered as a tag or end of tag while in between quotes or test.
 - ✅ filter attributes to get ones without in relation to VUE to directly set in the target node.
-- For both `v-if` and mustache braces, there is js expression support left on its value.
-- executed twice on the reactive registration of v-if in v-if test.
+- (**cancel**) For both `v-if` and mustache braces, there is js expression support left on its value.
+- ✅ executed twice on the reactive registration of v-if in v-if test.
 
 ## Issues
 
