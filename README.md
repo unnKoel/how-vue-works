@@ -1,10 +1,12 @@
 # 🐰 How Vue works
 
-## structure diagrams.
+## Main structure
 
-offer later...
+- HTML Parser
+- Reactive System
+- Component Tree
 
-## work list as follows.
+## Tasks
 
 - ✅ html parser.
   - Html syntax validation.
@@ -46,11 +48,11 @@ offer later...
 
 - make directive reactive to data chage.
 
-  - ✅ make dom updates related to mustache direactive `{{}}` reactive to data change.
-  - ✅ make dom updates related to directive `v-bind` reactive to data change.
-  - ✅ make dom updates related to directive `v-if` reactive to data change.
-  - ✅ make dom updates related to directive `v-for` reactive to data change.
-  - ✅ mplement `track-by` feature on `v-for` for better performance on rending array.
+  - ✅ make dom updates of mustache direactive `{{}}` when data change.
+  - ✅ make dom updates of directive `v-bind` when data change.
+  - ✅ make dom updates of directive `v-if` when data change.
+  - ✅ make dom updates of directive `v-for` when data change.
+  - ✅ implement `track-by` directive for `v-for` to obtain better performance when working on Array.
 
 - component tree.
 
@@ -60,13 +62,13 @@ offer later...
   - ✅ implementation of props.
   - ✅ pub-sub pattern implementation working on communication between components.
   - ✅ lifecycle functions of component.
-  - ✅ when unmount components, trigger the unsubscriptive callbacks to avoid risk of memory leak.
-  - ✅ when unmount components, trigger all descendant components to exectute unmount lifecycle function.
+  - ✅ when unmount components, unsubscribe event bound to avoid risk of memory leak.
+  - ✅ when unmount components, all descendant components exectute unmount lifecycle function.
   - tests
-    - ✅ testing on propogation of events happends in component tree.
-    - ✅ testing to validate event trigger.
+    - ✅ propogation of events happends on component tree.
+    - ✅ validate event trigger.
     - ✅ unsubscribe dom events.
-    - ✅ destruture components sub-tree and unmount lifecycle executes.
+    - ✅ destruture components subtree and unmount lifecycle function executes.
 
 - slot
 
@@ -75,7 +77,7 @@ offer later...
 
 - ✅ update as a batch.
 
-## bugs
+## Bugs
 
 - ✅ Don't allow exsiting spaces between tags.
 - ✅ Tags like \<br /> couldn't be parsed yet.
@@ -129,46 +131,36 @@ offer later...
 
 ## Questions
 
-take notes of questions I am encountering and thinking during this progarm.
+take notes of questions I encountered in this program.
 
 - How to deal with placeholder node for `v-if`?
 
-  supply later...
-
 - How to deal with placeholder node for `v-for`?
-
-  supply later...
 
 - How to keep track of directives in `v-if` and `v-for` block?
 
-  supply later...
-
-- How to implement an Observer based on `Object.definePropery`?
-
-  supply later...
+- How to implement an observer pattern based on `Object.definePropery`?
 
 - How to implement `track-by` to improve the performace of `v-for` directive?
 
-  supply later...
-
 - Is creation of component tree necessary? and how to create it?
 
-  Form my prospective now, It's necessary to create a component tree for finding out all child components to unmount them with invoking their lifecycle function.
-  As how to create it, We can identify Component node and directly render it, as well concatenate with parent component ref as a child ref in parsing phase. through rendering component, end up with getting the root element ref and unsubscription array. then insert that ref of root elemment into dom, in the meantime store both it and unsubscription into component instance.
+  From my perspective, it's necessary to create a component tree that helps finding out all children components to unmount them with invoking their lifecycle function.
+  As how to create it, we can identify component node in template and render it to concatenate with parent component ref as a child ref in parsing phase, end up with getting the root element ref and unsubscription array. Then inserting that root elemment ref into DOM tree, meanwhile storing them into the component instance.
 
-- could directives work on component node?
-- Do I need to collects all doms update as a batch for performance while data changes?
-- Whether I have to use class to create component, Could I apply function simple?
+- Are directives able to work in the component node?
+- Do I need to collect all DOM updates as a batch for performance while data changes?
+- Whether I have to use a class to create component, Could I use a function simply?
 
-  `Class` actually is a contructor function which creates an object in heap and initialize it. There are totally two duties, one is creating an object, another is initialization of it. So can we manually create an object, then using a normal function to initialze it? but how can we access that object created? React uses hooks to sort out this problem, So therefore I think we can do the same as react by adopting hooks. hooks is based on JS closure by it own.
+  `Class` actually is a contructor function which creates an object in heap and initialize it. There are totally two duties, one is creating an object, another is initialization of it. So can we manually create an object, then using a normal function to initialze it? but how can we access that object created? React uses hooks to sort out this problem, therefore I think we can do the same as react by adopting hooks. hooks is based on JS closure by its own.
 
-  In terms of programming language, Once function can be returned inside of another function, Closure mechaism is inevitable to be included into that language, because as long as ref to that function hasn't died, then its context couldn't be recycled.
+  In terms of programming language, once function can be returned inside of another function, closure mechaism is inevitable to be included into that language, because as long as the ref to that function hasn't died, then its context couldn't be recycled.
 
-  By this way of hooks, for developer they are able to write function only, this programming form is exactly what I prefer.
+  A developer opts to write function only through hooks, this programming style is exactly what I prefer.
 
 - how to implement slots?
 
-  Before render child component found in parent template, wrap up the block inside child component tags and compile it as a child template. then take compilation result as a parameter to render child component. In this process, using the compilation result of child template to replace the position `slot` resides.
+  Before rendering child component found in parent's template, wrap the block inside child component tags and compile it as a child template. then take compilation result as a parameter to render child component. In this process, using the compilation result of child template to replace the position `slot` resides.
 
 ## Reference
 
